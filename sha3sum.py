@@ -24,6 +24,8 @@ import sys
 
 class SHA3:
     '''
+    SHA-3/Keccak hash algorithm implementation
+    
     @author  Mattias Andrée (maandree@member.fsf.org)
     '''
     
@@ -307,9 +309,11 @@ class SHA3:
         rc = [0] * ((SHA3.n + 7) >> 3)
         ptr = 0
         
-        # Absorbing phase
         rr = SHA3.r >> 3
+        nn = SHA3.n >> 3
         ww = SHA3.w >> 3
+        
+        # Absorbing phase
         msg_i =[0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0,
@@ -322,15 +326,13 @@ class SHA3:
             SHA3.keccakF(SHA3.S)
         
         # Squeezing phase
-        rr = SHA3.r >> 3
-        nn = SHA3.n >> 3
         olen = SHA3.n
         j = 0
         while (olen > 0):
             i = 0
             while (i < 25) and (i < rr) and (j < nn):
                 v = SHA3.S[i % 5][i // 5]
-                for _ in range(8):
+                for _ in range(ww):
                     if (j < nn):
                         rc[ptr] = v & 255
                         ptr += 1
@@ -344,16 +346,111 @@ class SHA3:
         return rc
 
 
-output = 512
-total = 1600
-bitrate = total - output * 2
-MESSAGE = 'The quick brown fox jumps over the lazy dog.'.encode('UTF-8')
-
-SHA3.initalise(bitrate, total - bitrate, output)
-SHA3.update(MESSAGE[:20])
-sys.stdout.buffer.write(bytes(SHA3.digest(MESSAGE[20:])))
-sys.stdout.buffer.flush()
-
+if __name__ == '__main__':
+    cmd = sys.argv[0]
+    args = sys.argv[1:]
+    if '/' in cmd:
+        cmd = cmd[cmd.rfind('/') + 1:]
+    if cmd.endswith('.py'):
+        cmd = cmd[:-3]
+    
+    o = 512           # --outputsize
+    if   cmd == 'sha3-224sum':  o = 224
+    elif cmd == 'sha3-256sum':  o = 256
+    elif cmd == 'sha3-384sum':  o = 384
+    elif cmd == 'sha3-512sum':  o = 512
+    s = 1600          # --statesize
+    r = s - (o << 1)  # --bitrate
+    c = s - r         # --capacity
+    w = s // 25       # --wordsize
+    i = 1             # --iterations
+    binary = False
+    
+    files = []
+    dashed = False
+    linger = None
+    
+    for arg in args:
+        if linger is not None:
+            if linger[1] is None:
+                linger[1] = arg
+                arg = None
+            if linger[0] in ('-r', '--bitrate'):
+                r = linger[1]
+                o = (s - r) >> 1
+            elif linger[0] in ('-c', '--capacity'):
+                c = linger[1]
+                r = s - c
+            elif linger[0] in ('-w', '--wordsize'):
+                w = linger[1]
+                s = w * 25
+            elif linger[0] in ('-o', '--outputsize'):
+                o = linger[1]
+                r = s - (o << 1)
+            elif linger[0] in ('-s', '--statesize'):
+                s = linger[1]
+                r = s - (o << 1)
+            elif linger[0] in ('-i', '--iterations'):
+                iterations = linger[1]
+            else:
+                sys.stderr.write(sys.argv[0] + ': unrecognised option: ' + linger)
+                exit(1)
+            linger = None
+            if arg is None:
+                continue
+        if dashed:
+            files.append(None if arg == '-' else arg)
+        elif arg == '--':
+            dashed = True
+        elif arg.startswith('--'):
+            if '=' in arg:
+                linger = (arg[:arg.find('=')], arg[arg.find('=') + 1:])
+            else:
+                if arg == '--binary':
+                    binary = True
+                else:
+                    linger = (arg, None)
+        elif arg.startswith('-'):
+            if arg[1] == 'b':
+                binary = True
+                arg = arg[1:]
+            if len(arg) > 1:
+                linger = ('-' + arg, None)
+            else:
+                linger = ('-' + arg[0], arg[1:])
+        else:
+            files.append(None if arg == '-' else arg)
+    
+    if len(files) == 0:
+        files.append(None)
+    
+    
+    stdin = None
+    for filename in files:
+        if (filename is None) and (stdin is not None):
+            print(stdin)
+            continue
+        rc = ''
+        with open('/dev/stdin' if filename is None else filename, 'rb') as file:
+            message = file.read()
+            SHA3.initalise(r, c, o)
+            ##SHA3.update(msg)
+            bs = bytes(SHA3.digest(message))
+            if binary:
+                if filename is None:
+                    stdin = bs
+                sys.stdout.buffer.write(bs)
+                sys.stdout.buffer.flush()
+            else:
+                for b in bs:
+                    rc += "0123456789ABCDEF"[b >> 4]
+                    rc += "0123456789ABCDEF"[b & 15]
+                rc += ' ' + ('-' if filename is None else filename) + '\n'
+                if filename is None:
+                    stdin = rc
+                sys.stdout.buffer.write(rc.encode('UTF-8'))
+                sys.stdout.buffer.flush()
+    
 # 0e ab 42 de  4c 3c eb 92  35 fc 91 ac  ff e7 46 b2
 # 9c 29 a8 c3  66 b7 c6 0e  4e 67 c4 66  f3 6a 43 04
 # c0 0f a9 ca  f9 d8 79 76  ba 46 9b cb  e0 67 13 b4
@@ -370,6 +467,7 @@ SHA-3/Keccak checksum calculator
 
 USAGE:	sha3sum [option...] < FILE
 	sha3sum [option...] file...
+
 
 OPTIONS:
 	-r BITRATE
@@ -392,6 +490,24 @@ OPTIONS:
 
 	-b
 	--binary	Print the checksum in binary, rather than hexadecimal.
+
+
+COPYRIGHT:
+
+Copyright © 2013  Mattias Andrée (maandree@member.fsf.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 
