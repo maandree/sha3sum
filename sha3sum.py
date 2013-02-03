@@ -1,7 +1,31 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+'''
+sha3sum – SHA-3 (Keccak) checksum calculator
+
+Copyright © 2013  Mattias Andrée (maandree@member.fsf.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+'''
+
 import sys
 
 
 class SHA3:
+    '''
+    @author  Mattias Andrée (maandree@member.fsf.org)
+    '''
     
     RC=[0x0000000000000001, 0x0000000000008082, 0x800000000000808A, 0x8000000080008000,
         0x000000000000808B, 0x0000000080000001, 0x8000000080008081, 0x8000000000008009,
@@ -24,25 +48,40 @@ class SHA3:
     
     
     
-    B = [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]
+    B = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
     '''
     :list<list<int>>  Keccak-f round temporary
     '''
     
-    C = [0,0,0,0,0]
+    C = [0, 0, 0, 0, 0]
     '''
     :list<int>  Keccak-f round temporary
     '''
     
-    D = [0,0,0,0,0]
+    D = [0, 0, 0, 0, 0]
     '''
     :list<int>  Keccak-f round temporary
     '''
     
-    
-    b = 0
+
+    r = 0
     '''
     :int  The bitrate
+    '''
+    
+    c = 0
+    '''
+    :int  The capacity
+    '''
+    
+    n = 0
+    '''
+    :int  The output size
+    '''
+        
+    b = 0
+    '''
+    :int  The state size
     '''
     
     w = 0
@@ -65,6 +104,16 @@ class SHA3:
     :int  12 + 2ℓ, the number of rounds
     '''
     
+    S = None
+    '''
+    :list<list<int>>  The current state
+    '''
+    
+    M = None
+    '''
+    :bytes  Left over water to fill the sponge with at next update
+    '''
+    
     
     
     @staticmethod
@@ -76,7 +125,7 @@ class SHA3:
         @param   n:int  Rotation steps
         @return   :int  The value rotated
         '''
-        return ((x >> (Keccak.w - (n % Keccak.w))) + (x << (n % Keccak.w))) & Keccak.wmod
+        return ((x >> (SHA3.w - (n % SHA3.w))) + (x << (n % SHA3.w))) & SHA3.wmod
     
     
     @staticmethod
@@ -104,22 +153,22 @@ class SHA3:
         '''
         # θ step
         for x in range(5):
-            Keccak.C[x] = A[x][0] ^ A[x][1] ^ A[x][2] ^ A[x][3] ^ A[x][4]
+            SHA3.C[x] = A[x][0] ^ A[x][1] ^ A[x][2] ^ A[x][3] ^ A[x][4]
         for x in range(5):
-            Keccak.D[x] = Keccak.C[(x - 1) % 5] ^ Keccak.rotate(Keccak.C[(x + 1) % 5], 1)
+            SHA3.D[x] = SHA3.C[(x - 1) % 5] ^ SHA3.rotate(SHA3.C[(x + 1) % 5], 1)
         for x in range(5):
             for y in range(5):
-                A[x][y] ^= Keccak.D[x]
+                A[x][y] ^= SHA3.D[x]
         
         # ρ and π steps
         for x in range(5):
             for y in range(5):
-                Keccak.B[y][(2 * x + 3 * y) % 5] = Keccak.rotate(A[x][y], Keccak.R[x * 5 + y])
+                SHA3.B[y][(2 * x + 3 * y) % 5] = SHA3.rotate(A[x][y], SHA3.R[x * 5 + y])
         
         # ξ step
         for x in range(5):
             for y in range(5):
-                A[x][y] = Keccak.B[x][y] ^ ((~(Keccak.B[(x + 1) % 5][y])) & Keccak.B[(x + 2) % 5][y])
+                A[x][y] = SHA3.B[x][y] ^ ((~(SHA3.B[(x + 1) % 5][y])) & SHA3.B[(x + 2) % 5][y])
         
         # ι step
         A[0][0] ^= rc
@@ -132,8 +181,8 @@ class SHA3:
         
         @param  A:list<list<int>>  The current state
         '''
-        for i in range(Keccak.nr):
-            Keccak.keccakFRound(A, Keccak.RC[i] & Keccak.wmod)
+        for i in range(SHA3.nr):
+            SHA3.keccakFRound(A, SHA3.RC[i] & SHA3.wmod)
     
     
     @staticmethod
@@ -151,116 +200,198 @@ class SHA3:
         i = off + ww - 1
         while i >= off:
             rc <<= 8
-            rc |= ord(message[i]) if (i < rr) else 0
+            rc |= message[i] if (i < rr) else 0
             i -= 1
         return rc
     
     
     @staticmethod
-    def pad10star1(M, r):
+    def pad10star1(msg, r):
         '''
         pad 10*1
         
-        @param   M:str  The message to pad
-        @param   r:int  The bitrate
-        @return   :str  The message padded
+        @param   msg:bytes  The message to pad
+        @param     n:int    The The message to pad
+        @param     r:int    The bitrate
+        @return     :str    The message padded
         '''
-        [nnn, msg] = M
+        nnn = len(msg)
         
         nrf = nnn >> 3
         nbrf = nnn & 7
         ll = nnn % r
         
-        bbbb = 1 if nbrf == 0 else ((ord(msg[nrf]) >> (8 - nbrf)) | (1 << nbrf))
+        bbbb = 1 if nbrf == 0 else ((msg[nrf] >> (8 - nbrf)) | (1 << nbrf))
         
         message = None
         if ((r - 8 <= ll) and (ll <= r - 2)):
             nnn = nrf + 1
-            message = [''] * 1
-            message[0] = chr(bbbb ^ 128)
+            message = [bbbb ^ 128]
         else:
             nnn = (nrf + 1) << 3
             nnn = ((nnn - (nnn % r) + (r - 8)) >> 3) + 1
-            message = [''] * (nnn - nrf)
-            message[0] = chr(bbbb)
+            message = [0] * (nnn - nrf)
+            message[0] = bbbb
             i = nrf + 1
             while i < nnn:
-                message[i - nrf] += '\0'
+                message[i - nrf] = 0
                 i += 1
-            message[nnn - nrf - 1] = chr(0x80)
+            message[nnn - nrf - 1] = 0x80
         
-        return msg[:nrf] + ''.join(message)
+        return msg[:nrf] + bytes(message)
     
     
     @staticmethod
-    def keccak(M, r = 1024, c = 576, n = 1024):
-        Keccak.b = (r + c)
-        Keccak.w = Keccak.b // 25
-        Keccak.l = Keccak.lb(Keccak.w)
-        Keccak.nr = 12 + (Keccak.l << 1)
-        Keccak.wmod = (1 << Keccak.w) - 1
+    def initalise(r, c, n):
+        '''
+        Initalise Keccak sponge
         
-        S=[[0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0]]
-        
-        message = Keccak.pad10star1(M, r)
-        nnn = len(message)
-        
-        rr = r >> 3
-        cc = c >> 3
-        nn = n >> 3
-        ww = Keccak.w >> 3
-        
-        #Absorbing phase
-        msg_i =[[0, 0, 0, 0, 0],
+        @param  r:int  The bitrate
+        @param  c:int  The capacity
+        @param  n:int  The output size
+        '''
+        SHA3.r = r
+        SHA3.c = c
+        SHA3.n = n
+        SHA3.b = (r + c)
+        SHA3.w = SHA3.b // 25
+        SHA3.l = SHA3.lb(SHA3.w)
+        SHA3.nr = 12 + (SHA3.l << 1)
+        SHA3.wmod = (1 << SHA3.w) - 1
+        SHA3.S=[[0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0]]
+        SHA3.M = bytes([])
+    
+    
+    @staticmethod
+    def update(msg):
+        '''
+        Absorb the more of the message message to the Keccak sponge
+        
+        @param  msg:bytes  The partial message
+        '''
+        rr = SHA3.r >> 3
+        ww = SHA3.w >> 3
+        
+        SHA3.M += msg
+        nnn = len(SHA3.M)
+        nnn -= nnn % rr
+        message = SHA3.M[:nnn]
+        SHA3.M = SHA3.M[nnn:]
+        
+        # Absorbing phase
+        msg_i =[0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0]
         m = nnn
-        i = 0
-        while i < m:
-            for y in range(5):
-                for x in range(5):
-                    off = (5 * y + x) * ww
-                    msg_i[x][y] = Keccak.toLane(message[i:], rr, ww, off)
-            for y in range(5):
-              for x in range(5):
-                  S[x][y] ^= msg_i[x][y]
-            Keccak.keccakF(S)
-            i += rr
+        for i in range(0, m, rr):
+            for j in range(25):
+                SHA3.S[j % 5][j // 5] ^= SHA3.toLane(message[i:], rr, ww, j * ww)
+            SHA3.keccakF(SHA3.S)
+    
+    
+    @staticmethod
+    def digest(msg):
+        '''
+        Absorb the last part of the message and squeeze the Keccak sponge
         
+        @param  msg:bytes  The rest of the message
+        '''
+        message = SHA3.pad10star1(SHA3.M + msg, SHA3.r)
+        nnn = len(message)
+        rc = [0] * ((SHA3.n + 7) >> 3)
+        ptr = 0
         
-        #Squeezing phase
-        olen = n
+        # Absorbing phase
+        rr = SHA3.r >> 3
+        ww = SHA3.w >> 3
+        msg_i =[0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0]
+        m = nnn
+        for i in range(0, m, rr):
+            for j in range(25):
+                SHA3.S[j % 5][j // 5] ^= SHA3.toLane(message[i:], rr, ww, j * ww)
+            SHA3.keccakF(SHA3.S)
+        
+        # Squeezing phase
+        rr = SHA3.r >> 3
+        nn = SHA3.n >> 3
+        olen = SHA3.n
         j = 0
         while (olen > 0):
             i = 0
             while (i < 25) and (i < rr) and (j < nn):
-                v = S[i % 5][i // 5]
+                v = SHA3.S[i % 5][i // 5]
                 for _ in range(8):
                     if (j < nn):
-                        sys.stdout.buffer.write(bytes([v & 255]))
+                        rc[ptr] = v & 255
+                        ptr += 1
                     v >>= 8
                     j += 1
                 i += 1
-            olen -= r
+            olen -= SHA3.r
             if olen > 0:
-                Keccak.keccakF(S)
+                SHA3.keccakF(S)
+        
+        return rc
 
 
 output = 512
 total = 1600
 bitrate = total - output * 2
-MESSAGE = "The quick brown fox jumps over the lazy dog."
-SHA3.keccak([len(MESSAGE)*0, MESSAGE], bitrate, total - bitrate, output)
+MESSAGE = 'The quick brown fox jumps over the lazy dog.'.encode('UTF-8')
+
+SHA3.initalise(bitrate, total - bitrate, output)
+SHA3.update(MESSAGE[:20])
+sys.stdout.buffer.write(bytes(SHA3.digest(MESSAGE[20:])))
 sys.stdout.buffer.flush()
 
 # 0e ab 42 de  4c 3c eb 92  35 fc 91 ac  ff e7 46 b2
 # 9c 29 a8 c3  66 b7 c6 0e  4e 67 c4 66  f3 6a 43 04
 # c0 0f a9 ca  f9 d8 79 76  ba 46 9b cb  e0 67 13 b4
 # 35 f0 91 ef  27 69 fb 16  0c da b3 3d  36 70 68 0e
+
+# 87 e3 33 fa 22 26 2a aa 97 c4 4e ca 0a 92 67 3e
+# f0 06 1c d7 8b 5e 72 22 ca 51 a9 54 cb a0 4f 0d
+# 19 3a 82 2f 11 b8 3f 72 d0 41 7c 42 74 31 78 a9
+# c2 b9 e1 27 8e c9 4c b7 5d 50 88 aa b8 d2 60 c9
+
+
+'''
+SHA-3/Keccak checksum calculator
+
+USAGE:	sha3sum [option...] < FILE
+	sha3sum [option...] file...
+
+OPTIONS:
+	-r BITRATE
+	--bitrate	The bitrate to use for SHA-3.		(default: 576)
+	
+	-c CAPACITY
+	--capacity	The capacity to use for SHA-3.		(default: 1024)
+	
+	-w WORDSIZE
+	--wordsize	The word size to use for SHA-3.		(default: 64)
+	
+	-o OUTPUTSIZE
+	--outputsize	The output size to use for SHA-3.	(default: 512)
+	
+	-s STATESIZE
+	--statesize	The state size to use for SHA-3.	(default: 1600)
+	
+	-i ITERATIONS
+	--iterations	The number of hash iterations to run.	(default: 1)
+
+	-b
+	--binary	Print the checksum in binary, rather than hexadecimal.
+
+'''
 
