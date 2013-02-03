@@ -366,38 +366,93 @@ if __name__ == '__main__':
     i = 1             # --iterations
     binary = False
     
+    (_r, _c, _w, _o, _s, _i) = (r, c, w, o, s, i)
+    
     files = []
     dashed = False
     linger = None
     
-    for arg in args:
+    for arg in args + [None]:
         if linger is not None:
-            if linger[1] is None:
-                linger[1] = arg
-                arg = None
-            if linger[0] in ('-r', '--bitrate'):
-                r = linger[1]
-                o = (s - r) >> 1
-            elif linger[0] in ('-c', '--capacity'):
-                c = linger[1]
-                r = s - c
-            elif linger[0] in ('-w', '--wordsize'):
-                w = linger[1]
-                s = w * 25
-            elif linger[0] in ('-o', '--outputsize'):
-                o = linger[1]
-                r = s - (o << 1)
-            elif linger[0] in ('-s', '--statesize'):
-                s = linger[1]
-                r = s - (o << 1)
-            elif linger[0] in ('-i', '--iterations'):
-                iterations = linger[1]
+            if linger[0] in ('-h', '--help'):
+                print('''
+SHA-3/Keccak checksum calculator
+
+USAGE:	sha3sum [option...] < file
+	sha3sum [option...] file...
+
+
+OPTIONS:
+	-r BITRATE
+	--bitrate	The bitrate to use for SHA-3.		(default: %d)
+	
+	-c CAPACITY
+	--capacity	The capacity to use for SHA-3.		(default: %d)
+	
+	-w WORDSIZE
+	--wordsize	The word size to use for SHA-3.		(default: %d)
+	
+	-o OUTPUTSIZE
+	--outputsize	The output size to use for SHA-3.	(default: %d)
+	
+	-s STATESIZE
+	--statesize	The state size to use for SHA-3.	(default: %d)
+	
+	-i ITERATIONS
+	--iterations	The number of hash iterations to run.	(default: %d)
+
+	-b
+	--binary	Print the checksum in binary, rather than hexadecimal.
+
+
+COPYRIGHT:
+
+Copyright © 2013  Mattias Andrée (maandree@member.fsf.org)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+''' % (_r, _c, _w, _o, _s, _i))
+                exit(2)
             else:
-                sys.stderr.write(sys.argv[0] + ': unrecognised option: ' + linger)
-                exit(1)
+                if linger[1] is None:
+                    linger[1] = arg
+                    arg = None
+                if linger[0] in ('-r', '--bitrate'):
+                    r = linger[1]
+                    o = (s - r) >> 1
+                elif linger[0] in ('-c', '--capacity'):
+                    c = linger[1]
+                    r = s - c
+                elif linger[0] in ('-w', '--wordsize'):
+                    w = linger[1]
+                    s = w * 25
+                elif linger[0] in ('-o', '--outputsize'):
+                    o = linger[1]
+                    r = s - (o << 1)
+                elif linger[0] in ('-s', '--statesize'):
+                    s = linger[1]
+                    r = s - (o << 1)
+                elif linger[0] in ('-i', '--iterations'):
+                    iterations = linger[1]
+                else:
+                    sys.stderr.write(sys.argv[0] + ': unrecognised option: ' + linger)
+                    exit(1)
             linger = None
             if arg is None:
                 continue
+        if arg is None:
+            continue
         if dashed:
             files.append(None if arg == '-' else arg)
         elif arg == '--':
@@ -450,64 +505,4 @@ if __name__ == '__main__':
                     stdin = rc
                 sys.stdout.buffer.write(rc.encode('UTF-8'))
                 sys.stdout.buffer.flush()
-    
-# 0e ab 42 de  4c 3c eb 92  35 fc 91 ac  ff e7 46 b2
-# 9c 29 a8 c3  66 b7 c6 0e  4e 67 c4 66  f3 6a 43 04
-# c0 0f a9 ca  f9 d8 79 76  ba 46 9b cb  e0 67 13 b4
-# 35 f0 91 ef  27 69 fb 16  0c da b3 3d  36 70 68 0e
-
-# 87 e3 33 fa 22 26 2a aa 97 c4 4e ca 0a 92 67 3e
-# f0 06 1c d7 8b 5e 72 22 ca 51 a9 54 cb a0 4f 0d
-# 19 3a 82 2f 11 b8 3f 72 d0 41 7c 42 74 31 78 a9
-# c2 b9 e1 27 8e c9 4c b7 5d 50 88 aa b8 d2 60 c9
-
-
-'''
-SHA-3/Keccak checksum calculator
-
-USAGE:	sha3sum [option...] < FILE
-	sha3sum [option...] file...
-
-
-OPTIONS:
-	-r BITRATE
-	--bitrate	The bitrate to use for SHA-3.		(default: 576)
-	
-	-c CAPACITY
-	--capacity	The capacity to use for SHA-3.		(default: 1024)
-	
-	-w WORDSIZE
-	--wordsize	The word size to use for SHA-3.		(default: 64)
-	
-	-o OUTPUTSIZE
-	--outputsize	The output size to use for SHA-3.	(default: 512)
-	
-	-s STATESIZE
-	--statesize	The state size to use for SHA-3.	(default: 1600)
-	
-	-i ITERATIONS
-	--iterations	The number of hash iterations to run.	(default: 1)
-
-	-b
-	--binary	Print the checksum in binary, rather than hexadecimal.
-
-
-COPYRIGHT:
-
-Copyright © 2013  Mattias Andrée (maandree@member.fsf.org)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-'''
 
