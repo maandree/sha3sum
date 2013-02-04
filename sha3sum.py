@@ -90,6 +90,18 @@ class SHA3:
     
     
     @staticmethod
+    def rotate64(x, n):
+        '''
+        Rotate a 64-bit word
+        
+        @param   x:int  The value to rotate
+        @param   n:int  Rotation steps
+        @return   :int  The value rotated
+        '''
+        return ((x >> (SHA3.w - n)) + (x << n)) & 0xFFFFFFFFFFFFFFFF
+    
+    
+    @staticmethod
     def lb(x):
         '''
         Binary logarithm
@@ -108,48 +120,92 @@ class SHA3:
         @param   A:list<int>  The current state
         @param  rc:int        Round constant
         '''
-        # θ step (step 1 and 2 of 3)
-        SHA3.C[0] = (A[0]  ^ A[1])  ^ (A[2]  ^ A[3])  ^ A[4]
-        SHA3.C[2] = (A[10] ^ A[11]) ^ (A[12] ^ A[13]) ^ A[14]
-        db = SHA3.C[0] ^ SHA3.rotate(SHA3.C[2], 1)
-        SHA3.C[4] = (A[20] ^ A[21]) ^ (A[22] ^ A[23]) ^ A[24]
-        dd = SHA3.C[2] ^ SHA3.rotate(SHA3.C[4], 1)
-        SHA3.C[1] = (A[5]  ^ A[6])  ^ (A[7]  ^ A[8])  ^ A[9]
-        da = SHA3.C[4] ^ SHA3.rotate(SHA3.C[1], 1)
-        SHA3.C[3] = (A[15] ^ A[16]) ^ (A[17] ^ A[18]) ^ A[19]
-        dc = SHA3.C[1] ^ SHA3.rotate(SHA3.C[3], 1)
-        de = SHA3.C[3] ^ SHA3.rotate(SHA3.C[0], 1)
-        
-        # ρ and π steps, with last part of θ
-        SHA3.B[0] = SHA3.rotate(A[0] ^ da, 0)
-        SHA3.B[1] = SHA3.rotate(A[15] ^ dd, 28)
-        SHA3.B[2] = SHA3.rotate(A[5] ^ db, 1)
-        SHA3.B[3] = SHA3.rotate(A[20] ^ de, 27)
-        SHA3.B[4] = SHA3.rotate(A[10] ^ dc, 62)
-        
-        SHA3.B[5] = SHA3.rotate(A[6] ^ db, 44)
-        SHA3.B[6] = SHA3.rotate(A[21] ^ de, 20)
-        SHA3.B[7] = SHA3.rotate(A[11] ^ dc, 6)
-        SHA3.B[8] = SHA3.rotate(A[1] ^ da, 36)
-        SHA3.B[9] = SHA3.rotate(A[16] ^ dd, 55)
-        
-        SHA3.B[10] = SHA3.rotate(A[12] ^ dc, 43)
-        SHA3.B[11] = SHA3.rotate(A[2] ^ da, 3)
-        SHA3.B[12] = SHA3.rotate(A[17] ^ dd, 25)
-        SHA3.B[13] = SHA3.rotate(A[7] ^ db, 10)
-        SHA3.B[14] = SHA3.rotate(A[22] ^ de, 39)
-        
-        SHA3.B[15] = SHA3.rotate(A[18] ^ dd, 21)
-        SHA3.B[16] = SHA3.rotate(A[8] ^ db, 45)
-        SHA3.B[17] = SHA3.rotate(A[23] ^ de, 8)
-        SHA3.B[18] = SHA3.rotate(A[13] ^ dc, 15)
-        SHA3.B[19] = SHA3.rotate(A[3] ^ da, 41)
-        
-        SHA3.B[20] = SHA3.rotate(A[24] ^ de, 14)
-        SHA3.B[21] = SHA3.rotate(A[14] ^ dc, 61)
-        SHA3.B[22] = SHA3.rotate(A[4] ^ da, 18)
-        SHA3.B[23] = SHA3.rotate(A[19] ^ dd, 56)
-        SHA3.B[24] = SHA3.rotate(A[9] ^ db, 2)
+        if SHA3.w == 64:
+            # θ step (step 1 and 2 of 3)
+            SHA3.C[0] = (A[0]  ^ A[1])  ^ (A[2]  ^ A[3])  ^ A[4]
+            SHA3.C[2] = (A[10] ^ A[11]) ^ (A[12] ^ A[13]) ^ A[14]
+            db = SHA3.C[0] ^ SHA3.rotate64(SHA3.C[2], 1)
+            SHA3.C[4] = (A[20] ^ A[21]) ^ (A[22] ^ A[23]) ^ A[24]
+            dd = SHA3.C[2] ^ SHA3.rotate64(SHA3.C[4], 1)
+            SHA3.C[1] = (A[5]  ^ A[6])  ^ (A[7]  ^ A[8])  ^ A[9]
+            da = SHA3.C[4] ^ SHA3.rotate64(SHA3.C[1], 1)
+            SHA3.C[3] = (A[15] ^ A[16]) ^ (A[17] ^ A[18]) ^ A[19]
+            dc = SHA3.C[1] ^ SHA3.rotate64(SHA3.C[3], 1)
+            de = SHA3.C[3] ^ SHA3.rotate64(SHA3.C[0], 1)
+            
+            # ρ and π steps, with last part of θ
+            SHA3.B[0] = SHA3.rotate64(A[0] ^ da, 0)
+            SHA3.B[1] = SHA3.rotate64(A[15] ^ dd, 28)
+            SHA3.B[2] = SHA3.rotate64(A[5] ^ db, 1)
+            SHA3.B[3] = SHA3.rotate64(A[20] ^ de, 27)
+            SHA3.B[4] = SHA3.rotate64(A[10] ^ dc, 62)
+            
+            SHA3.B[5] = SHA3.rotate64(A[6] ^ db, 44)
+            SHA3.B[6] = SHA3.rotate64(A[21] ^ de, 20)
+            SHA3.B[7] = SHA3.rotate64(A[11] ^ dc, 6)
+            SHA3.B[8] = SHA3.rotate64(A[1] ^ da, 36)
+            SHA3.B[9] = SHA3.rotate64(A[16] ^ dd, 55)
+            
+            SHA3.B[10] = SHA3.rotate64(A[12] ^ dc, 43)
+            SHA3.B[11] = SHA3.rotate64(A[2] ^ da, 3)
+            SHA3.B[12] = SHA3.rotate64(A[17] ^ dd, 25)
+            SHA3.B[13] = SHA3.rotate64(A[7] ^ db, 10)
+            SHA3.B[14] = SHA3.rotate64(A[22] ^ de, 39)
+            
+            SHA3.B[15] = SHA3.rotate64(A[18] ^ dd, 21)
+            SHA3.B[16] = SHA3.rotate64(A[8] ^ db, 45)
+            SHA3.B[17] = SHA3.rotate64(A[23] ^ de, 8)
+            SHA3.B[18] = SHA3.rotate64(A[13] ^ dc, 15)
+            SHA3.B[19] = SHA3.rotate64(A[3] ^ da, 41)
+            
+            SHA3.B[20] = SHA3.rotate64(A[24] ^ de, 14)
+            SHA3.B[21] = SHA3.rotate64(A[14] ^ dc, 61)
+            SHA3.B[22] = SHA3.rotate64(A[4] ^ da, 18)
+            SHA3.B[23] = SHA3.rotate64(A[19] ^ dd, 56)
+            SHA3.B[24] = SHA3.rotate64(A[9] ^ db, 2)
+        else:
+            # θ step (step 1 and 2 of 3)
+            SHA3.C[0] = (A[0]  ^ A[1])  ^ (A[2]  ^ A[3])  ^ A[4]
+            SHA3.C[2] = (A[10] ^ A[11]) ^ (A[12] ^ A[13]) ^ A[14]
+            db = SHA3.C[0] ^ SHA3.rotate(SHA3.C[2], 1)
+            SHA3.C[4] = (A[20] ^ A[21]) ^ (A[22] ^ A[23]) ^ A[24]
+            dd = SHA3.C[2] ^ SHA3.rotate(SHA3.C[4], 1)
+            SHA3.C[1] = (A[5]  ^ A[6])  ^ (A[7]  ^ A[8])  ^ A[9]
+            da = SHA3.C[4] ^ SHA3.rotate(SHA3.C[1], 1)
+            SHA3.C[3] = (A[15] ^ A[16]) ^ (A[17] ^ A[18]) ^ A[19]
+            dc = SHA3.C[1] ^ SHA3.rotate(SHA3.C[3], 1)
+            de = SHA3.C[3] ^ SHA3.rotate(SHA3.C[0], 1)
+            
+            # ρ and π steps, with last part of θ
+            SHA3.B[0] = SHA3.rotate(A[0] ^ da, 0)
+            SHA3.B[1] = SHA3.rotate(A[15] ^ dd, 28)
+            SHA3.B[2] = SHA3.rotate(A[5] ^ db, 1)
+            SHA3.B[3] = SHA3.rotate(A[20] ^ de, 27)
+            SHA3.B[4] = SHA3.rotate(A[10] ^ dc, 62)
+            
+            SHA3.B[5] = SHA3.rotate(A[6] ^ db, 44)
+            SHA3.B[6] = SHA3.rotate(A[21] ^ de, 20)
+            SHA3.B[7] = SHA3.rotate(A[11] ^ dc, 6)
+            SHA3.B[8] = SHA3.rotate(A[1] ^ da, 36)
+            SHA3.B[9] = SHA3.rotate(A[16] ^ dd, 55)
+            
+            SHA3.B[10] = SHA3.rotate(A[12] ^ dc, 43)
+            SHA3.B[11] = SHA3.rotate(A[2] ^ da, 3)
+            SHA3.B[12] = SHA3.rotate(A[17] ^ dd, 25)
+            SHA3.B[13] = SHA3.rotate(A[7] ^ db, 10)
+            SHA3.B[14] = SHA3.rotate(A[22] ^ de, 39)
+            
+            SHA3.B[15] = SHA3.rotate(A[18] ^ dd, 21)
+            SHA3.B[16] = SHA3.rotate(A[8] ^ db, 45)
+            SHA3.B[17] = SHA3.rotate(A[23] ^ de, 8)
+            SHA3.B[18] = SHA3.rotate(A[13] ^ dc, 15)
+            SHA3.B[19] = SHA3.rotate(A[3] ^ da, 41)
+            
+            SHA3.B[20] = SHA3.rotate(A[24] ^ de, 14)
+            SHA3.B[21] = SHA3.rotate(A[14] ^ dc, 61)
+            SHA3.B[22] = SHA3.rotate(A[4] ^ da, 18)
+            SHA3.B[23] = SHA3.rotate(A[19] ^ dd, 56)
+            SHA3.B[24] = SHA3.rotate(A[9] ^ db, 2)
         
         # ξ step
         A[0] = SHA3.B[0] ^ ((~(SHA3.B[5])) & SHA3.B[10])
