@@ -294,10 +294,25 @@ class SHA3:
         i = off + ww - 1
         n = min(len(message), rr)
         while i >= off:
-            rc <<= 8
-            rc |= message[i] if (i < n) else 0
+            rc = (rc << 8) | (message[i] if (i < n) else 0)
             i -= 1
         return rc
+    
+    
+    @staticmethod
+    def toLane64(message, rr, off):
+        '''
+        Convert a chunk of char:s to a 64-bit word
+        
+        @param   message:bytes  The message
+        @param        rr:int    Bitrate in bytes
+        @param       off:int    The offset in the message
+        @return         :int    Lane
+        '''
+        rc = 0
+        n = min(len(message), rr)
+        
+        return ((message[off + 7] << 56) if (off + 7 < n) else 0) | ((message[off + 6] << 48) if (off + 6 < n) else 0) | ((message[off + 5] << 40) if (off + 5 < n) else 0) | ((message[off + 4] << 32) if (off + 4 < n) else 0) | ((message[off + 3] << 24) if (off + 3 < n) else 0) | ((message[off + 2] << 16) if (off + 2 < n) else 0) | ((message[off + 1] <<  8) if (off + 1 < n) else 0) | ((message[off]) if (off < n) else 0)
     
     
     @staticmethod
@@ -381,31 +396,31 @@ class SHA3:
         m = nnn
         if ww == 8:
             for i in range(0, m, rr):
-                SHA3.S[ 0] ^= SHA3.toLane(message[i:], rr, 8, 0)
-                SHA3.S[ 1] ^= SHA3.toLane(message[i:], rr, 8, 8)
-                SHA3.S[ 2] ^= SHA3.toLane(message[i:], rr, 8, 16)
-                SHA3.S[ 3] ^= SHA3.toLane(message[i:], rr, 8, 24)
-                SHA3.S[ 4] ^= SHA3.toLane(message[i:], rr, 8, 32)
-                SHA3.S[ 5] ^= SHA3.toLane(message[i:], rr, 8, 40)
-                SHA3.S[ 6] ^= SHA3.toLane(message[i:], rr, 8, 48)
-                SHA3.S[ 7] ^= SHA3.toLane(message[i:], rr, 8, 56)
-                SHA3.S[ 8] ^= SHA3.toLane(message[i:], rr, 8, 64)
-                SHA3.S[ 9] ^= SHA3.toLane(message[i:], rr, 8, 72)
-                SHA3.S[10] ^= SHA3.toLane(message[i:], rr, 8, 80)
-                SHA3.S[11] ^= SHA3.toLane(message[i:], rr, 8, 88)
-                SHA3.S[12] ^= SHA3.toLane(message[i:], rr, 8, 96)
-                SHA3.S[13] ^= SHA3.toLane(message[i:], rr, 8, 104)
-                SHA3.S[14] ^= SHA3.toLane(message[i:], rr, 8, 112)
-                SHA3.S[15] ^= SHA3.toLane(message[i:], rr, 8, 120)
-                SHA3.S[16] ^= SHA3.toLane(message[i:], rr, 8, 128)
-                SHA3.S[17] ^= SHA3.toLane(message[i:], rr, 8, 136)
-                SHA3.S[18] ^= SHA3.toLane(message[i:], rr, 8, 144)
-                SHA3.S[19] ^= SHA3.toLane(message[i:], rr, 8, 152)
-                SHA3.S[20] ^= SHA3.toLane(message[i:], rr, 8, 160)
-                SHA3.S[21] ^= SHA3.toLane(message[i:], rr, 8, 168)
-                SHA3.S[22] ^= SHA3.toLane(message[i:], rr, 8, 176)
-                SHA3.S[23] ^= SHA3.toLane(message[i:], rr, 8, 184)
-                SHA3.S[24] ^= SHA3.toLane(message[i:], rr, 8, 192)
+                SHA3.S[ 0] ^= SHA3.toLane64(message[i:], rr, 0)
+                SHA3.S[ 1] ^= SHA3.toLane64(message[i:], rr, 8)
+                SHA3.S[ 2] ^= SHA3.toLane64(message[i:], rr, 16)
+                SHA3.S[ 3] ^= SHA3.toLane64(message[i:], rr, 24)
+                SHA3.S[ 4] ^= SHA3.toLane64(message[i:], rr, 32)
+                SHA3.S[ 5] ^= SHA3.toLane64(message[i:], rr, 40)
+                SHA3.S[ 6] ^= SHA3.toLane64(message[i:], rr, 48)
+                SHA3.S[ 7] ^= SHA3.toLane64(message[i:], rr, 56)
+                SHA3.S[ 8] ^= SHA3.toLane64(message[i:], rr, 64)
+                SHA3.S[ 9] ^= SHA3.toLane64(message[i:], rr, 72)
+                SHA3.S[10] ^= SHA3.toLane64(message[i:], rr, 80)
+                SHA3.S[11] ^= SHA3.toLane64(message[i:], rr, 88)
+                SHA3.S[12] ^= SHA3.toLane64(message[i:], rr, 96)
+                SHA3.S[13] ^= SHA3.toLane64(message[i:], rr, 104)
+                SHA3.S[14] ^= SHA3.toLane64(message[i:], rr, 112)
+                SHA3.S[15] ^= SHA3.toLane64(message[i:], rr, 120)
+                SHA3.S[16] ^= SHA3.toLane64(message[i:], rr, 128)
+                SHA3.S[17] ^= SHA3.toLane64(message[i:], rr, 136)
+                SHA3.S[18] ^= SHA3.toLane64(message[i:], rr, 144)
+                SHA3.S[19] ^= SHA3.toLane64(message[i:], rr, 152)
+                SHA3.S[20] ^= SHA3.toLane64(message[i:], rr, 160)
+                SHA3.S[21] ^= SHA3.toLane64(message[i:], rr, 168)
+                SHA3.S[22] ^= SHA3.toLane64(message[i:], rr, 176)
+                SHA3.S[23] ^= SHA3.toLane64(message[i:], rr, 184)
+                SHA3.S[24] ^= SHA3.toLane64(message[i:], rr, 192)
                 SHA3.keccakF(SHA3.S)
         else:
             for i in range(0, m, rr):
@@ -437,31 +452,31 @@ class SHA3:
         m = nnn
         if ww == 8:
             for i in range(0, m, rr):
-                SHA3.S[ 0] ^= SHA3.toLane(message[i:], rr, 8, 0)
-                SHA3.S[ 1] ^= SHA3.toLane(message[i:], rr, 8, 8)
-                SHA3.S[ 2] ^= SHA3.toLane(message[i:], rr, 8, 16)
-                SHA3.S[ 3] ^= SHA3.toLane(message[i:], rr, 8, 24)
-                SHA3.S[ 4] ^= SHA3.toLane(message[i:], rr, 8, 32)
-                SHA3.S[ 5] ^= SHA3.toLane(message[i:], rr, 8, 40)
-                SHA3.S[ 6] ^= SHA3.toLane(message[i:], rr, 8, 48)
-                SHA3.S[ 7] ^= SHA3.toLane(message[i:], rr, 8, 56)
-                SHA3.S[ 8] ^= SHA3.toLane(message[i:], rr, 8, 64)
-                SHA3.S[ 9] ^= SHA3.toLane(message[i:], rr, 8, 72)
-                SHA3.S[10] ^= SHA3.toLane(message[i:], rr, 8, 80)
-                SHA3.S[11] ^= SHA3.toLane(message[i:], rr, 8, 88)
-                SHA3.S[12] ^= SHA3.toLane(message[i:], rr, 8, 96)
-                SHA3.S[13] ^= SHA3.toLane(message[i:], rr, 8, 104)
-                SHA3.S[14] ^= SHA3.toLane(message[i:], rr, 8, 112)
-                SHA3.S[15] ^= SHA3.toLane(message[i:], rr, 8, 120)
-                SHA3.S[16] ^= SHA3.toLane(message[i:], rr, 8, 128)
-                SHA3.S[17] ^= SHA3.toLane(message[i:], rr, 8, 136)
-                SHA3.S[18] ^= SHA3.toLane(message[i:], rr, 8, 144)
-                SHA3.S[19] ^= SHA3.toLane(message[i:], rr, 8, 152)
-                SHA3.S[20] ^= SHA3.toLane(message[i:], rr, 8, 160)
-                SHA3.S[21] ^= SHA3.toLane(message[i:], rr, 8, 168)
-                SHA3.S[22] ^= SHA3.toLane(message[i:], rr, 8, 176)
-                SHA3.S[23] ^= SHA3.toLane(message[i:], rr, 8, 184)
-                SHA3.S[24] ^= SHA3.toLane(message[i:], rr, 8, 192)
+                SHA3.S[ 0] ^= SHA3.toLane64(message[i:], rr, 0)
+                SHA3.S[ 1] ^= SHA3.toLane64(message[i:], rr, 8)
+                SHA3.S[ 2] ^= SHA3.toLane64(message[i:], rr, 16)
+                SHA3.S[ 3] ^= SHA3.toLane64(message[i:], rr, 24)
+                SHA3.S[ 4] ^= SHA3.toLane64(message[i:], rr, 32)
+                SHA3.S[ 5] ^= SHA3.toLane64(message[i:], rr, 40)
+                SHA3.S[ 6] ^= SHA3.toLane64(message[i:], rr, 48)
+                SHA3.S[ 7] ^= SHA3.toLane64(message[i:], rr, 56)
+                SHA3.S[ 8] ^= SHA3.toLane64(message[i:], rr, 64)
+                SHA3.S[ 9] ^= SHA3.toLane64(message[i:], rr, 72)
+                SHA3.S[10] ^= SHA3.toLane64(message[i:], rr, 80)
+                SHA3.S[11] ^= SHA3.toLane64(message[i:], rr, 88)
+                SHA3.S[12] ^= SHA3.toLane64(message[i:], rr, 96)
+                SHA3.S[13] ^= SHA3.toLane64(message[i:], rr, 104)
+                SHA3.S[14] ^= SHA3.toLane64(message[i:], rr, 112)
+                SHA3.S[15] ^= SHA3.toLane64(message[i:], rr, 120)
+                SHA3.S[16] ^= SHA3.toLane64(message[i:], rr, 128)
+                SHA3.S[17] ^= SHA3.toLane64(message[i:], rr, 136)
+                SHA3.S[18] ^= SHA3.toLane64(message[i:], rr, 144)
+                SHA3.S[19] ^= SHA3.toLane64(message[i:], rr, 152)
+                SHA3.S[20] ^= SHA3.toLane64(message[i:], rr, 160)
+                SHA3.S[21] ^= SHA3.toLane64(message[i:], rr, 168)
+                SHA3.S[22] ^= SHA3.toLane64(message[i:], rr, 176)
+                SHA3.S[23] ^= SHA3.toLane64(message[i:], rr, 184)
+                SHA3.S[24] ^= SHA3.toLane64(message[i:], rr, 192)
                 SHA3.keccakF(SHA3.S)
         else:
             for i in range(0, m, rr):
