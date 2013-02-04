@@ -30,6 +30,7 @@ class SHA3:
     @author  Mattias Andrée (maandree@member.fsf.org)
     '''
     
+    
     RC=[0x0000000000000001, 0x0000000000008082, 0x800000000000808A, 0x8000000080008000,
         0x000000000000808B, 0x0000000080000001, 0x8000000080008081, 0x8000000000008009,
         0x000000000000008A, 0x0000000000000088, 0x0000000080008009, 0x000000008000000A,
@@ -40,7 +41,7 @@ class SHA3:
     :list<int>  Round contants
     '''
     
-    B = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
+    B = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     '''
     :list<list<int>>  Keccak-f round temporary
     '''
@@ -51,44 +52,16 @@ class SHA3:
     '''
     
 
-    r = 0
+    (r, c, n, b, w, wmod, l, nr) = (0, 0, 0, 0, 0, 0, 0, 0)
     '''
-    :int  The bitrate
-    '''
-    
-    c = 0
-    '''
-    :int  The capacity
-    '''
-    
-    n = 0
-    '''
-    :int  The output size
-    '''
-        
-    b = 0
-    '''
-    :int  The state size
-    '''
-    
-    w = 0
-    '''
-    :int  The word size
-    '''
-    
-    wmod = 0
-    '''
-    :int  The word mask
-    '''
-    
-    l = 0
-    '''
-    :int  ℓ, the binary logarithm of the word size
-    '''
-    
-    nr = 0
-    '''
-    :int  12 + 2ℓ, the number of rounds
+       r:int  The bitrate
+       c:int  The capacity
+       n:int  The output size
+       b:int  The state size
+       w:int  The word size
+    wmod:int  The word mask
+       l:int  ℓ, the binary logarithm of the word size
+      nr:int  12 + 2ℓ, the number of rounds
     '''
     
     S = None
@@ -138,7 +111,7 @@ class SHA3:
         @param   A:list<int>  The current state
         @param  rc:int        Round constant
         '''
-        # θ step
+        # θ step (step 1 and 2 of 3)
         SHA3.C[0] = (A[0]  ^ A[1])  ^ (A[2]  ^ A[3])  ^ A[4]
         SHA3.C[1] = (A[5]  ^ A[6])  ^ (A[7]  ^ A[8])  ^ A[9]
         SHA3.C[2] = (A[10] ^ A[11]) ^ (A[12] ^ A[13]) ^ A[14]
@@ -152,66 +125,66 @@ class SHA3:
         de = SHA3.C[3] ^ SHA3.rotate(SHA3.C[0], 1)
         
         # ρ and π steps, with last part of θ
-        SHA3.B[0][0] = SHA3.rotate(A[0] ^ da, 0)
-        SHA3.B[0][2] = SHA3.rotate(A[5] ^ db, 1)
-        SHA3.B[0][4] = SHA3.rotate(A[10] ^ dc, 62)
-        SHA3.B[0][1] = SHA3.rotate(A[15] ^ dd, 28)
-        SHA3.B[0][3] = SHA3.rotate(A[20] ^ de, 27)
+        SHA3.B[0] = SHA3.rotate(A[0] ^ da, 0)
+        SHA3.B[1] = SHA3.rotate(A[15] ^ dd, 28)
+        SHA3.B[2] = SHA3.rotate(A[5] ^ db, 1)
+        SHA3.B[3] = SHA3.rotate(A[20] ^ de, 27)
+        SHA3.B[4] = SHA3.rotate(A[10] ^ dc, 62)
         
-        SHA3.B[1][3] = SHA3.rotate(A[1] ^ da, 36)
-        SHA3.B[1][0] = SHA3.rotate(A[6] ^ db, 44)
-        SHA3.B[1][2] = SHA3.rotate(A[11] ^ dc, 6)
-        SHA3.B[1][4] = SHA3.rotate(A[16] ^ dd, 55)
-        SHA3.B[1][1] = SHA3.rotate(A[21] ^ de, 20)
+        SHA3.B[5] = SHA3.rotate(A[6] ^ db, 44)
+        SHA3.B[6] = SHA3.rotate(A[21] ^ de, 20)
+        SHA3.B[7] = SHA3.rotate(A[11] ^ dc, 6)
+        SHA3.B[8] = SHA3.rotate(A[1] ^ da, 36)
+        SHA3.B[9] = SHA3.rotate(A[16] ^ dd, 55)
         
-        SHA3.B[2][1] = SHA3.rotate(A[2] ^ da, 3)
-        SHA3.B[2][3] = SHA3.rotate(A[7] ^ db, 10)
-        SHA3.B[2][0] = SHA3.rotate(A[12] ^ dc, 43)
-        SHA3.B[2][2] = SHA3.rotate(A[17] ^ dd, 25)
-        SHA3.B[2][4] = SHA3.rotate(A[22] ^ de, 39)
+        SHA3.B[10] = SHA3.rotate(A[12] ^ dc, 43)
+        SHA3.B[11] = SHA3.rotate(A[2] ^ da, 3)
+        SHA3.B[12] = SHA3.rotate(A[17] ^ dd, 25)
+        SHA3.B[13] = SHA3.rotate(A[7] ^ db, 10)
+        SHA3.B[14] = SHA3.rotate(A[22] ^ de, 39)
         
-        SHA3.B[3][4] = SHA3.rotate(A[3] ^ da, 41)
-        SHA3.B[3][1] = SHA3.rotate(A[8] ^ db, 45)
-        SHA3.B[3][3] = SHA3.rotate(A[13] ^ dc, 15)
-        SHA3.B[3][0] = SHA3.rotate(A[18] ^ dd, 21)
-        SHA3.B[3][2] = SHA3.rotate(A[23] ^ de, 8)
+        SHA3.B[15] = SHA3.rotate(A[18] ^ dd, 21)
+        SHA3.B[16] = SHA3.rotate(A[8] ^ db, 45)
+        SHA3.B[17] = SHA3.rotate(A[23] ^ de, 8)
+        SHA3.B[18] = SHA3.rotate(A[13] ^ dc, 15)
+        SHA3.B[19] = SHA3.rotate(A[3] ^ da, 41)
         
-        SHA3.B[4][2] = SHA3.rotate(A[4] ^ da, 18)
-        SHA3.B[4][4] = SHA3.rotate(A[9] ^ db, 2)
-        SHA3.B[4][1] = SHA3.rotate(A[14] ^ dc, 61)
-        SHA3.B[4][3] = SHA3.rotate(A[19] ^ dd, 56)
-        SHA3.B[4][0] = SHA3.rotate(A[24] ^ de, 14)
+        SHA3.B[20] = SHA3.rotate(A[24] ^ de, 14)
+        SHA3.B[21] = SHA3.rotate(A[14] ^ dc, 61)
+        SHA3.B[22] = SHA3.rotate(A[4] ^ da, 18)
+        SHA3.B[23] = SHA3.rotate(A[19] ^ dd, 56)
+        SHA3.B[24] = SHA3.rotate(A[9] ^ db, 2)
         
         # ξ step
-        A[0] = SHA3.B[0][0] ^ ((~(SHA3.B[1][0])) & SHA3.B[2][0])
-        A[1] = SHA3.B[0][1] ^ ((~(SHA3.B[1][1])) & SHA3.B[2][1])
-        A[2] = SHA3.B[0][2] ^ ((~(SHA3.B[1][2])) & SHA3.B[2][2])
-        A[3] = SHA3.B[0][3] ^ ((~(SHA3.B[1][3])) & SHA3.B[2][3])
-        A[4] = SHA3.B[0][4] ^ ((~(SHA3.B[1][4])) & SHA3.B[2][4])
+        A[0] = SHA3.B[0] ^ ((~(SHA3.B[5])) & SHA3.B[10])
+        A[1] = SHA3.B[1] ^ ((~(SHA3.B[6])) & SHA3.B[11])
+        A[2] = SHA3.B[2] ^ ((~(SHA3.B[7])) & SHA3.B[12])
+        A[3] = SHA3.B[3] ^ ((~(SHA3.B[8])) & SHA3.B[13])
+        A[4] = SHA3.B[4] ^ ((~(SHA3.B[9])) & SHA3.B[14])
         
-        A[5] = SHA3.B[1][0] ^ ((~(SHA3.B[2][0])) & SHA3.B[3][0])
-        A[6] = SHA3.B[1][1] ^ ((~(SHA3.B[2][1])) & SHA3.B[3][1])
-        A[7] = SHA3.B[1][2] ^ ((~(SHA3.B[2][2])) & SHA3.B[3][2])
-        A[8] = SHA3.B[1][3] ^ ((~(SHA3.B[2][3])) & SHA3.B[3][3])
-        A[9] = SHA3.B[1][4] ^ ((~(SHA3.B[2][4])) & SHA3.B[3][4])
+        A[5] = SHA3.B[5] ^ ((~(SHA3.B[10])) & SHA3.B[15])
+        A[6] = SHA3.B[6] ^ ((~(SHA3.B[11])) & SHA3.B[16])
+        A[7] = SHA3.B[7] ^ ((~(SHA3.B[12])) & SHA3.B[17])
+        A[8] = SHA3.B[8] ^ ((~(SHA3.B[13])) & SHA3.B[18])
+        A[9] = SHA3.B[9] ^ ((~(SHA3.B[14])) & SHA3.B[19])
         
-        A[10] = SHA3.B[2][0] ^ ((~(SHA3.B[3][0])) & SHA3.B[4][0])
-        A[11] = SHA3.B[2][1] ^ ((~(SHA3.B[3][1])) & SHA3.B[4][1])
-        A[12] = SHA3.B[2][2] ^ ((~(SHA3.B[3][2])) & SHA3.B[4][2])
-        A[13] = SHA3.B[2][3] ^ ((~(SHA3.B[3][3])) & SHA3.B[4][3])
-        A[14] = SHA3.B[2][4] ^ ((~(SHA3.B[3][4])) & SHA3.B[4][4])
+        A[10] = SHA3.B[10] ^ ((~(SHA3.B[15])) & SHA3.B[20])
+        A[11] = SHA3.B[11] ^ ((~(SHA3.B[16])) & SHA3.B[21])
+        A[12] = SHA3.B[12] ^ ((~(SHA3.B[17])) & SHA3.B[22])
+        A[13] = SHA3.B[13] ^ ((~(SHA3.B[18])) & SHA3.B[23])
+        A[14] = SHA3.B[14] ^ ((~(SHA3.B[19])) & SHA3.B[24])
         
-        A[15] = SHA3.B[3][0] ^ ((~(SHA3.B[4][0])) & SHA3.B[0][0])
-        A[16] = SHA3.B[3][1] ^ ((~(SHA3.B[4][1])) & SHA3.B[0][1])
-        A[17] = SHA3.B[3][2] ^ ((~(SHA3.B[4][2])) & SHA3.B[0][2])
-        A[18] = SHA3.B[3][3] ^ ((~(SHA3.B[4][3])) & SHA3.B[0][3])
-        A[19] = SHA3.B[3][4] ^ ((~(SHA3.B[4][4])) & SHA3.B[0][4])
+        A[15] = SHA3.B[15] ^ ((~(SHA3.B[20])) & SHA3.B[0])
+        A[16] = SHA3.B[16] ^ ((~(SHA3.B[21])) & SHA3.B[1])
+        A[17] = SHA3.B[17] ^ ((~(SHA3.B[22])) & SHA3.B[2])
+        A[18] = SHA3.B[18] ^ ((~(SHA3.B[23])) & SHA3.B[3])
+        A[19] = SHA3.B[19] ^ ((~(SHA3.B[24])) & SHA3.B[4])
         
-        A[20] = SHA3.B[4][0] ^ ((~(SHA3.B[0][0])) & SHA3.B[1][0])
-        A[21] = SHA3.B[4][1] ^ ((~(SHA3.B[0][1])) & SHA3.B[1][1])
-        A[22] = SHA3.B[4][2] ^ ((~(SHA3.B[0][2])) & SHA3.B[1][2])
-        A[23] = SHA3.B[4][3] ^ ((~(SHA3.B[0][3])) & SHA3.B[1][3])
-        A[24] = SHA3.B[4][4] ^ ((~(SHA3.B[0][4])) & SHA3.B[1][4])
+        A[20] = SHA3.B[20] ^ ((~(SHA3.B[0])) & SHA3.B[5])
+        A[21] = SHA3.B[21] ^ ((~(SHA3.B[1])) & SHA3.B[6])
+        A[22] = SHA3.B[22] ^ ((~(SHA3.B[2])) & SHA3.B[7])
+        A[23] = SHA3.B[23] ^ ((~(SHA3.B[3])) & SHA3.B[8])
+        A[24] = SHA3.B[24] ^ ((~(SHA3.B[4])) & SHA3.B[9])
         
         # ι step
         A[0] ^= rc
@@ -224,8 +197,34 @@ class SHA3:
         
         @param  A:list<int>  The current state
         '''
-        for i in range(SHA3.nr):
-            SHA3.keccakFRound(A, SHA3.RC[i] & SHA3.wmod)
+        if (SHA3.nr == 24):
+            SHA3.keccakFRound(A, 0x0000000000000001)
+            SHA3.keccakFRound(A, 0x0000000000008082)
+            SHA3.keccakFRound(A, 0x800000000000808A)
+            SHA3.keccakFRound(A, 0x8000000080008000)
+            SHA3.keccakFRound(A, 0x000000000000808B)
+            SHA3.keccakFRound(A, 0x0000000080000001)
+            SHA3.keccakFRound(A, 0x8000000080008081)
+            SHA3.keccakFRound(A, 0x8000000000008009)
+            SHA3.keccakFRound(A, 0x000000000000008A)
+            SHA3.keccakFRound(A, 0x0000000000000088)
+            SHA3.keccakFRound(A, 0x0000000080008009)
+            SHA3.keccakFRound(A, 0x000000008000000A)
+            SHA3.keccakFRound(A, 0x000000008000808B)
+            SHA3.keccakFRound(A, 0x800000000000008B)
+            SHA3.keccakFRound(A, 0x8000000000008089)
+            SHA3.keccakFRound(A, 0x8000000000008003)
+            SHA3.keccakFRound(A, 0x8000000000008002)
+            SHA3.keccakFRound(A, 0x8000000000000080)
+            SHA3.keccakFRound(A, 0x000000000000800A)
+            SHA3.keccakFRound(A, 0x800000008000000A)
+            SHA3.keccakFRound(A, 0x8000000080008081)
+            SHA3.keccakFRound(A, 0x8000000000008080)
+            SHA3.keccakFRound(A, 0x0000000080000001)
+            SHA3.keccakFRound(A, 0x8000000080008008)
+        else:
+            for i in range(SHA3.nr):
+                SHA3.keccakFRound(A, SHA3.RC[i] & SHA3.wmod)
     
     
     @staticmethod
@@ -276,11 +275,10 @@ class SHA3:
             nnn = ((nnn - (nnn % r) + (r - 8)) >> 3) + 1
             message = [0] * (nnn - nrf)
             message[0] = bbbb
-            i = nrf + 1
-            while i < nnn:
-                message[i - nrf] = 0
-                i += 1
-            message[nnn - nrf - 1] = 0x80
+            nnn -= nrf
+            for i in range(1, nnn):
+                message[i] = 0
+            message[nnn - 1] = 0x80
         
         return msg[:nrf] + bytes(message)
     
