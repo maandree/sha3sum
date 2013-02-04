@@ -532,7 +532,7 @@ class SHA3:
         while (olen > 0):
             i = 0
             while (i < ni) and (j < nn):
-                v = SHA3.S[(i % 5) * 5 + i // 5] # FIXME
+                v = SHA3.S[(i % 5) * 5 + i // 5]
                 for _ in range(ww):
                     if (j < nn):
                         rc[ptr] = v & 255

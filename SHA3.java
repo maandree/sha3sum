@@ -458,8 +458,7 @@ public class SHA3
 	if (SHA3.mptr + msglen > SHA3.M.length)
 	    System.arraycopy(SHA3.M, 0, SHA3.M = new byte[(SHA3.M.length + msglen) << 1], 0, SHA3.mptr);
 	System.arraycopy(msg, 0, SHA3.M, SHA3.mptr, msglen);
-	SHA3.mptr += msglen;
-        int len = SHA3.mptr;
+        int len = SHA3.mptr += msglen;
         len -= len % ((SHA3.r * SHA3.b) >> 3);
         byte[] message;
 	System.arraycopy(SHA3.M, 0, message = new byte[len], 0, len);
@@ -647,7 +646,7 @@ public class SHA3
             int i = 0;
 	    while ((i < ni) && (j < nn))
 	    {
-		long v = SHA3.S[i];
+		long v = SHA3.S[(i % 5) * 5 + i / 5];
 		for (int _ = 0; _ < ww; _++)
 		{
                     if (j < nn)
@@ -668,4 +667,3 @@ public class SHA3
     }
     
 }
-
