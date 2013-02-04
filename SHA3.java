@@ -440,13 +440,25 @@ public class SHA3
      */
     private static void update(byte[] msg)
     {
+	update(msg, msg.length);
+    }
+    
+    
+    /**
+     * Absorb the more of the message message to the Keccak sponge
+     * 
+     * @param  msg     The partial message
+     * @param  msglen  The length of the partial message
+     */
+    private static void update(byte[] msg, int msglen)
+    {
         int rr = SHA3.r >> 3;
         int ww = SHA3.w >> 3;
         
-	if (SHA3.mptr + msg.length > SHA3.M.length)
+	if (SHA3.mptr + msglen > SHA3.M.length)
 	    System.arraycopy(SHA3.M, 0, SHA3.M = new byte[SHA3.M.length << 1], 0, SHA3.mptr);
-	System.arraycopy(msg, 0, SHA3.M, SHA3.mptr, msg.length);
-	SHA3.mptr += msg.length;
+	System.arraycopy(msg, 0, SHA3.M, SHA3.mptr, msglen);
+	SHA3.mptr += msglen;
         int len = SHA3.mptr;
         len -= len % ((SHA3.r * SHA3.b) >> 3);
         byte[] message;
@@ -510,15 +522,27 @@ public class SHA3
      */
     private static byte[] digest(byte[] msg)
     {
+	return digest(msg, msg.length);
+    }
+    
+    
+    /**
+     * Absorb the last part of the message and squeeze the Keccak sponge
+     * 
+     * @param  msg     The rest of the message
+     * @param  msglen  The length of the partial message
+     */
+    private static byte[] digest(byte[] msg, int msglen)
+    {
 	byte[] message;
-        if ((msg == null) || (msg.length == 0))
+        if ((msg == null) || (msglen == 0))
             message = SHA3.pad10star1(SHA3.M, SHA3.mptr, SHA3.r);
 	else
 	{
-	    if (SHA3.mptr + msg.length > SHA3.M.length)
+	    if (SHA3.mptr + msglen > SHA3.M.length)
 		System.arraycopy(SHA3.M, 0, SHA3.M = new byte[SHA3.M.length << 1], 0, SHA3.mptr);
-	    System.arraycopy(msg, 0, SHA3.M, SHA3.mptr, msg.length);
-	    message = SHA3.pad10star1(SHA3.M, SHA3.mptr + msg.length, SHA3.r);
+	    System.arraycopy(msg, 0, SHA3.M, SHA3.mptr, msglen);
+	    message = SHA3.pad10star1(SHA3.M, SHA3.mptr + msglen, SHA3.r);
 	}
         SHA3.M = null;
         int len = message.length;
