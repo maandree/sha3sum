@@ -50,27 +50,27 @@ public class SHA3
     /**
      * The bitrate
      */
-    private static long r = 0;
+    private static int r = 0;
     
     /**
      * The capacity
      */
-    private static long c = 0;
+    private static int c = 0;
     
     /**
      * The output size
      */
-    private static long n = 0;
+    private static int n = 0;
     
     /**
      * The state size
      */
-    private static long b = 0;
+    private static int b = 0;
     
     /**
      * The word size
      */
-    private static long w = 0;
+    private static int w = 0;
     
     /**
      * The word mask
@@ -80,12 +80,12 @@ public class SHA3
     /**
      * ℓ, the binary logarithm of the word size
      */
-    private static long l = 0;
+    private static int l = 0;
     
     /**
      * 12 + 2ℓ, the number of rounds
      */
-    private static long nr = 0;
+    private static int nr = 0;
     
     
     /**
@@ -97,6 +97,11 @@ public class SHA3
      * Left over water to fill the sponge with at next update
      */
     private static byte[] M = null;
+    
+    /**
+     * Pointer for {@link #M}
+     */
+    private static int mptr = 0;
     
     
     
@@ -117,9 +122,9 @@ public class SHA3
      * @param   n  Rotation steps
      * @return     The value rotated
      */
-    private static long rotate(long x, long n)
+    private static long rotate(long x, int n)
     {
-        long m = n % SHA3.w
+        long m = n % SHA3.w;
         return (x >>> (SHA3.w - m)) + (x << m);
     }
     
@@ -131,7 +136,7 @@ public class SHA3
      * @param   n  Rotation steps
      * @return     The value rotated
      */
-    private static long rotate(long x, long n)
+    private static long rotate64(long x, int n)
     {
         return (x >> (SHA3.w - n)) + (x << n);
     }
@@ -143,7 +148,7 @@ public class SHA3
      * @param   x  The value of which to calculate the binary logarithm
      * @return     The binary logarithm
      */
-    private static long lb(long x)
+    private static int lb(int x)
     {
         return (((x & 0xFF00) == 0 ? 0 : 8) +
 		((x & 0xF0F0) == 0 ? 0 : 4)) +
@@ -321,13 +326,13 @@ public class SHA3
 	    SHA3.keccakFRound(A, 0x8000000080008008L);
 	}
         else
-            for (long i = 0; i < SHA3.nr; i++)
+            for (int i = 0; i < SHA3.nr; i++)
 		SHA3.keccakFRound(A, SHA3.RC[i] & SHA3.wmod);
     }
     
     
     /**
-     * Convert a chunk of char:s to a word
+     * Convert a chunk of byte:s to a word
      * 
      * @param   message  The message
      * @param   rr       Bitrate in bytes
@@ -335,10 +340,10 @@ public class SHA3
      * @param   off      The offset in the message
      * @return           Lane
      */
-    private static long toLane(byte[] message, ilong rr, long ww, long off)
+    private static long toLane(byte[] message, int rr, int ww, int off)
     {
-        long n = Math.min(len(message), rr), rc = 0;
-        for (long i = off + ww - 1; i >= off; i--)
+        int n = Math.min(message.length, rr), rc = 0;
+        for (int i = off + ww - 1; i >= off; i--)
             rc = (rc << 8) | ((i < n) ? message[i] : 0);
         return rc;
     }
@@ -352,9 +357,9 @@ public class SHA3
      * @param   off      The offset in the message
      * @return           Lane
      */
-    private static long toLane64(byte[] message, long rr, long off)
+    private static long toLane64(byte[] message, int rr, int off)
     {
-        long n = Math.min(len(message), rr), rc = 0;
+        int n = Math.min(message.length, rr), rc = 0;
         return ((off + 7 < n) ? (message[off + 7] << 56) : 0) |
 	       ((off + 6 < n) ? (message[off + 6] << 48) : 0) |
 	       ((off + 5 < n) ? (message[off + 5] << 40) : 0) |
@@ -370,36 +375,35 @@ public class SHA3
      * pad 10*1
      * 
      * @param   msg  The message to pad
+     * @parm    len  The length of the message
      * @param   r    The bitrate
      * @return       The message padded
      */
-    private static long[] pad10star1(byte[] msg, long r)
+    private static byte[] pad10star1(byte[] msg, int len, int r)
     {
-        long len = msg.length;
+        int nrf = len >> 3;
+        int nbrf = len & 7;
+        int ll = len % r;
         
-        long nrf = len >> 3;
-	long nbrf = len & 7;
-	long ll = len % r;
+        byte b = (byte)(nbrf == 0 ? 1 : ((msg[nrf] >> (8 - nbrf)) | (1 << nbrf)));
         
-        byte b = nbrf == 0 ? 1 : ((msg[nrf] >> (8 - nbrf)) | (1 << nbrf));
-        
-	char[] message;
+        byte[] message;
         if ((r - 8 <= ll) && (ll <= r - 2))
 	{
-	    message = new char[len = nrf + 1];
-            message[nrf] = b ^ 128;
+	    message = new byte[len = nrf + 1];
+            message[nrf] = (byte)(b ^ 128);
 	}
         else
 	{
 	    len = (nrf + 1) << 3;
 	    len = ((len - (len % r) + (r - 8)) >> 3) + 1;
-	    message = new char[len];
+	    message = new byte[len];
 	    message[nrf] = b;
 	    //for (long i = nrf + 1; i < len; i++)
 	    //    message[i + nrf] = 0;
 	    message[len - 1] = -128;
 	}
-	for (long i = 0; i < nrf; i++)
+	for (int i = 0; i < nrf; i++)
 	    message[i] = msg[i];
         
         return message;
@@ -413,7 +417,7 @@ public class SHA3
      * @param  c  The capacity
      * @param  n  The output size
      */
-    private static void initalise(long r, long c, long n)
+    private static void initalise(int r, int c, int n)
     {
         SHA3.r = r;
         SHA3.c = c;
@@ -424,7 +428,8 @@ public class SHA3
         SHA3.nr = 12 + (SHA3.l << 1);
         SHA3.wmod = (1 << SHA3.w) - 1;
         SHA3.S = new long[25];
-        SHA3.M = new char[(SHA3.r * SHA3.b) >> 3];
+        SHA3.M = new byte[(SHA3.r * SHA3.b) >> 2];
+	SHA3.mptr = 0;
     }
     
     
@@ -433,20 +438,24 @@ public class SHA3
      * 
      * @param  msg  The partial message
      */
-    private static void update(char[] msg)
+    private static void update(byte[] msg)
     {
-        long rr = SHA3.r >> 3;
-        long ww = SHA3.w >> 3;
+        int rr = SHA3.r >> 3;
+        int ww = SHA3.w >> 3;
         
-        SHA3.M += msg;/////////////////
-        long len = len(SHA3.M)://///////////////
-        len -= len % ((SHA3.r * SHA3.b) >> 3);///////////////
-        char[] message = SHA3.M[:len];///////////////////
-        SHA3.M = SHA3.M[len:];////////////(((((
-        
+	if (SHA3.mptr + msg.length > SHA3.M.length)
+	    System.arraycopy(SHA3.M, 0, SHA3.M = new byte[SHA3.M.length << 1], 0, SHA3.mptr);
+	System.arraycopy(msg, 0, SHA3.M, SHA3.mptr, msg.length);
+	SHA3.mptr += msg.length;
+        int len = SHA3.mptr;
+        len -= len % ((SHA3.r * SHA3.b) >> 3);
+        byte[] message;
+	System.arraycopy(SHA3.M, 0, message = new byte[len], 0, len);
+	System.arraycopy(SHA3.M, len, SHA3.M, 0, SHA3.mptr -= len);
+	
         /* Absorbing phase */
         if (ww == 8)
-            for (long i = 0; i < len; i += rr)
+            for (int i = 0; i < len; i += rr)
 	    {
                 SHA3.S[ 0] ^= SHA3.toLane64(message, rr, i + 0);
                 SHA3.S[ 1] ^= SHA3.toLane64(message, rr, i + 8);
@@ -476,9 +485,9 @@ public class SHA3
 		SHA3.keccakF(SHA3.S);
 	    }
         else
-	    for (long i = 0; i < len; i += rr)
+	    for (int i = 0; i < len; i += rr)
 	    {
-                for (long j = 0; j < 25; j++)
+                for (int j = 0; j < 25; j++)
 		    SHA3.S[j] ^= SHA3.toLane(message, rr, ww, i + j * ww);
 		SHA3.keccakF(SHA3.S);
 	    }
@@ -488,7 +497,7 @@ public class SHA3
     /**
      * Squeeze the Keccak sponge
      */
-    private static char[] digest()
+    private static byte[] digest()
     {
 	return digest(null);
     }
@@ -499,23 +508,30 @@ public class SHA3
      * 
      * @param  msg  The rest of the message
      */
-    private static char[] digest(char[] msg)
+    private static byte[] digest(byte[] msg)
     {
-        if (msg == null)
-            msg = bytes([]);
-        message = SHA3.pad10star1(SHA3.M + msg, SHA3.r);
+	byte[] message;
+        if ((msg == null) || (msg.length == 0))
+            message = SHA3.pad10star1(SHA3.M, SHA3.mptr, SHA3.r);
+	else
+	{
+	    if (SHA3.mptr + msg.length > SHA3.M.length)
+		System.arraycopy(SHA3.M, 0, SHA3.M = new byte[SHA3.M.length << 1], 0, SHA3.mptr);
+	    System.arraycopy(msg, 0, SHA3.M, SHA3.mptr, msg.length);
+	    message = SHA3.pad10star1(SHA3.M, SHA3.mptr + msg.length, SHA3.r);
+	}
         SHA3.M = null;
-        long len = len(message);
-        char[] rc = new char[(SHA3.n + 7) >> 3];
-        long ptr = 0;
+        int len = message.length;
+        byte[] rc = new byte[(SHA3.n + 7) >> 3];
+        int ptr = 0;
         
-        long rr = SHA3.r >> 3;
-        long nn = SHA3.n >> 3;
-        long ww = SHA3.w >> 3;
+        int rr = SHA3.r >> 3;
+        int nn = SHA3.n >> 3;
+        int ww = SHA3.w >> 3;
         
         /* Absorbing phase */
         if (ww == 8)
-            for (long i = 0; i < len; i += rr)
+            for (int i = 0; i < len; i += rr)
 	    {
 		SHA3.S[ 0] ^= SHA3.toLane64(message, rr, i + 0);
 		SHA3.S[ 1] ^= SHA3.toLane64(message, rr, i + 8);
@@ -545,34 +561,34 @@ public class SHA3
                 SHA3.keccakF(SHA3.S);
 	    }
         else
-	    for (long i = 0; i < len; i += rr)
+	    for (int i = 0; i < len; i += rr)
 	    {
-                for (long j = 0; j < 25; j++)
+                for (int j = 0; j < 25; j++)
 		    SHA3.S[j] ^= SHA3.toLane(message, rr, ww, i + j * ww);
 		SHA3.keccakF(SHA3.S);
 	    }
         
         /* Squeezing phase */
-        long olen = SHA3.n;
-        long j = 0;
-        long ni = Math.min(25, rr);
+        int olen = SHA3.n;
+        int j = 0;
+        int ni = Math.min(25, rr);
         while (olen > 0)
 	{
-            i = 0;
+            int i = 0;
 	    while ((i < ni) && (j < nn))
 	    {
-		v = SHA3.S[i]:
-		for (long _ = 0; _ < ww; _++)
+		long v = SHA3.S[i];
+		for (int _ = 0; _ < ww; _++)
 		{
                     if (j < nn)
 		    {
-			rc[ptr] = v & 255:
-                        ptr += 1:
+			rc[ptr] = (byte)v;
+                        ptr += 1;
 		    }
-                    v >>= 8:
-                    j += 1:
+                    v >>= 8;
+                    j += 1;
 		}
-                i += 1:
+                i += 1;
 	    }
             olen -= SHA3.r;
 	    if (olen > 0)
