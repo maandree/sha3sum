@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 import sys
+import os
 
 
 class SHA3:
@@ -192,17 +193,18 @@ class SHA3:
         '''
         Convert a chunk of char:s to a word
         
-        @param   message:str  The message
-        @param        rr:int  Bitrate in bytes
-        @param        ww:int  Word size in bytes
-        @param       off:int  The offset in the message
-        @return         :int  Lane
+        @param   message:bytes  The message
+        @param        rr:int    Bitrate in bytes
+        @param        ww:int    Word size in bytes
+        @param       off:int    The offset in the message
+        @return         :int    Lane
         '''
         rc = 0
         i = off + ww - 1
+        n = len(message)
         while i >= off:
             rc <<= 8
-            rc |= message[i] if (i < rr) else 0
+            rc |= message[i] if (i < rr) and (i < n) else 0
             i -= 1
         return rc
     
@@ -279,8 +281,9 @@ class SHA3:
         ww = SHA3.w >> 3
         
         SHA3.M += msg
+        SHA3.pad10star1(SHA3.M, SHA3.r)
         nnn = len(SHA3.M)
-        nnn -= nnn % rr
+        nnn -= nnn % ((SHA3.r * SHA3.b) >> 3)
         message = SHA3.M[:nnn]
         SHA3.M = SHA3.M[nnn:]
         
@@ -298,13 +301,16 @@ class SHA3:
     
     
     @staticmethod
-    def digest(msg):
+    def digest(msg = None):
         '''
         Absorb the last part of the message and squeeze the Keccak sponge
         
         @param  msg:bytes  The rest of the message
         '''
+        if msg is None:
+            msg = bytes([])
         message = SHA3.pad10star1(SHA3.M + msg, SHA3.r)
+        SHA3.M = None
         nnn = len(message)
         rc = [0] * ((SHA3.n + 7) >> 3)
         ptr = 0
@@ -343,7 +349,7 @@ class SHA3:
             if olen > 0:
                 SHA3.keccakF(S)
         
-        return rc
+        return bytes(rc)
 
 
 if __name__ == '__main__':
@@ -375,7 +381,7 @@ if __name__ == '__main__':
     for arg in args + [None]:
         if linger is not None:
             if linger[0] in ('-h', '--help'):
-                print('''
+                sys.stderr.buffer.write(('''
 SHA-3/Keccak checksum calculator
 
 USAGE:	sha3sum [option...] < file
@@ -422,31 +428,33 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-''' % (_r, _c, _w, _o, _s, _i))
+''' % (_r, _c, _w, _o, _s, _i)).encode('utf-8'))
+                sys.stderr.buffer.flush()
                 exit(2)
             else:
                 if linger[1] is None:
                     linger[1] = arg
                     arg = None
                 if linger[0] in ('-r', '--bitrate'):
-                    r = linger[1]
+                    r = int(linger[1])
                     o = (s - r) >> 1
                 elif linger[0] in ('-c', '--capacity'):
-                    c = linger[1]
+                    c = int(linger[1])
                     r = s - c
                 elif linger[0] in ('-w', '--wordsize'):
-                    w = linger[1]
+                    w = int(linger[1])
                     s = w * 25
                 elif linger[0] in ('-o', '--outputsize'):
-                    o = linger[1]
+                    o = int(linger[1])
                     r = s - (o << 1)
                 elif linger[0] in ('-s', '--statesize'):
-                    s = linger[1]
+                    s = int(linger[1])
                     r = s - (o << 1)
                 elif linger[0] in ('-i', '--iterations'):
-                    iterations = linger[1]
+                    i = int(linger[1])
                 else:
-                    sys.stderr.write(sys.argv[0] + ': unrecognised option: ' + linger)
+                    sys.stderr.buffer.write((sys.argv[0] + ': unrecognised option: ' + linger[0] + '\n').encode('utf-8'))
+                    sys.stdout.buffer.flush()
                     exit(1)
             linger = None
             if arg is None:
@@ -457,6 +465,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             files.append(None if arg == '-' else arg)
         elif arg == '--':
             dashed = True
+        elif arg == '-':
+            files.append(None)
         elif arg.startswith('--'):
             if '=' in arg:
                 linger = (arg[:arg.find('=')], arg[arg.find('=') + 1:])
@@ -464,33 +474,40 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 if arg == '--binary':
                     binary = True
                 else:
-                    linger = (arg, None)
+                    linger = [arg, None]
         elif arg.startswith('-'):
-            if arg[1] == 'b':
+            arg = arg[1:]
+            if arg[0] == 'b':
                 binary = True
                 arg = arg[1:]
-            if len(arg) > 1:
-                linger = ('-' + arg, None)
+            elif len(arg) == 1:
+                linger = ['-' + arg, None]
             else:
-                linger = ('-' + arg[0], arg[1:])
+                linger = ['-' + arg[0], arg[1:]]
         else:
-            files.append(None if arg == '-' else arg)
+            files.append(arg)
     
     if len(files) == 0:
         files.append(None)
-    
-    
+    if i < 1:
+        sys.stdout.buffer.write((sys.argv[0] + ': sorry, I will only do at least one iteration!\n').encode('utf-8'))
+        sys.stdout.buffer.flush()
+        exit(3)
     stdin = None
     for filename in files:
         if (filename is None) and (stdin is not None):
             print(stdin)
             continue
         rc = ''
-        with open('/dev/stdin' if filename is None else filename, 'rb') as file:
-            message = file.read()
+        fn = '/dev/stdin' if filename is None else filename
+        with open(fn, 'rb') as file:
             SHA3.initalise(r, c, o)
-            ##SHA3.update(msg)
-            bs = bytes(SHA3.digest(message))
+            blksize = os.stat(os.path.realpath(fn)).st_size
+            SHA3.update(file.read(blksize))
+            bs = SHA3.digest(file.read())
+            for _ in range(1, i):
+                SHA3.initalise(r, c, o)
+                bs = SHA3.digest(bs)
             if binary:
                 if filename is None:
                     stdin = bs
@@ -505,4 +522,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     stdin = rc
                 sys.stdout.buffer.write(rc.encode('UTF-8'))
                 sys.stdout.buffer.flush()
+
 
