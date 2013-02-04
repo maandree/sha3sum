@@ -41,12 +41,12 @@ class SHA3:
     :list<int>  Round contants
     '''
     
-    B = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    B = [0] * 25
     '''
-    :list<list<int>>  Keccak-f round temporary
+    :list<int>  Keccak-f round temporary
     '''
     
-    C = [0, 0, 0, 0, 0]
+    C = [0] * 5
     '''
     :list<int>  Keccak-f round temporary
     '''
