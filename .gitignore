@@ -1,0 +1,10 @@
+_/
+*~
+\#*\#*
+.\#*
+*.swp
+*.bak
+__pycache__/
+*.class
+*.jar
+*.pyc
