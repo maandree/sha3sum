@@ -1,3 +1,11 @@
+COMPLETE STATUS:
+	 python  :: optimised
+	 java    :: not correct, not optimised
+	 c       :: planned (after java)
+	 nasm    :: planned (maybe, after c)
+	 haskell :: planned (maybe)
+
+
 SHA-3/Keccak checksum calculator
 
 USAGE:	sha3sum [option...] < FILE
