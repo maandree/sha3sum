@@ -417,7 +417,7 @@ public class SHA3
      * @param  c  The capacity
      * @param  n  The output size
      */
-    private static void initalise(int r, int c, int n)
+    public static void initalise(int r, int c, int n)
     {
         SHA3.r = r;
         SHA3.c = c;
@@ -438,7 +438,7 @@ public class SHA3
      * 
      * @param  msg  The partial message
      */
-    private static void update(byte[] msg)
+    public static void update(byte[] msg)
     {
 	update(msg, msg.length);
     }
@@ -450,7 +450,7 @@ public class SHA3
      * @param  msg     The partial message
      * @param  msglen  The length of the partial message
      */
-    private static void update(byte[] msg, int msglen)
+    public static void update(byte[] msg, int msglen)
     {
         int rr = SHA3.r >> 3;
         int ww = SHA3.w >> 3;
@@ -509,7 +509,7 @@ public class SHA3
     /**
      * Squeeze the Keccak sponge
      */
-    private static byte[] digest()
+    public static byte[] digest()
     {
 	return digest(null);
     }
@@ -520,9 +520,9 @@ public class SHA3
      * 
      * @param  msg  The rest of the message
      */
-    private static byte[] digest(byte[] msg)
+    public static byte[] digest(byte[] msg)
     {
-	return digest(msg, msg.length);
+	return digest(msg, msg == null ? 0 : msg.length);
     }
     
     
@@ -532,7 +532,7 @@ public class SHA3
      * @param  msg     The rest of the message
      * @param  msglen  The length of the partial message
      */
-    private static byte[] digest(byte[] msg, int msglen)
+    public static byte[] digest(byte[] msg, int msglen)
     {
 	byte[] message;
         if ((msg == null) || (msglen == 0))

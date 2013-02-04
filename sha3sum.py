@@ -534,31 +534,31 @@ if __name__ == '__main__':
                 sys.stderr.buffer.write(('''
 SHA-3/Keccak checksum calculator
 
-USAGE:	sha3sum [option...] < file
-	sha3sum [option...] file...
+USAGE:  sha3sum [option...] < file
+        sha3sum [option...] file...
 
 
 OPTIONS:
-	-r BITRATE
-	--bitrate	The bitrate to use for SHA-3.		(default: %d)
-	
-	-c CAPACITY
-	--capacity	The capacity to use for SHA-3.		(default: %d)
-	
-	-w WORDSIZE
-	--wordsize	The word size to use for SHA-3.		(default: %d)
-	
-	-o OUTPUTSIZE
-	--outputsize	The output size to use for SHA-3.	(default: %d)
-	
-	-s STATESIZE
-	--statesize	The state size to use for SHA-3.	(default: %d)
-	
-	-i ITERATIONS
-	--iterations	The number of hash iterations to run.	(default: %d)
+        -r BITRATE
+        --bitrate       The bitrate to use for SHA-3.           (default: %d)
+        
+        -c CAPACITY
+        --capacity      The capacity to use for SHA-3.          (default: %d)
+        
+        -w WORDSIZE
+        --wordsize      The word size to use for SHA-3.         (default: %d)
+        
+        -o OUTPUTSIZE
+        --outputsize    The output size to use for SHA-3.       (default: %d)
+        
+        -s STATESIZE
+        --statesize     The state size to use for SHA-3.        (default: %d)
+        
+        -i ITERATIONS
+        --iterations    The number of hash iterations to run.   (default: %d)
 
-	-b
-	--binary	Print the checksum in binary, rather than hexadecimal.
+        -b
+        --binary        Print the checksum in binary, rather than hexadecimal.
 
 
 COPYRIGHT:
@@ -653,7 +653,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         with open(fn, 'rb') as file:
             SHA3.initalise(r, c, o)
             blksize = os.stat(os.path.realpath(fn)).st_size
-            SHA3.update(file.read(blksize))
+            while True:
+                chunk = file.read(blksize)
+                if len(chunk) == 0:
+                    break
+                SHA3.update(chunk)
             bs = SHA3.digest(file.read())
             for _ in range(1, i):
                 SHA3.initalise(r, c, o)
