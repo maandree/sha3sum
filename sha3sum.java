@@ -36,7 +36,7 @@ public class sha3sum
      */
     public static void main(String... argv) throws IOException
     {
-	String cmd, _cmd = cmd = ""; //FIXME
+	String cmd, _cmd = cmd = ""; //FIXME  /proc/self/cmdline split ^@ [0]
 	if (cmd.indexOf('/') >= 0)
 	    cmd = cmd.substring(cmd.lastIndexOf('/') + 1);
 	if (cmd.endsWith(".jar"))
@@ -200,7 +200,7 @@ public class sha3sum
 	    try
 	    {
 		file = new FileInputStream(fn);
-		SHA3.initalise(r, c, o);
+		SHA3.initialise(r, c, o);
 		int blksize = 4096; /** XXX os.stat(os.path.realpath(fn)).st_size; **/
 		byte[] chunk = new byte[blksize];
 		for (;;)
@@ -213,7 +213,7 @@ public class sha3sum
 		byte[] bs = SHA3.digest();
 		for (int _ = 1; _ < i; _++)
 		{
-		    SHA3.initalise(r, c, o);
+		    SHA3.initialise(r, c, o);
 		    bs = SHA3.digest(bs);
 		}
 		if (binary)

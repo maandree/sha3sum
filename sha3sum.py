@@ -349,9 +349,9 @@ class SHA3:
     
     
     @staticmethod
-    def initalise(r, c, n):
+    def initialise(r, c, n):
         '''
-        Initalise Keccak sponge
+        Initialise Keccak sponge
         
         @param  r:int  The bitrate
         @param  c:int  The capacity
@@ -697,7 +697,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         rc = ''
         fn = '/dev/stdin' if filename is None else filename
         with open(fn, 'rb') as file:
-            SHA3.initalise(r, c, o)
+            SHA3.initialise(r, c, o)
             blksize = os.stat(os.path.realpath(fn)).st_size
             while True:
                 chunk = file.read(blksize)
@@ -706,7 +706,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 SHA3.update(chunk)
             bs = SHA3.digest(file.read())
             for _ in range(1, i):
-                SHA3.initalise(r, c, o)
+                SHA3.initialise(r, c, o)
                 bs = SHA3.digest(bs)
             if binary:
                 if filename is None:
