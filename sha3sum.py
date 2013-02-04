@@ -45,9 +45,6 @@ class SHA3:
        62,  6, 43, 15, 61,
        28, 55, 25, 21, 56,
        27, 20, 39,  8, 14]
-    '''
-    :list<int>  Rotate constants
-    '''
     
     
     
@@ -139,11 +136,11 @@ class SHA3:
         @param   x:int  The value of which to calculate the binary logarithm
         @return   :int  The binary logarithm
         '''
-        rc_a = 0 if (x & 0xFF00) == 0 else  8
-        rc_b = 0 if (x & 0xF0F0) == 0 else  4
-        rc_c = 0 if (x & 0xCCCC) == 0 else  2
-        rc_d = 0 if (x & 0xAAAA) == 0 else  1
-        return rc_a + rc_b + rc_c + rc_d
+        rc_a = 0 if (x & 0xFF00) == 0 else 8
+        rc_b = 0 if (x & 0xF0F0) == 0 else 4
+        rc_c = 0 if (x & 0xCCCC) == 0 else 2
+        rc_d = 0 if (x & 0xAAAA) == 0 else 1
+        return (rc_a + rc_b) + (rc_c + rc_d)
     
     
     @staticmethod
@@ -156,17 +153,48 @@ class SHA3:
         '''
         # θ step
         for x in range(5):
-            SHA3.C[x] = A[x][0] ^ A[x][1] ^ A[x][2] ^ A[x][3] ^ A[x][4]
-        for x in range(5):
-            SHA3.D[x] = SHA3.C[(x - 1) % 5] ^ SHA3.rotate(SHA3.C[(x + 1) % 5], 1)
+            SHA3.C[x] = (A[x][0] ^ A[x][1]) ^ (A[x][2] ^ A[x][3]) ^ A[x][4]
+        
+        SHA3.D[0] = SHA3.C[4] ^ SHA3.rotate(SHA3.C[1], 1)
+        SHA3.D[1] = SHA3.C[0] ^ SHA3.rotate(SHA3.C[2], 1)
+        SHA3.D[2] = SHA3.C[1] ^ SHA3.rotate(SHA3.C[3], 1)
+        SHA3.D[3] = SHA3.C[2] ^ SHA3.rotate(SHA3.C[4], 1)
+        SHA3.D[4] = SHA3.C[3] ^ SHA3.rotate(SHA3.C[0], 1)
+        
         for x in range(5):
             for y in range(5):
                 A[x][y] ^= SHA3.D[x]
         
         # ρ and π steps
-        for x in range(5):
-            for y in range(5):
-                SHA3.B[y][(2 * x + 3 * y) % 5] = SHA3.rotate(A[x][y], SHA3.R[x * 5 + y])
+        SHA3.B[0][0] = SHA3.rotate(A[0][0], 0)
+        SHA3.B[0][2] = SHA3.rotate(A[1][0], 1)
+        SHA3.B[0][4] = SHA3.rotate(A[2][0], 62)
+        SHA3.B[0][1] = SHA3.rotate(A[3][0], 28)
+        SHA3.B[0][3] = SHA3.rotate(A[4][0], 27)
+        
+        SHA3.B[1][3] = SHA3.rotate(A[0][1], 36)
+        SHA3.B[1][0] = SHA3.rotate(A[1][1], 44)
+        SHA3.B[1][2] = SHA3.rotate(A[2][1], 6)
+        SHA3.B[1][4] = SHA3.rotate(A[3][1], 55)
+        SHA3.B[1][1] = SHA3.rotate(A[4][1], 20)
+        
+        SHA3.B[2][1] = SHA3.rotate(A[0][2], 3)
+        SHA3.B[2][3] = SHA3.rotate(A[1][2], 10)
+        SHA3.B[2][0] = SHA3.rotate(A[2][2], 43)
+        SHA3.B[2][2] = SHA3.rotate(A[3][2], 25)
+        SHA3.B[2][4] = SHA3.rotate(A[4][2], 39)
+        
+        SHA3.B[3][4] = SHA3.rotate(A[0][3], 41)
+        SHA3.B[3][1] = SHA3.rotate(A[1][3], 45)
+        SHA3.B[3][3] = SHA3.rotate(A[2][3], 15)
+        SHA3.B[3][0] = SHA3.rotate(A[3][3], 21)
+        SHA3.B[3][2] = SHA3.rotate(A[4][3], 8)
+        
+        SHA3.B[4][2] = SHA3.rotate(A[0][4], 18)
+        SHA3.B[4][4] = SHA3.rotate(A[1][4], 2)
+        SHA3.B[4][1] = SHA3.rotate(A[2][4], 61)
+        SHA3.B[4][3] = SHA3.rotate(A[3][4], 56)
+        SHA3.B[4][0] = SHA3.rotate(A[4][4], 14)
         
         # ξ step
         for x in range(5):
@@ -334,9 +362,10 @@ class SHA3:
         # Squeezing phase
         olen = SHA3.n
         j = 0
+        ni = min(25, rr)
         while (olen > 0):
             i = 0
-            while (i < 25) and (i < rr) and (j < nn):
+            while i < ni and (j < nn):
                 v = SHA3.S[i % 5][i // 5]
                 for _ in range(ww):
                     if (j < nn):
