@@ -132,8 +132,8 @@ public class SHA3
      */
     private static long rotate(long x, int n)
     {
-        long m = n % SHA3.w;
-        return ((x >>> (SHA3.w - m)) + (x << m)) & SHA3.wmod;
+        long m;
+        return ((x >>> (SHA3.w - (m = n % SHA3.w))) + (x << m)) & SHA3.wmod;
     }
     
     
@@ -307,32 +307,8 @@ public class SHA3
     private static void keccakF(long[] A)
     {
         if (SHA3.nr == 24)
-	{
-            SHA3.keccakFRound(A, 0x0000000000000001L);
-            SHA3.keccakFRound(A, 0x0000000000008082L);
-            SHA3.keccakFRound(A, 0x800000000000808AL);
-            SHA3.keccakFRound(A, 0x8000000080008000L);
-            SHA3.keccakFRound(A, 0x000000000000808BL);
-            SHA3.keccakFRound(A, 0x0000000080000001L);
-            SHA3.keccakFRound(A, 0x8000000080008081L);
-            SHA3.keccakFRound(A, 0x8000000000008009L);
-            SHA3.keccakFRound(A, 0x000000000000008AL);
-            SHA3.keccakFRound(A, 0x0000000000000088L);
-            SHA3.keccakFRound(A, 0x0000000080008009L);
-            SHA3.keccakFRound(A, 0x000000008000000AL);
-            SHA3.keccakFRound(A, 0x000000008000808BL);
-            SHA3.keccakFRound(A, 0x800000000000008BL);
-            SHA3.keccakFRound(A, 0x8000000000008089L);
-            SHA3.keccakFRound(A, 0x8000000000008003L);
-            SHA3.keccakFRound(A, 0x8000000000008002L);
-            SHA3.keccakFRound(A, 0x8000000000000080L);
-            SHA3.keccakFRound(A, 0x000000000000800AL);
-            SHA3.keccakFRound(A, 0x800000008000000AL);
-	    SHA3.keccakFRound(A, 0x8000000080008081L);
-	    SHA3.keccakFRound(A, 0x8000000000008080L);
-	    SHA3.keccakFRound(A, 0x0000000080000001L);
-	    SHA3.keccakFRound(A, 0x8000000080008008L);
-	}
+            for (int i = 0; i < SHA3.nr; i++)
+		SHA3.keccakFRound(A, SHA3.RC[i]);
         else
             for (int i = 0; i < SHA3.nr; i++)
 		SHA3.keccakFRound(A, SHA3.RC[i] & SHA3.wmod);
