@@ -34,7 +34,8 @@
 
 
 #define min(X, Y) ((X) < (Y) ? (X) : (Y))
-#define arraycopy(src, soff, dest, doff, lenght)  {long copyi; for (copyi = 0; copyi < lenght; copyi++)  dest[copyi + soff] = src[copyi + doff];}
+#define arraycopy(src, soff, dest, doff, length)     {long copyi; for (copyi = 0; copyi < length; copyi++)       dest[copyi + soff] = src[copyi + doff];}
+#define revarraycopy(src, soff, dest, doff, length)  {long copyi; for (copyi = length - 1; copyi >= 0; copyi--)  dest[copyi + soff] = src[copyi + doff];}
 
 
 
@@ -411,7 +412,8 @@ extern void update(byte* msg, long msglen)
   len -= len % ((r * b) >> 3);
   message = (byte*)malloc(len);
   arraycopy(M, 0, message, 0, len);
-  System.arraycopy(M, len, M, 0, mptr -= len);
+  mptr -= len;
+  revarraycopy(M, len, M, 0, mptr);
   
   /* Absorbing phase */
   if (ww == 8)
