@@ -16,6 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <stdlib.h>
+
 
 #if __x86_64__ || __ppc64__
     #define llong long int
@@ -29,6 +31,11 @@
 #define boolean long
 #define true    1
 #define false   0
+
+
+#define min(X, Y) ((X) < (Y) ? (X) : (Y))
+#define arraycopy(src, soff, dest, doff, lenght)  {long copyi; for (copyi = 0; copyi < lenght; copyi++)  dest[copyi + soff] = src[copyi + doff];}
+
 
 
 /**
@@ -161,86 +168,87 @@ static long lb(long x)
  */
 static void keccakFRound(llong* A, llong rc)
 {
-  /* θ step (step 1 of 3) */
-  for (long i = 0, j = 0; i < 5; i++, j += 5)
-    SHA3.C[i] = (A[j] ^ A[j + 1]) ^ (A[j + 2] ^ A[j + 3]) ^ A[j + 4];
-  
   llong da, db, dc, dd, de;
+  long i, j;
   
-  if (SHA3.w == 64)
+  /* θ step (step 1 of 3) */
+  for (i = 0, j = 0; i < 5; i++, j += 5)
+    C[i] = (A[j] ^ A[j + 1]) ^ (A[j + 2] ^ A[j + 3]) ^ A[j + 4];
+  
+  if (w == 64)
     {
       /* ρ and π steps, with last two part of θ */
-      SHA3.B[0] =               A[ 0] ^ (da = SHA3.C[4] ^ SHA3.rotate64(SHA3.C[1], 1));
-      SHA3.B[1] = SHA3.rotate64(A[15] ^ (dd = SHA3.C[2] ^ SHA3.rotate64(SHA3.C[4], 1)), 28);
-      SHA3.B[2] = SHA3.rotate64(A[ 5] ^ (db = SHA3.C[0] ^ SHA3.rotate64(SHA3.C[2], 1)),  1);
-      SHA3.B[3] = SHA3.rotate64(A[20] ^ (de = SHA3.C[3] ^ SHA3.rotate64(SHA3.C[0], 1)), 27);
-      SHA3.B[4] = SHA3.rotate64(A[10] ^ (dc = SHA3.C[1] ^ SHA3.rotate64(SHA3.C[3], 1)), 62);
+      B[0] =          A[ 0] ^ (da = C[4] ^ rotate64(C[1], 1));
+      B[1] = rotate64(A[15] ^ (dd = C[2] ^ rotate64(C[4], 1)), 28);
+      B[2] = rotate64(A[ 5] ^ (db = C[0] ^ rotate64(C[2], 1)),  1);
+      B[3] = rotate64(A[20] ^ (de = C[3] ^ rotate64(C[0], 1)), 27);
+      B[4] = rotate64(A[10] ^ (dc = C[1] ^ rotate64(C[3], 1)), 62);
       
-      SHA3.B[5] = SHA3.rotate64(A[ 6] ^ db, 44);
-      SHA3.B[6] = SHA3.rotate64(A[21] ^ de, 20);
-      SHA3.B[7] = SHA3.rotate64(A[11] ^ dc,  6);
-      SHA3.B[8] = SHA3.rotate64(A[ 1] ^ da, 36);
-      SHA3.B[9] = SHA3.rotate64(A[16] ^ dd, 55);
+      B[5] = rotate64(A[ 6] ^ db, 44);
+      B[6] = rotate64(A[21] ^ de, 20);
+      B[7] = rotate64(A[11] ^ dc,  6);
+      B[8] = rotate64(A[ 1] ^ da, 36);
+      B[9] = rotate64(A[16] ^ dd, 55);
       
-      SHA3.B[10] = SHA3.rotate64(A[12] ^ dc, 43);
-      SHA3.B[11] = SHA3.rotate64(A[ 2] ^ da,  3);
-      SHA3.B[12] = SHA3.rotate64(A[17] ^ dd, 25);
-      SHA3.B[13] = SHA3.rotate64(A[ 7] ^ db, 10);
-      SHA3.B[14] = SHA3.rotate64(A[22] ^ de, 39);
+      B[10] = rotate64(A[12] ^ dc, 43);
+      B[11] = rotate64(A[ 2] ^ da,  3);
+      B[12] = rotate64(A[17] ^ dd, 25);
+      B[13] = rotate64(A[ 7] ^ db, 10);
+      B[14] = rotate64(A[22] ^ de, 39);
       
-      SHA3.B[15] = SHA3.rotate64(A[18] ^ dd, 21);
-      SHA3.B[16] = SHA3.rotate64(A[ 8] ^ db, 45);
-      SHA3.B[17] = SHA3.rotate64(A[23] ^ de,  8);
-      SHA3.B[18] = SHA3.rotate64(A[13] ^ dc, 15);
-      SHA3.B[19] = SHA3.rotate64(A[ 3] ^ da, 41);
+      B[15] = rotate64(A[18] ^ dd, 21);
+      B[16] = rotate64(A[ 8] ^ db, 45);
+      B[17] = rotate64(A[23] ^ de,  8);
+      B[18] = rotate64(A[13] ^ dc, 15);
+      B[19] = rotate64(A[ 3] ^ da, 41);
       
-      SHA3.B[20] = SHA3.rotate64(A[24] ^ de, 14);
-      SHA3.B[21] = SHA3.rotate64(A[14] ^ dc, 61);
-      SHA3.B[22] = SHA3.rotate64(A[ 4] ^ da, 18);
-      SHA3.B[23] = SHA3.rotate64(A[19] ^ dd, 56);
-      SHA3.B[24] = SHA3.rotate64(A[ 9] ^ db,  2);
+      B[20] = rotate64(A[24] ^ de, 14);
+      B[21] = rotate64(A[14] ^ dc, 61);
+      B[22] = rotate64(A[ 4] ^ da, 18);
+      B[23] = rotate64(A[19] ^ dd, 56);
+      B[24] = rotate64(A[ 9] ^ db,  2);
     }
   else
     {
       /* ρ and π steps, with last two part of θ */
-      SHA3.B[0] =             A[ 0] ^ (da = SHA3.C[4] ^ SHA3.rotate(SHA3.C[1], 1));
-      SHA3.B[1] = SHA3.rotate(A[15] ^ (dd = SHA3.C[2] ^ SHA3.rotate(SHA3.C[4], 1)), 28);
-      SHA3.B[2] = SHA3.rotate(A[ 5] ^ (db = SHA3.C[0] ^ SHA3.rotate(SHA3.C[2], 1)),  1);
-      SHA3.B[3] = SHA3.rotate(A[20] ^ (de = SHA3.C[3] ^ SHA3.rotate(SHA3.C[0], 1)), 27);
-      SHA3.B[4] = SHA3.rotate(A[10] ^ (dc = SHA3.C[1] ^ SHA3.rotate(SHA3.C[3], 1)), 62);
+      B[0] =        A[ 0] ^ (da = C[4] ^ rotate(C[1], 1));
+      B[1] = rotate(A[15] ^ (dd = C[2] ^ rotate(C[4], 1)), 28);
+      B[2] = rotate(A[ 5] ^ (db = C[0] ^ rotate(C[2], 1)),  1);
+      B[3] = rotate(A[20] ^ (de = C[3] ^ rotate(C[0], 1)), 27);
+      B[4] = rotate(A[10] ^ (dc = C[1] ^ rotate(C[3], 1)), 62);
       
-      SHA3.B[5] = SHA3.rotate(A[ 6] ^ db, 44);
-      SHA3.B[6] = SHA3.rotate(A[21] ^ de, 20);
-      SHA3.B[7] = SHA3.rotate(A[11] ^ dc,  6);
-      SHA3.B[8] = SHA3.rotate(A[ 1] ^ da, 36);
-      SHA3.B[9] = SHA3.rotate(A[16] ^ dd, 55);
+      B[5] = rotate(A[ 6] ^ db, 44);
+      B[6] = rotate(A[21] ^ de, 20);
+      B[7] = rotate(A[11] ^ dc,  6);
+      B[8] = rotate(A[ 1] ^ da, 36);
+      B[9] = rotate(A[16] ^ dd, 55);
       
-      SHA3.B[10] = SHA3.rotate(A[12] ^ dc, 43);
-      SHA3.B[11] = SHA3.rotate(A[ 2] ^ da,  3);
-      SHA3.B[12] = SHA3.rotate(A[17] ^ dd, 25);
-      SHA3.B[13] = SHA3.rotate(A[ 7] ^ db, 10);
-      SHA3.B[14] = SHA3.rotate(A[22] ^ de, 39);
+      B[10] = rotate(A[12] ^ dc, 43);
+      B[11] = rotate(A[ 2] ^ da,  3);
+      B[12] = rotate(A[17] ^ dd, 25);
+      B[13] = rotate(A[ 7] ^ db, 10);
+      B[14] = rotate(A[22] ^ de, 39);
       
-      SHA3.B[15] = SHA3.rotate(A[18] ^ dd, 21);
-      SHA3.B[16] = SHA3.rotate(A[ 8] ^ db, 45);
-      SHA3.B[17] = SHA3.rotate(A[23] ^ de,  8);
-      SHA3.B[18] = SHA3.rotate(A[13] ^ dc, 15);
-      SHA3.B[19] = SHA3.rotate(A[ 3] ^ da, 41);
+      B[15] = rotate(A[18] ^ dd, 21);
+      B[16] = rotate(A[ 8] ^ db, 45);
+      B[17] = rotate(A[23] ^ de,  8);
+      B[18] = rotate(A[13] ^ dc, 15);
+      B[19] = rotate(A[ 3] ^ da, 41);
       
-      SHA3.B[20] = SHA3.rotate(A[24] ^ de, 14);
-      SHA3.B[21] = SHA3.rotate(A[14] ^ dc, 61);
-      SHA3.B[22] = SHA3.rotate(A[ 4] ^ da, 18);
-      SHA3.B[23] = SHA3.rotate(A[19] ^ dd, 56);
-      SHA3.B[24] = SHA3.rotate(A[ 9] ^ db,  2);
+      B[20] = rotate(A[24] ^ de, 14);
+      B[21] = rotate(A[14] ^ dc, 61);
+      B[22] = rotate(A[ 4] ^ da, 18);
+      B[23] = rotate(A[19] ^ dd, 56);
+      B[24] = rotate(A[ 9] ^ db,  2);
     }
   
   /* ξ step */
-  for (long i = 0; i < 15; i++)
-    A[i     ] = SHA3.B[i     ] ^ ((~(SHA3.B[i +  5])) & SHA3.B[i + 10]);
-  for (long i = 0; i < 5; i++)
+  for (i = 0; i < 15; i++)
+    A[i     ] = B[i     ] ^ ((~(B[i +  5])) & B[i + 10]);
+  for (i = 0; i < 5; i++)
     {
-      A[i + 15] = SHA3.B[i + 15] ^ ((~(SHA3.B[i + 20])) & SHA3.B[i     ]);
-      A[i + 20] = SHA3.B[i + 20] ^ ((~(SHA3.B[i     ])) & SHA3.B[i +  5]);
+      A[i + 15] = B[i + 15] ^ ((~(B[i + 20])) & B[i     ]);
+      A[i + 20] = B[i + 20] ^ ((~(B[i     ])) & B[i +  5]);
     }
   
   /* ι step */
@@ -255,12 +263,13 @@ static void keccakFRound(llong* A, llong rc)
  */
 static void keccakF(llong* A)
 {
-  if (SHA3.nr == 24)
-    for (long i = 0; i < SHA3.nr; i++)
-      SHA3.keccakFRound(A, SHA3.RC[i]);
+  long i;
+  if (nr == 24)
+    for (i = 0; i < nr; i++)
+      keccakFRound(A, RC[i]);
   else
-    for (long i = 0; i < SHA3.nr; i++)
-      SHA3.keccakFRound(A, SHA3.RC[i] & SHA3.wmod);
+    for (i = 0; i < nr; i++)
+      keccakFRound(A, RC[i] & wmod);
 }
 
 
@@ -276,8 +285,8 @@ static void keccakF(llong* A)
 static llong toLane(byte* message, long rr, long ww, long off)
 {
   llong rc = 0;
-  long n = Math.min(message.length, rr);
-  for (long i = off + ww - 1; i >= off; i--)
+  long n = min(message.length, rr), i;
+  for (i = off + ww - 1; i >= off; i--)
     rc = (rc << 8) | ((i < n) ? (llong)(message[i] & 255) : 0L);
   return rc;
 }
@@ -293,7 +302,7 @@ static llong toLane(byte* message, long rr, long ww, long off)
  */
 static llong toLane64(byte* message, long rr, long off)
 {
-  long n = Math.min(message.length, rr);
+  long n = min(message.length, rr);
   return ((off + 7 < n) ? ((llong)(message[off + 7] & 255) << 56) : 0L) |
          ((off + 6 < n) ? ((llong)(message[off + 6] & 255) << 48) : 0L) |
          ((off + 5 < n) ? ((llong)(message[off + 5] & 255) << 40) : 0L) |
@@ -318,26 +327,27 @@ static byte* pad10star1(byte* msg, long len, long r)
   long nrf = len >> 3;
   long nbrf = len & 7;
   long ll = len % r;
+  long i;
   
   byte b = (byte)(nbrf == 0 ? 1 : ((msg[nrf] >> (8 - nbrf)) | (1 << nbrf)));
   
   byte* message;
   if ((r - 8 <= ll) && (ll <= r - 2))
     {
-      message = new byte[len = nrf + 1];
+      message = (byte*)malloc(len = nrf + 1);
       message[nrf] = (byte)(b ^ 128);
     }
   else
     {
       len = (nrf + 1) << 3;
       len = ((len - (len % r) + (r - 8)) >> 3) + 1;
-      message = new byte[len];
+      message = (byte*)malloc(len);
       message[nrf] = b;
-      //for (llong i = nrf + 1; i < len; i++)
-      //    message[i + nrf] = 0;
+      for (i = nrf + 1; i < len; i++)
+          message[i + nrf] = 0;
       message[len - 1] = -128;
     }
-  System.arraycopy(msg, 0, message, 0, nrf);
+  arraycopy(msg, 0, message, 0, nrf);
   
   return message;
 }
@@ -352,17 +362,17 @@ static byte* pad10star1(byte* msg, long len, long r)
  */
 extern void initialise(long r, long c, long n)
 {
-  SHA3.r = r;
-  SHA3.c = c;
-  SHA3.n = n;
-  SHA3.b = r + c;
-  SHA3.w = SHA3.b / 25;
-  SHA3.l = SHA3.lb(SHA3.w);
-  SHA3.nr = 12 + (SHA3.l << 1);
-  SHA3.wmod = (1L << SHA3.w) - 1L;
-  SHA3.S = new llong[25];
-  SHA3.M = new byte[(SHA3.r * SHA3.b) >> 2];
-  SHA3.mptr = 0;
+  r = r;
+  c = c;
+  n = n;
+  b = r + c;
+  w = b / 25;
+  l = lb(w);
+  nr = 12 + (l << 1);
+  wmod = (1L << w) - 1L;
+  S = (llong*)malloc(25 * sizeof(llong));
+  M = (byte*)malloc((r * b) >> 2);
+  mptr = 0;
 }
 
 
@@ -385,78 +395,79 @@ extern void update(byte* msg)
  */
 extern void update(byte* msg, long msglen)
 {
-  long rr = SHA3.r >> 3;
-  long ww = SHA3.w >> 3;
+  long rr = r >> 3;
+  long ww = w >> 3;
+  long i;
   
-  if (SHA3.mptr + msglen > SHA3.M.length)
-    System.arraycopy(SHA3.M, 0, SHA3.M = new byte[(SHA3.M.length + msglen) << 1], 0, SHA3.mptr);
-  System.arraycopy(msg, 0, SHA3.M, SHA3.mptr, msglen);
-  long len = SHA3.mptr += msglen;
-  len -= len % ((SHA3.r * SHA3.b) >> 3);
-  byte* message;
-  System.arraycopy(SHA3.M, 0, message = new byte[len], 0, len);
-  System.arraycopy(SHA3.M, len, SHA3.M, 0, SHA3.mptr -= len);
+  if (mptr + msglen > M.length)
+    System.arraycopy(M, 0, M = new byte[(M.length + msglen) << 1], 0, mptr);
+  arraycopy(msg, 0, M, mptr, msglen);
+  long len = mptr += msglen;
+  len -= len % ((r * b) >> 3);
+  byte* message = (byte*)malloc(len);
+  arraycopy(M, 0, message, 0, len);
+  System.arraycopy(M, len, M, 0, mptr -= len);
   
   /* Absorbing phase */
   if (ww == 8)
-    for (long i = 0; i < len; i += rr)
+    for (i = 0; i < len; i += rr)
       {
-	SHA3.S[ 0] ^= SHA3.toLane64(message, rr, i + 0);
-	SHA3.S[ 5] ^= SHA3.toLane64(message, rr, i + 8);
-	SHA3.S[10] ^= SHA3.toLane64(message, rr, i + 16);
-	SHA3.S[15] ^= SHA3.toLane64(message, rr, i + 24);
-	SHA3.S[20] ^= SHA3.toLane64(message, rr, i + 32);
-	SHA3.S[ 1] ^= SHA3.toLane64(message, rr, i + 40);
-	SHA3.S[ 6] ^= SHA3.toLane64(message, rr, i + 48);
-	SHA3.S[11] ^= SHA3.toLane64(message, rr, i + 56);
-	SHA3.S[16] ^= SHA3.toLane64(message, rr, i + 64);
-	SHA3.S[21] ^= SHA3.toLane64(message, rr, i + 72);
-	SHA3.S[ 2] ^= SHA3.toLane64(message, rr, i + 80);
-	SHA3.S[ 7] ^= SHA3.toLane64(message, rr, i + 88);
-	SHA3.S[12] ^= SHA3.toLane64(message, rr, i + 96);
-	SHA3.S[17] ^= SHA3.toLane64(message, rr, i + 104);
-	SHA3.S[22] ^= SHA3.toLane64(message, rr, i + 112);
-	SHA3.S[ 3] ^= SHA3.toLane64(message, rr, i + 120);
-	SHA3.S[ 8] ^= SHA3.toLane64(message, rr, i + 128);
-	SHA3.S[13] ^= SHA3.toLane64(message, rr, i + 136);
-	SHA3.S[18] ^= SHA3.toLane64(message, rr, i + 144);
-	SHA3.S[23] ^= SHA3.toLane64(message, rr, i + 152);
-	SHA3.S[ 4] ^= SHA3.toLane64(message, rr, i + 160);
-	SHA3.S[ 9] ^= SHA3.toLane64(message, rr, i + 168);
-	SHA3.S[14] ^= SHA3.toLane64(message, rr, i + 176);
-	SHA3.S[19] ^= SHA3.toLane64(message, rr, i + 184);
-	SHA3.S[24] ^= SHA3.toLane64(message, rr, i + 192);
-	SHA3.keccakF(SHA3.S);
+	S[ 0] ^= toLane64(message, rr, i + 0);
+	S[ 5] ^= toLane64(message, rr, i + 8);
+	S[10] ^= toLane64(message, rr, i + 16);
+	S[15] ^= toLane64(message, rr, i + 24);
+	S[20] ^= toLane64(message, rr, i + 32);
+	S[ 1] ^= toLane64(message, rr, i + 40);
+	S[ 6] ^= toLane64(message, rr, i + 48);
+	S[11] ^= toLane64(message, rr, i + 56);
+	S[16] ^= toLane64(message, rr, i + 64);
+	S[21] ^= toLane64(message, rr, i + 72);
+	S[ 2] ^= toLane64(message, rr, i + 80);
+	S[ 7] ^= toLane64(message, rr, i + 88);
+	S[12] ^= toLane64(message, rr, i + 96);
+	S[17] ^= toLane64(message, rr, i + 104);
+	S[22] ^= toLane64(message, rr, i + 112);
+	S[ 3] ^= toLane64(message, rr, i + 120);
+	S[ 8] ^= toLane64(message, rr, i + 128);
+	S[13] ^= toLane64(message, rr, i + 136);
+	S[18] ^= toLane64(message, rr, i + 144);
+	S[23] ^= toLane64(message, rr, i + 152);
+	S[ 4] ^= toLane64(message, rr, i + 160);
+	S[ 9] ^= toLane64(message, rr, i + 168);
+	S[14] ^= toLane64(message, rr, i + 176);
+	S[19] ^= toLane64(message, rr, i + 184);
+	S[24] ^= toLane64(message, rr, i + 192);
+	keccakF(S);
       }
   else
-    for (long i = 0; i < len; i += rr)
+    for (i = 0; i < len; i += rr)
       {
-	SHA3.S[ 0] ^= SHA3.toLane(message, rr, ww, i +  0    );
-	SHA3.S[ 5] ^= SHA3.toLane(message, rr, ww, i +      w);
-	SHA3.S[10] ^= SHA3.toLane(message, rr, ww, i +  2 * w);
-	SHA3.S[15] ^= SHA3.toLane(message, rr, ww, i +  3 * w);
-	SHA3.S[20] ^= SHA3.toLane(message, rr, ww, i +  4 * w);
-	SHA3.S[ 1] ^= SHA3.toLane(message, rr, ww, i +  5 * w);
-	SHA3.S[ 6] ^= SHA3.toLane(message, rr, ww, i +  6 * w);
-	SHA3.S[11] ^= SHA3.toLane(message, rr, ww, i +  7 * w);
-	SHA3.S[16] ^= SHA3.toLane(message, rr, ww, i +  8 * w);
-	SHA3.S[21] ^= SHA3.toLane(message, rr, ww, i +  9 * w);
-	SHA3.S[ 2] ^= SHA3.toLane(message, rr, ww, i + 10 * w);
-	SHA3.S[ 7] ^= SHA3.toLane(message, rr, ww, i + 11 * w);
-	SHA3.S[12] ^= SHA3.toLane(message, rr, ww, i + 12 * w);
-	SHA3.S[17] ^= SHA3.toLane(message, rr, ww, i + 13 * w);
-	SHA3.S[22] ^= SHA3.toLane(message, rr, ww, i + 14 * w);
-	SHA3.S[ 3] ^= SHA3.toLane(message, rr, ww, i + 15 * w);
-	SHA3.S[ 8] ^= SHA3.toLane(message, rr, ww, i + 16 * w);
-	SHA3.S[13] ^= SHA3.toLane(message, rr, ww, i + 17 * w);
-	SHA3.S[18] ^= SHA3.toLane(message, rr, ww, i + 18 * w);
-	SHA3.S[23] ^= SHA3.toLane(message, rr, ww, i + 19 * w);
-	SHA3.S[ 4] ^= SHA3.toLane(message, rr, ww, i + 20 * w);
-	SHA3.S[ 9] ^= SHA3.toLane(message, rr, ww, i + 21 * w);
-	SHA3.S[14] ^= SHA3.toLane(message, rr, ww, i + 22 * w);
-	SHA3.S[19] ^= SHA3.toLane(message, rr, ww, i + 23 * w);
-	SHA3.S[24] ^= SHA3.toLane(message, rr, ww, i + 24 * w);
-	SHA3.keccakF(SHA3.S);
+	S[ 0] ^= toLane(message, rr, ww, i +  0    );
+	S[ 5] ^= toLane(message, rr, ww, i +      w);
+	S[10] ^= toLane(message, rr, ww, i +  2 * w);
+	S[15] ^= toLane(message, rr, ww, i +  3 * w);
+	S[20] ^= toLane(message, rr, ww, i +  4 * w);
+	S[ 1] ^= toLane(message, rr, ww, i +  5 * w);
+	S[ 6] ^= toLane(message, rr, ww, i +  6 * w);
+	S[11] ^= toLane(message, rr, ww, i +  7 * w);
+	S[16] ^= toLane(message, rr, ww, i +  8 * w);
+	S[21] ^= toLane(message, rr, ww, i +  9 * w);
+	S[ 2] ^= toLane(message, rr, ww, i + 10 * w);
+	S[ 7] ^= toLane(message, rr, ww, i + 11 * w);
+	S[12] ^= toLane(message, rr, ww, i + 12 * w);
+	S[17] ^= toLane(message, rr, ww, i + 13 * w);
+	S[22] ^= toLane(message, rr, ww, i + 14 * w);
+	S[ 3] ^= toLane(message, rr, ww, i + 15 * w);
+	S[ 8] ^= toLane(message, rr, ww, i + 16 * w);
+	S[13] ^= toLane(message, rr, ww, i + 17 * w);
+	S[18] ^= toLane(message, rr, ww, i + 18 * w);
+	S[23] ^= toLane(message, rr, ww, i + 19 * w);
+	S[ 4] ^= toLane(message, rr, ww, i + 20 * w);
+	S[ 9] ^= toLane(message, rr, ww, i + 21 * w);
+	S[14] ^= toLane(message, rr, ww, i + 22 * w);
+	S[19] ^= toLane(message, rr, ww, i + 23 * w);
+	S[24] ^= toLane(message, rr, ww, i + 24 * w);
+	keccakF(S);
       }
 }
     
@@ -491,95 +502,96 @@ extern byte* digest(byte* msg, long msglen)
 {
   byte* message;
   if ((msg == null) || (msglen == 0))
-    message = SHA3.pad10star1(SHA3.M, SHA3.mptr, SHA3.r);
+    message = pad10star1(M, mptr, r);
   else
     {
-      if (SHA3.mptr + msglen > SHA3.M.length)
-	System.arraycopy(SHA3.M, 0, SHA3.M = new byte[SHA3.M.length + msglen], 0, SHA3.mptr);
-      System.arraycopy(msg, 0, SHA3.M, SHA3.mptr, msglen);
-      message = SHA3.pad10star1(SHA3.M, SHA3.mptr + msglen, SHA3.r);
+      if (mptr + msglen > M.length)
+	System.arraycopy(M, 0, M = new byte[M.length + msglen], 0, mptr);
+      arraycopy(msg, 0, M, mptr, msglen);
+      message = pad10star1(M, mptr + msglen, r);
     }
-  SHA3.M = null;
+  M = null;
   long len = message.length;
-  byte* rc = new byte[(SHA3.n + 7) >> 3];
+  byte* rc = (byte*)malloc((n + 7) >> 3);
   long ptr = 0;
   
-  long rr = SHA3.r >> 3;
-  long nn = SHA3.n >> 3;
-  long ww = SHA3.w >> 3;
+  long rr = r >> 3;
+  long nn = n >> 3;
+  long ww = w >> 3;
+  long i;
   
   /* Absorbing phase */
   if (ww == 8)
-    for (long i = 0; i < len; i += rr)
+    for (i = 0; i < len; i += rr)
       {
-	SHA3.S[ 0] ^= SHA3.toLane64(message, rr, i + 0);
-	SHA3.S[ 5] ^= SHA3.toLane64(message, rr, i + 8);
-	SHA3.S[10] ^= SHA3.toLane64(message, rr, i + 16);
-	SHA3.S[15] ^= SHA3.toLane64(message, rr, i + 24);
-	SHA3.S[20] ^= SHA3.toLane64(message, rr, i + 32);
-	SHA3.S[ 1] ^= SHA3.toLane64(message, rr, i + 40);
-	SHA3.S[ 6] ^= SHA3.toLane64(message, rr, i + 48);
-	SHA3.S[11] ^= SHA3.toLane64(message, rr, i + 56);
-	SHA3.S[16] ^= SHA3.toLane64(message, rr, i + 64);
-	SHA3.S[21] ^= SHA3.toLane64(message, rr, i + 72);
-	SHA3.S[ 2] ^= SHA3.toLane64(message, rr, i + 80);
-	SHA3.S[ 7] ^= SHA3.toLane64(message, rr, i + 88);
-	SHA3.S[12] ^= SHA3.toLane64(message, rr, i + 96);
-	SHA3.S[17] ^= SHA3.toLane64(message, rr, i + 104);
-	SHA3.S[22] ^= SHA3.toLane64(message, rr, i + 112);
-	SHA3.S[ 3] ^= SHA3.toLane64(message, rr, i + 120);
-	SHA3.S[ 8] ^= SHA3.toLane64(message, rr, i + 128);
-	SHA3.S[13] ^= SHA3.toLane64(message, rr, i + 136);
-	SHA3.S[18] ^= SHA3.toLane64(message, rr, i + 144);
-	SHA3.S[23] ^= SHA3.toLane64(message, rr, i + 152);
-	SHA3.S[ 4] ^= SHA3.toLane64(message, rr, i + 160);
-	SHA3.S[ 9] ^= SHA3.toLane64(message, rr, i + 168);
-	SHA3.S[14] ^= SHA3.toLane64(message, rr, i + 176);
-	SHA3.S[19] ^= SHA3.toLane64(message, rr, i + 184);
-	SHA3.S[24] ^= SHA3.toLane64(message, rr, i + 192);
-	SHA3.keccakF(SHA3.S);
+	S[ 0] ^= toLane64(message, rr, i + 0);
+	S[ 5] ^= toLane64(message, rr, i + 8);
+	S[10] ^= toLane64(message, rr, i + 16);
+	S[15] ^= toLane64(message, rr, i + 24);
+	S[20] ^= toLane64(message, rr, i + 32);
+	S[ 1] ^= toLane64(message, rr, i + 40);
+	S[ 6] ^= toLane64(message, rr, i + 48);
+	S[11] ^= toLane64(message, rr, i + 56);
+	S[16] ^= toLane64(message, rr, i + 64);
+	S[21] ^= toLane64(message, rr, i + 72);
+	S[ 2] ^= toLane64(message, rr, i + 80);
+	S[ 7] ^= toLane64(message, rr, i + 88);
+	S[12] ^= toLane64(message, rr, i + 96);
+	S[17] ^= toLane64(message, rr, i + 104);
+	S[22] ^= toLane64(message, rr, i + 112);
+	S[ 3] ^= toLane64(message, rr, i + 120);
+	S[ 8] ^= toLane64(message, rr, i + 128);
+	S[13] ^= toLane64(message, rr, i + 136);
+	S[18] ^= toLane64(message, rr, i + 144);
+	S[23] ^= toLane64(message, rr, i + 152);
+	S[ 4] ^= toLane64(message, rr, i + 160);
+	S[ 9] ^= toLane64(message, rr, i + 168);
+	S[14] ^= toLane64(message, rr, i + 176);
+	S[19] ^= toLane64(message, rr, i + 184);
+	S[24] ^= toLane64(message, rr, i + 192);
+	keccakF(S);
       }
   else
-    for (long i = 0; i < len; i += rr)
+    for (i = 0; i < len; i += rr)
       {
-	SHA3.S[ 0] ^= SHA3.toLane(message, rr, ww, i +  0    );
-	SHA3.S[ 5] ^= SHA3.toLane(message, rr, ww, i +      w);
-	SHA3.S[10] ^= SHA3.toLane(message, rr, ww, i +  2 * w);
-	SHA3.S[15] ^= SHA3.toLane(message, rr, ww, i +  3 * w);
-	SHA3.S[20] ^= SHA3.toLane(message, rr, ww, i +  4 * w);
-	SHA3.S[ 1] ^= SHA3.toLane(message, rr, ww, i +  5 * w);
-	SHA3.S[ 6] ^= SHA3.toLane(message, rr, ww, i +  6 * w);
-	SHA3.S[11] ^= SHA3.toLane(message, rr, ww, i +  7 * w);
-	SHA3.S[16] ^= SHA3.toLane(message, rr, ww, i +  8 * w);
-	SHA3.S[21] ^= SHA3.toLane(message, rr, ww, i +  9 * w);
-	SHA3.S[ 2] ^= SHA3.toLane(message, rr, ww, i + 10 * w);
-	SHA3.S[ 7] ^= SHA3.toLane(message, rr, ww, i + 11 * w);
-	SHA3.S[12] ^= SHA3.toLane(message, rr, ww, i + 12 * w);
-	SHA3.S[17] ^= SHA3.toLane(message, rr, ww, i + 13 * w);
-	SHA3.S[22] ^= SHA3.toLane(message, rr, ww, i + 14 * w);
-	SHA3.S[ 3] ^= SHA3.toLane(message, rr, ww, i + 15 * w);
-	SHA3.S[ 8] ^= SHA3.toLane(message, rr, ww, i + 16 * w);
-	SHA3.S[13] ^= SHA3.toLane(message, rr, ww, i + 17 * w);
-	SHA3.S[18] ^= SHA3.toLane(message, rr, ww, i + 18 * w);
-	SHA3.S[23] ^= SHA3.toLane(message, rr, ww, i + 19 * w);
-	SHA3.S[ 4] ^= SHA3.toLane(message, rr, ww, i + 20 * w);
-	SHA3.S[ 9] ^= SHA3.toLane(message, rr, ww, i + 21 * w);
-	SHA3.S[14] ^= SHA3.toLane(message, rr, ww, i + 22 * w);
-	SHA3.S[19] ^= SHA3.toLane(message, rr, ww, i + 23 * w);
-	SHA3.S[24] ^= SHA3.toLane(message, rr, ww, i + 24 * w);
-	SHA3.keccakF(SHA3.S);
+	S[ 0] ^= toLane(message, rr, ww, i +  0    );
+	S[ 5] ^= toLane(message, rr, ww, i +      w);
+	S[10] ^= toLane(message, rr, ww, i +  2 * w);
+	S[15] ^= toLane(message, rr, ww, i +  3 * w);
+	S[20] ^= toLane(message, rr, ww, i +  4 * w);
+	S[ 1] ^= toLane(message, rr, ww, i +  5 * w);
+	S[ 6] ^= toLane(message, rr, ww, i +  6 * w);
+	S[11] ^= toLane(message, rr, ww, i +  7 * w);
+	S[16] ^= toLane(message, rr, ww, i +  8 * w);
+	S[21] ^= toLane(message, rr, ww, i +  9 * w);
+	S[ 2] ^= toLane(message, rr, ww, i + 10 * w);
+	S[ 7] ^= toLane(message, rr, ww, i + 11 * w);
+	S[12] ^= toLane(message, rr, ww, i + 12 * w);
+	S[17] ^= toLane(message, rr, ww, i + 13 * w);
+	S[22] ^= toLane(message, rr, ww, i + 14 * w);
+	S[ 3] ^= toLane(message, rr, ww, i + 15 * w);
+	S[ 8] ^= toLane(message, rr, ww, i + 16 * w);
+	S[13] ^= toLane(message, rr, ww, i + 17 * w);
+	S[18] ^= toLane(message, rr, ww, i + 18 * w);
+	S[23] ^= toLane(message, rr, ww, i + 19 * w);
+	S[ 4] ^= toLane(message, rr, ww, i + 20 * w);
+	S[ 9] ^= toLane(message, rr, ww, i + 21 * w);
+	S[14] ^= toLane(message, rr, ww, i + 22 * w);
+	S[19] ^= toLane(message, rr, ww, i + 23 * w);
+	S[24] ^= toLane(message, rr, ww, i + 24 * w);
+	keccakF(S);
       }
   
   /* Squeezing phase */
-  long olen = SHA3.n;
+  long olen = n;
   long j = 0;
-  long ni = Math.min(25, rr);
+  long ni = min(25, rr);
   while (olen > 0)
     {
       long i = 0;
       while ((i < ni) && (j < nn))
 	{
-	  llong v = SHA3.S[(i % 5) * 5 + i / 5];
+	  llong v = S[(i % 5) * 5 + i / 5];
 	  for (long _ = 0; _ < ww; _++)
 	    {
 	      if (j < nn)
@@ -592,9 +604,9 @@ extern byte* digest(byte* msg, long msglen)
 	    }
 	  i += 1;
 	}
-      olen -= SHA3.r;
+      olen -= r;
       if (olen > 0)
-	SHA3.keccakF(S);
+	keccakF(S);
     }
   return rc;
 }
