@@ -277,15 +277,16 @@ static void keccakF(llong* A)
  * Convert a chunk of byte:s to a word
  * 
  * @param   message  The message
+ * @param   msglen   The length of the message
  * @param   rr       Bitrate in bytes
  * @param   ww       Word size in bytes
  * @param   off      The offset in the message
  * @return           Lane
  */
-static llong toLane(byte* message, long rr, long ww, long off)
+static llong toLane(byte* message, long msglen, long rr, long ww, long off)
 {
   llong rc = 0;
-  long n = min(message.length, rr), i;
+  long n = min(msglen, rr), i;
   for (i = off + ww - 1; i >= off; i--)
     rc = (rc << 8) | ((i < n) ? (llong)(message[i] & 255) : 0L);
   return rc;
@@ -296,13 +297,14 @@ static llong toLane(byte* message, long rr, long ww, long off)
  * Convert a chunk of byte:s to a 64-bit word
  * 
  * @param   message  The message
+ * @param   msglen   The length of the message
  * @param   rr       Bitrate in bytes
  * @param   off      The offset in the message
  * @return           Lane
  */
-static llong toLane64(byte* message, long rr, long off)
+static llong toLane64(byte* message, long msglen, long rr, long off)
 {
-  long n = min(message.length, rr);
+  long n = min(msglen, rr);
   return ((off + 7 < n) ? ((llong)(message[off + 7] & 255) << 56) : 0L) |
          ((off + 6 < n) ? ((llong)(message[off + 6] & 255) << 48) : 0L) |
          ((off + 5 < n) ? ((llong)(message[off + 5] & 255) << 40) : 0L) |
@@ -401,61 +403,61 @@ extern void update(byte* msg, long msglen)
   if (ww == 8)
     for (i = 0; i < len; i += rr)
       {
-	S[ 0] ^= toLane64(message, rr, i + 0);
-	S[ 5] ^= toLane64(message, rr, i + 8);
-	S[10] ^= toLane64(message, rr, i + 16);
-	S[15] ^= toLane64(message, rr, i + 24);
-	S[20] ^= toLane64(message, rr, i + 32);
-	S[ 1] ^= toLane64(message, rr, i + 40);
-	S[ 6] ^= toLane64(message, rr, i + 48);
-	S[11] ^= toLane64(message, rr, i + 56);
-	S[16] ^= toLane64(message, rr, i + 64);
-	S[21] ^= toLane64(message, rr, i + 72);
-	S[ 2] ^= toLane64(message, rr, i + 80);
-	S[ 7] ^= toLane64(message, rr, i + 88);
-	S[12] ^= toLane64(message, rr, i + 96);
-	S[17] ^= toLane64(message, rr, i + 104);
-	S[22] ^= toLane64(message, rr, i + 112);
-	S[ 3] ^= toLane64(message, rr, i + 120);
-	S[ 8] ^= toLane64(message, rr, i + 128);
-	S[13] ^= toLane64(message, rr, i + 136);
-	S[18] ^= toLane64(message, rr, i + 144);
-	S[23] ^= toLane64(message, rr, i + 152);
-	S[ 4] ^= toLane64(message, rr, i + 160);
-	S[ 9] ^= toLane64(message, rr, i + 168);
-	S[14] ^= toLane64(message, rr, i + 176);
-	S[19] ^= toLane64(message, rr, i + 184);
-	S[24] ^= toLane64(message, rr, i + 192);
+	S[ 0] ^= toLane64(message, len, rr, i + 0);
+	S[ 5] ^= toLane64(message, len, rr, i + 8);
+	S[10] ^= toLane64(message, len, rr, i + 16);
+	S[15] ^= toLane64(message, len, rr, i + 24);
+	S[20] ^= toLane64(message, len, rr, i + 32);
+	S[ 1] ^= toLane64(message, len, rr, i + 40);
+	S[ 6] ^= toLane64(message, len, rr, i + 48);
+	S[11] ^= toLane64(message, len, rr, i + 56);
+	S[16] ^= toLane64(message, len, rr, i + 64);
+	S[21] ^= toLane64(message, len, rr, i + 72);
+	S[ 2] ^= toLane64(message, len, rr, i + 80);
+	S[ 7] ^= toLane64(message, len, rr, i + 88);
+	S[12] ^= toLane64(message, len, rr, i + 96);
+	S[17] ^= toLane64(message, len, rr, i + 104);
+	S[22] ^= toLane64(message, len, rr, i + 112);
+	S[ 3] ^= toLane64(message, len, rr, i + 120);
+	S[ 8] ^= toLane64(message, len, rr, i + 128);
+	S[13] ^= toLane64(message, len, rr, i + 136);
+	S[18] ^= toLane64(message, len, rr, i + 144);
+	S[23] ^= toLane64(message, len, rr, i + 152);
+	S[ 4] ^= toLane64(message, len, rr, i + 160);
+	S[ 9] ^= toLane64(message, len, rr, i + 168);
+	S[14] ^= toLane64(message, len, rr, i + 176);
+	S[19] ^= toLane64(message, len, rr, i + 184);
+	S[24] ^= toLane64(message, len, rr, i + 192);
 	keccakF(S);
       }
   else
     for (i = 0; i < len; i += rr)
       {
-	S[ 0] ^= toLane(message, rr, ww, i +  0    );
-	S[ 5] ^= toLane(message, rr, ww, i +      w);
-	S[10] ^= toLane(message, rr, ww, i +  2 * w);
-	S[15] ^= toLane(message, rr, ww, i +  3 * w);
-	S[20] ^= toLane(message, rr, ww, i +  4 * w);
-	S[ 1] ^= toLane(message, rr, ww, i +  5 * w);
-	S[ 6] ^= toLane(message, rr, ww, i +  6 * w);
-	S[11] ^= toLane(message, rr, ww, i +  7 * w);
-	S[16] ^= toLane(message, rr, ww, i +  8 * w);
-	S[21] ^= toLane(message, rr, ww, i +  9 * w);
-	S[ 2] ^= toLane(message, rr, ww, i + 10 * w);
-	S[ 7] ^= toLane(message, rr, ww, i + 11 * w);
-	S[12] ^= toLane(message, rr, ww, i + 12 * w);
-	S[17] ^= toLane(message, rr, ww, i + 13 * w);
-	S[22] ^= toLane(message, rr, ww, i + 14 * w);
-	S[ 3] ^= toLane(message, rr, ww, i + 15 * w);
-	S[ 8] ^= toLane(message, rr, ww, i + 16 * w);
-	S[13] ^= toLane(message, rr, ww, i + 17 * w);
-	S[18] ^= toLane(message, rr, ww, i + 18 * w);
-	S[23] ^= toLane(message, rr, ww, i + 19 * w);
-	S[ 4] ^= toLane(message, rr, ww, i + 20 * w);
-	S[ 9] ^= toLane(message, rr, ww, i + 21 * w);
-	S[14] ^= toLane(message, rr, ww, i + 22 * w);
-	S[19] ^= toLane(message, rr, ww, i + 23 * w);
-	S[24] ^= toLane(message, rr, ww, i + 24 * w);
+	S[ 0] ^= toLane(message, len, rr, ww, i +  0    );
+	S[ 5] ^= toLane(message, len, rr, ww, i +      w);
+	S[10] ^= toLane(message, len, rr, ww, i +  2 * w);
+	S[15] ^= toLane(message, len, rr, ww, i +  3 * w);
+	S[20] ^= toLane(message, len, rr, ww, i +  4 * w);
+	S[ 1] ^= toLane(message, len, rr, ww, i +  5 * w);
+	S[ 6] ^= toLane(message, len, rr, ww, i +  6 * w);
+	S[11] ^= toLane(message, len, rr, ww, i +  7 * w);
+	S[16] ^= toLane(message, len, rr, ww, i +  8 * w);
+	S[21] ^= toLane(message, len, rr, ww, i +  9 * w);
+	S[ 2] ^= toLane(message, len, rr, ww, i + 10 * w);
+	S[ 7] ^= toLane(message, len, rr, ww, i + 11 * w);
+	S[12] ^= toLane(message, len, rr, ww, i + 12 * w);
+	S[17] ^= toLane(message, len, rr, ww, i + 13 * w);
+	S[22] ^= toLane(message, len, rr, ww, i + 14 * w);
+	S[ 3] ^= toLane(message, len, rr, ww, i + 15 * w);
+	S[ 8] ^= toLane(message, len, rr, ww, i + 16 * w);
+	S[13] ^= toLane(message, len, rr, ww, i + 17 * w);
+	S[18] ^= toLane(message, len, rr, ww, i + 18 * w);
+	S[23] ^= toLane(message, len, rr, ww, i + 19 * w);
+	S[ 4] ^= toLane(message, len, rr, ww, i + 20 * w);
+	S[ 9] ^= toLane(message, len, rr, ww, i + 21 * w);
+	S[14] ^= toLane(message, len, rr, ww, i + 22 * w);
+	S[19] ^= toLane(message, len, rr, ww, i + 23 * w);
+	S[24] ^= toLane(message, len, rr, ww, i + 24 * w);
 	keccakF(S);
       }
 }
@@ -502,61 +504,61 @@ extern byte* digest(byte* msg, long msglen)
   if (ww == 8)
     for (i = 0; i < len; i += rr)
       {
-	S[ 0] ^= toLane64(message, rr, i + 0);
-	S[ 5] ^= toLane64(message, rr, i + 8);
-	S[10] ^= toLane64(message, rr, i + 16);
-	S[15] ^= toLane64(message, rr, i + 24);
-	S[20] ^= toLane64(message, rr, i + 32);
-	S[ 1] ^= toLane64(message, rr, i + 40);
-	S[ 6] ^= toLane64(message, rr, i + 48);
-	S[11] ^= toLane64(message, rr, i + 56);
-	S[16] ^= toLane64(message, rr, i + 64);
-	S[21] ^= toLane64(message, rr, i + 72);
-	S[ 2] ^= toLane64(message, rr, i + 80);
-	S[ 7] ^= toLane64(message, rr, i + 88);
-	S[12] ^= toLane64(message, rr, i + 96);
-	S[17] ^= toLane64(message, rr, i + 104);
-	S[22] ^= toLane64(message, rr, i + 112);
-	S[ 3] ^= toLane64(message, rr, i + 120);
-	S[ 8] ^= toLane64(message, rr, i + 128);
-	S[13] ^= toLane64(message, rr, i + 136);
-	S[18] ^= toLane64(message, rr, i + 144);
-	S[23] ^= toLane64(message, rr, i + 152);
-	S[ 4] ^= toLane64(message, rr, i + 160);
-	S[ 9] ^= toLane64(message, rr, i + 168);
-	S[14] ^= toLane64(message, rr, i + 176);
-	S[19] ^= toLane64(message, rr, i + 184);
-	S[24] ^= toLane64(message, rr, i + 192);
+	S[ 0] ^= toLane64(message, len, rr, i + 0);
+	S[ 5] ^= toLane64(message, len, rr, i + 8);
+	S[10] ^= toLane64(message, len, rr, i + 16);
+	S[15] ^= toLane64(message, len, rr, i + 24);
+	S[20] ^= toLane64(message, len, rr, i + 32);
+	S[ 1] ^= toLane64(message, len, rr, i + 40);
+	S[ 6] ^= toLane64(message, len, rr, i + 48);
+	S[11] ^= toLane64(message, len, rr, i + 56);
+	S[16] ^= toLane64(message, len, rr, i + 64);
+	S[21] ^= toLane64(message, len, rr, i + 72);
+	S[ 2] ^= toLane64(message, len, rr, i + 80);
+	S[ 7] ^= toLane64(message, len, rr, i + 88);
+	S[12] ^= toLane64(message, len, rr, i + 96);
+	S[17] ^= toLane64(message, len, rr, i + 104);
+	S[22] ^= toLane64(message, len, rr, i + 112);
+	S[ 3] ^= toLane64(message, len, rr, i + 120);
+	S[ 8] ^= toLane64(message, len, rr, i + 128);
+	S[13] ^= toLane64(message, len, rr, i + 136);
+	S[18] ^= toLane64(message, len, rr, i + 144);
+	S[23] ^= toLane64(message, len, rr, i + 152);
+	S[ 4] ^= toLane64(message, len, rr, i + 160);
+	S[ 9] ^= toLane64(message, len, rr, i + 168);
+	S[14] ^= toLane64(message, len, rr, i + 176);
+	S[19] ^= toLane64(message, len, rr, i + 184);
+	S[24] ^= toLane64(message, len, rr, i + 192);
 	keccakF(S);
       }
   else
     for (i = 0; i < len; i += rr)
       {
-	S[ 0] ^= toLane(message, rr, ww, i +  0    );
-	S[ 5] ^= toLane(message, rr, ww, i +      w);
-	S[10] ^= toLane(message, rr, ww, i +  2 * w);
-	S[15] ^= toLane(message, rr, ww, i +  3 * w);
-	S[20] ^= toLane(message, rr, ww, i +  4 * w);
-	S[ 1] ^= toLane(message, rr, ww, i +  5 * w);
-	S[ 6] ^= toLane(message, rr, ww, i +  6 * w);
-	S[11] ^= toLane(message, rr, ww, i +  7 * w);
-	S[16] ^= toLane(message, rr, ww, i +  8 * w);
-	S[21] ^= toLane(message, rr, ww, i +  9 * w);
-	S[ 2] ^= toLane(message, rr, ww, i + 10 * w);
-	S[ 7] ^= toLane(message, rr, ww, i + 11 * w);
-	S[12] ^= toLane(message, rr, ww, i + 12 * w);
-	S[17] ^= toLane(message, rr, ww, i + 13 * w);
-	S[22] ^= toLane(message, rr, ww, i + 14 * w);
-	S[ 3] ^= toLane(message, rr, ww, i + 15 * w);
-	S[ 8] ^= toLane(message, rr, ww, i + 16 * w);
-	S[13] ^= toLane(message, rr, ww, i + 17 * w);
-	S[18] ^= toLane(message, rr, ww, i + 18 * w);
-	S[23] ^= toLane(message, rr, ww, i + 19 * w);
-	S[ 4] ^= toLane(message, rr, ww, i + 20 * w);
-	S[ 9] ^= toLane(message, rr, ww, i + 21 * w);
-	S[14] ^= toLane(message, rr, ww, i + 22 * w);
-	S[19] ^= toLane(message, rr, ww, i + 23 * w);
-	S[24] ^= toLane(message, rr, ww, i + 24 * w);
+	S[ 0] ^= toLane(message, len, rr, ww, i +  0    );
+	S[ 5] ^= toLane(message, len, rr, ww, i +      w);
+	S[10] ^= toLane(message, len, rr, ww, i +  2 * w);
+	S[15] ^= toLane(message, len, rr, ww, i +  3 * w);
+	S[20] ^= toLane(message, len, rr, ww, i +  4 * w);
+	S[ 1] ^= toLane(message, len, rr, ww, i +  5 * w);
+	S[ 6] ^= toLane(message, len, rr, ww, i +  6 * w);
+	S[11] ^= toLane(message, len, rr, ww, i +  7 * w);
+	S[16] ^= toLane(message, len, rr, ww, i +  8 * w);
+	S[21] ^= toLane(message, len, rr, ww, i +  9 * w);
+	S[ 2] ^= toLane(message, len, rr, ww, i + 10 * w);
+	S[ 7] ^= toLane(message, len, rr, ww, i + 11 * w);
+	S[12] ^= toLane(message, len, rr, ww, i + 12 * w);
+	S[17] ^= toLane(message, len, rr, ww, i + 13 * w);
+	S[22] ^= toLane(message, len, rr, ww, i + 14 * w);
+	S[ 3] ^= toLane(message, len, rr, ww, i + 15 * w);
+	S[ 8] ^= toLane(message, len, rr, ww, i + 16 * w);
+	S[13] ^= toLane(message, len, rr, ww, i + 17 * w);
+	S[18] ^= toLane(message, len, rr, ww, i + 18 * w);
+	S[23] ^= toLane(message, len, rr, ww, i + 19 * w);
+	S[ 4] ^= toLane(message, len, rr, ww, i + 20 * w);
+	S[ 9] ^= toLane(message, len, rr, ww, i + 21 * w);
+	S[14] ^= toLane(message, len, rr, ww, i + 22 * w);
+	S[19] ^= toLane(message, len, rr, ww, i + 23 * w);
+	S[24] ^= toLane(message, len, rr, ww, i + 24 * w);
 	keccakF(S);
       }
   
