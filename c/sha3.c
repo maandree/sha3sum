@@ -396,7 +396,7 @@ extern void update(byte* msg, long msglen)
   long i;
   
   if (mptr + msglen > mlen)
-    System.arraycopy(M, 0, M = new byte[(mlen += msglen) << 1], 0, mptr);
+    System.arraycopy(M, 0, M = new byte[mlen = mlen + msglen << 1], 0, mptr);
   arraycopy(msg, 0, M, mptr, msglen);
   long len = mptr += msglen;
   len -= len % ((r * b) >> 3);
