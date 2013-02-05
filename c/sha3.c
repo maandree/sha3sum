@@ -132,8 +132,8 @@ static long mlen = 0;
  */
 static llong rotate(llong x, long n)
 {
-  llong m;
-  return ((x >> (w - (m = n % w))) + (x << m)) & wmod;
+  llong m = n % w;
+  return ((x >> (w - m)) + (x << m)) & wmod;
 }
 
 
@@ -324,13 +324,16 @@ static llong toLane64(byte* message, long msglen, long rr, long off)
 /**
  * pad 10*1
  * 
- * @param   msg  The message to pad
- * @parm    len  The length of the message
- * @param   r    The bitrate
- * @return       The message padded
+ * @param   msg     The message to pad
+ * @param   len     The length of the message
+ * @param   r       The bitrate
+ * @param   outlen  The length of the padded message (out parameter)
+ * @return          The message padded
  */
-static byte* pad10star1(byte* msg, long len, long r)
+static byte* pad10star1(byte* msg, long len, long r, long* outlen)
 {
+  byte* message;
+  
   long nrf = len >> 3;
   long nbrf = len & 7;
   long ll = len % r;
@@ -338,7 +341,6 @@ static byte* pad10star1(byte* msg, long len, long r)
   
   byte b = (byte)(nbrf == 0 ? 1 : ((msg[nrf] >> (8 - nbrf)) | (1 << nbrf)));
   
-  byte* message;
   if ((r - 8 <= ll) && (ll <= r - 2))
     {
       message = (byte*)malloc(len = nrf + 1);
@@ -356,6 +358,7 @@ static byte* pad10star1(byte* msg, long len, long r)
     }
   arraycopy(msg, 0, message, 0, nrf);
   
+  *outlen = len;
   return message;
 }
 
@@ -363,15 +366,15 @@ static byte* pad10star1(byte* msg, long len, long r)
 /**
  * Initialise Keccak sponge
  * 
- * @param  r  The bitrate
- * @param  c  The capacity
- * @param  n  The output size
+ * @param  bitrate   The bitrate
+ * @param  capacity  The capacity
+ * @param  output    The output size
  */
-extern void initialise(long r, long c, long n)
+extern void initialise(long bitrate, long capacity, long output)
 {
-  r = r;
-  c = c;
-  n = n;
+  r = bitrate;
+  n = output;
+  c = capacity;
   b = r + c;
   w = b / 25;
   l = lb(w);
@@ -393,14 +396,20 @@ extern void update(byte* msg, long msglen)
 {
   long rr = r >> 3;
   long ww = w >> 3;
-  long i;
+  long i, len;
+  byte* message;
   
   if (mptr + msglen > mlen)
-    System.arraycopy(M, 0, M = new byte[mlen = mlen + msglen << 1], 0, mptr);
+    {
+      byte* buf = (byte*)malloc(mlen = (mlen + msglen) << 1);
+      arraycopy(M, 0, buf, 0, mptr);
+      free(M);
+      M = buf;
+    }
   arraycopy(msg, 0, M, mptr, msglen);
-  long len = mptr += msglen;
+  len = mptr += msglen;
   len -= len % ((r * b) >> 3);
-  byte* message = (byte*)malloc(len);
+  message = (byte*)malloc(len);
   arraycopy(M, 0, message, 0, len);
   System.arraycopy(M, len, M, 0, mptr -= len);
   
@@ -469,41 +478,37 @@ extern void update(byte* msg, long msglen)
     
 
 /**
- * Squeeze the Keccak sponge
- */
-extern byte* digest()
-{
-  return digest(null);
-}
-
-
-/**
  * Absorb the last part of the message and squeeze the Keccak sponge
  * 
- * @param  msg     The rest of the message
+ * @param  msg     The rest of the message, may be {@code null}
  * @param  msglen  The length of the partial message
  */
 extern byte* digest(byte* msg, long msglen)
 {
   byte* message;
+  byte* rc;
+  long rr = r >> 3, len;
+  long nn = n >> 3, olen;
+  long ww = w >> 3, ni;
+  long i, j = 0, ptr = 0, _;
+  
   if ((msg == null) || (msglen == 0))
-    message = pad10star1(M, mptr, r);
+    message = pad10star1(M, mptr, r, &len);
   else
     {
       if (mptr + msglen > mlen)
-	System.arraycopy(M, 0, M = new byte[mlen += msglen], 0, mptr);
+	{
+	  byte* buf = (byte*)malloc(mlen += msglen);
+	  arraycopy(M, 0, buf, 0, mptr);
+	  free(M);
+	  M = buf;
+	}
       arraycopy(msg, 0, M, mptr, msglen);
-      message = pad10star1(M, mptr + msglen, r);
+      message = pad10star1(M, mptr + msglen, r, &len);
     }
+  free(M);
   M = null;
-  long len = message.length;
-  byte* rc = (byte*)malloc((n + 7) >> 3);
-  long ptr = 0;
-  
-  long rr = r >> 3;
-  long nn = n >> 3;
-  long ww = w >> 3;
-  long i;
+  rc = (byte*)malloc((n + 7) >> 3);
   
   /* Absorbing phase */
   if (ww == 8)
@@ -568,16 +573,15 @@ extern byte* digest(byte* msg, long msglen)
       }
   
   /* Squeezing phase */
-  long olen = n;
-  long j = 0;
-  long ni = min(25, rr);
+  olen = n;
+  ni = min(25, rr);
   while (olen > 0)
     {
-      long i = 0;
+      i = 0;
       while ((i < ni) && (j < nn))
 	{
 	  llong v = S[(i % 5) * 5 + i / 5];
-	  for (long _ = 0; _ < ww; _++)
+	  for (_ = 0; _ < ww; _++)
 	    {
 	      if (j < nn)
 		{
