@@ -173,11 +173,8 @@ public class SHA3
     private static void keccakFRound(long[] A, long rc)
     {
 	/* θ step (step 1 of 3) */
-	SHA3.C[0] = (A[0]  ^ A[1])  ^ (A[2]  ^ A[3])  ^ A[4];
-	SHA3.C[1] = (A[5]  ^ A[6])  ^ (A[7]  ^ A[8])  ^ A[9];
-	SHA3.C[2] = (A[10] ^ A[11]) ^ (A[12] ^ A[13]) ^ A[14];
-	SHA3.C[3] = (A[15] ^ A[16]) ^ (A[17] ^ A[18]) ^ A[19];
-	SHA3.C[4] = (A[20] ^ A[21]) ^ (A[22] ^ A[23]) ^ A[24];
+	for (int i = 0, j = 0; i < 5; i++, j += 5)
+	    SHA3.C[i] = (A[j] ^ A[j + 1]) ^ (A[j + 2] ^ A[j + 3]) ^ A[j + 4];
 	
         if (SHA3.w == 64)
 	{
