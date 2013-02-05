@@ -379,17 +379,6 @@ extern void initialise(long r, long c, long n)
 /**
  * Absorb the more of the message message to the Keccak sponge
  * 
- * @param  msg  The partial message
- */
-extern void update(byte* msg)
-{
-  update(msg, msg.length);
-}
-
-
-/**
- * Absorb the more of the message message to the Keccak sponge
- * 
  * @param  msg     The partial message
  * @param  msglen  The length of the partial message
  */
@@ -478,17 +467,6 @@ extern void update(byte* msg, long msglen)
 extern byte* digest()
 {
   return digest(null);
-}
-
-
-/**
- * Absorb the last part of the message and squeeze the Keccak sponge
- * 
- * @param  msg  The rest of the message
- */
-extern byte* digest(byte* msg)
-{
-  return digest(msg, msg == null ? 0 : msg.length);
 }
 
 
