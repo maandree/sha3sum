@@ -34,7 +34,7 @@ public class sha3sum
      * @param   argv         Command line arguments
      * @throws  IOException  On I/O error (such as broken pipes)
      */
-    public static void main(String... argv) throws IOException
+    public static void main(String[] argv) throws IOException
     {
 	String cmd, _cmd = cmd = ""; //FIXME  /proc/self/cmdline split ^@ [0]
 	if (cmd.indexOf('/') >= 0)
@@ -55,14 +55,15 @@ public class sha3sum
 	int _i, i = _i = 1;             /* --iterations */
 	boolean binary = false;
 	
-	ArrayList<String> files = new ArrayList<String>();
+	String[] files = new String[argv.length + 1];
+	int fptr = 0;
 	boolean dashed = false;
 	String[] linger = null;
 	
 	String[] args = new String[argv.length + 1];
 	System.arraycopy(argv, 0, args, 0, argv.length);
-	for (String arg : args)
-	{
+	for (int a = 0, an = args.length; a < an; a++)
+	{   String arg = args[a];
 	    arg = arg == null ? null : arg.intern();
 	    if (linger != null)
 	    {
@@ -148,11 +149,11 @@ public class sha3sum
 	    if (arg == null)
 		continue;
 	    if (dashed)
-		files.add(arg == "-" ? null : arg);
+		files[fptr++] = arg == "-" ? null : arg;
 	    else if (arg == "--")
 		dashed = true;
 	    else if (arg == "-")
-		files.add(null);
+		files[fptr++] = null;
 	    else if (arg.startsWith("--"))
 		if (arg.indexOf('=') >= 0)
 	            linger = new String[] { arg.substring(0, arg.indexOf('=')), arg.substring(arg.indexOf('=') + 1) };
@@ -175,11 +176,11 @@ public class sha3sum
                     linger = new String[] { "-" + arg.charAt(0), arg.substring(1) };
 	    }
             else
-                files.add(arg);
+                files[fptr++] = arg;
 	}
 	
-	if (files.isEmpty())
-	    files.add(null);
+	if (fptr == 0)
+	    files[fptr++] = null;
 	if (i < 1)
 	{
 	    System.err.println(_cmd + ": sorry, I will only do at least one iteration!\n");
@@ -188,9 +189,10 @@ public class sha3sum
 	
 	byte[] stdin = null;
 	boolean fail = false;
+	String filename;
 
-	for (String filename : files)
-	{   if ((filename == null) && (stdin != null))
+	for (int f = 0; f < fptr; f++)
+	{   if (((filename = files[f]) == null) && (stdin != null))
 	    {	System.out.write(stdin);
 		continue;
 	    }
@@ -223,9 +225,9 @@ public class sha3sum
 		    System.out.flush();
 		}
 		else
-		{   for (byte b : bs)
-		    {	rc += "0123456789ABCDEF".charAt((b >> 4) & 15);
-			rc += "0123456789ABCDEF".charAt(b & 15);
+		{   for (int b = 0, bn = bs.length; b < bn; b++)
+		    {	rc += "0123456789ABCDEF".charAt((bs[b] >> 4) & 15);
+			rc += "0123456789ABCDEF".charAt(bs[b] & 15);
 		    }
 		    rc += " " + (filename == null ? "-" : filename) + "\n";
 		    if (filename == null)
