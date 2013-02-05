@@ -1,9 +1,11 @@
 COMPLETE STATUS:
-	 python  :: optimised
-	 java    :: optimised
-	 c       :: planned (after java)
-	 nasm    :: planned (maybe, after c)
-	 haskell :: planned (maybe)
+	 Java 1.2+ :: optimised
+	 Python 3  :: optimised []
+	 C         :: planned
+	 NASM      :: planned (maybe, after c)
+	 Haskell   :: planned (maybe)
+	 Python 2  :: planned (maybe)
+	 Perl      :: planned (maybe)
 
 
 SHA-3/Keccak checksum calculator
