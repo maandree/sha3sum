@@ -172,18 +172,20 @@ public class SHA3
      */
     private static void keccakFRound(long[] A, long rc)
     {
+	/* θ step (step 1 of 3) */
+	SHA3.C[0] = (A[0]  ^ A[1])  ^ (A[2]  ^ A[3])  ^ A[4];
+	SHA3.C[1] = (A[5]  ^ A[6])  ^ (A[7]  ^ A[8])  ^ A[9];
+	SHA3.C[2] = (A[10] ^ A[11]) ^ (A[12] ^ A[13]) ^ A[14];
+	SHA3.C[3] = (A[15] ^ A[16]) ^ (A[17] ^ A[18]) ^ A[19];
+	SHA3.C[4] = (A[20] ^ A[21]) ^ (A[22] ^ A[23]) ^ A[24];
+	
         if (SHA3.w == 64)
 	{
-            /* θ step (step 1 and 2 of 3) */
-            SHA3.C[0] = (A[0]  ^ A[1])  ^ (A[2]  ^ A[3])  ^ A[4];
-            SHA3.C[2] = (A[10] ^ A[11]) ^ (A[12] ^ A[13]) ^ A[14];
-            long db = SHA3.C[0] ^ SHA3.rotate64(SHA3.C[2], 1);
-            SHA3.C[4] = (A[20] ^ A[21]) ^ (A[22] ^ A[23]) ^ A[24];
-            long dd = SHA3.C[2] ^ SHA3.rotate64(SHA3.C[4], 1);
-            SHA3.C[1] = (A[5]  ^ A[6])  ^ (A[7]  ^ A[8])  ^ A[9];
+	    /* θ step (step 2 of 3) */
             long da = SHA3.C[4] ^ SHA3.rotate64(SHA3.C[1], 1);
-            SHA3.C[3] = (A[15] ^ A[16]) ^ (A[17] ^ A[18]) ^ A[19];
+            long db = SHA3.C[0] ^ SHA3.rotate64(SHA3.C[2], 1);
             long dc = SHA3.C[1] ^ SHA3.rotate64(SHA3.C[3], 1);
+            long dd = SHA3.C[2] ^ SHA3.rotate64(SHA3.C[4], 1);
             long de = SHA3.C[3] ^ SHA3.rotate64(SHA3.C[0], 1);
             
             /* ρ and π steps, with last part of θ */
@@ -219,16 +221,11 @@ public class SHA3
 	}
         else
 	{
-            /* θ step (step 1 and 2 of 3) */
-            SHA3.C[0] = (A[0]  ^ A[1])  ^ (A[2]  ^ A[3])  ^ A[4];
-            SHA3.C[2] = (A[10] ^ A[11]) ^ (A[12] ^ A[13]) ^ A[14];
-            long db = SHA3.C[0] ^ SHA3.rotate(SHA3.C[2], 1);
-            SHA3.C[4] = (A[20] ^ A[21]) ^ (A[22] ^ A[23]) ^ A[24];
-            long dd = SHA3.C[2] ^ SHA3.rotate(SHA3.C[4], 1);
-            SHA3.C[1] = (A[5]  ^ A[6])  ^ (A[7]  ^ A[8])  ^ A[9];
+	    /* θ step (step 2 of 3) */
             long da = SHA3.C[4] ^ SHA3.rotate(SHA3.C[1], 1);
-            SHA3.C[3] = (A[15] ^ A[16]) ^ (A[17] ^ A[18]) ^ A[19];
+            long db = SHA3.C[0] ^ SHA3.rotate(SHA3.C[2], 1);
             long dc = SHA3.C[1] ^ SHA3.rotate(SHA3.C[3], 1);
+            long dd = SHA3.C[2] ^ SHA3.rotate(SHA3.C[4], 1);
             long de = SHA3.C[3] ^ SHA3.rotate(SHA3.C[0], 1);
             
             /*ρ and π steps, with last part of θ */
@@ -388,8 +385,7 @@ public class SHA3
 	    //    message[i + nrf] = 0;
 	    message[len - 1] = -128;
 	}
-	for (int i = 0; i < nrf; i++)
-	    message[i] = msg[i];
+	System.arraycopy(msg, 0, message, 0, nrf);
         
         return message;
     }
