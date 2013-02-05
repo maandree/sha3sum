@@ -112,9 +112,14 @@ static llong* S = null;
 static byte* M = null;
     
 /**
- * Polonger for {@link #M}
+ * Pointer for {@link #M}
  */
 static long mptr = 0;
+
+/**
+ * Size of {@link #M}
+ */
+static long mlen = 0;
 
 
 
@@ -373,7 +378,7 @@ extern void initialise(long r, long c, long n)
   nr = 12 + (l << 1);
   wmod = (1L << w) - 1L;
   S = (llong*)malloc(25 * sizeof(llong));
-  M = (byte*)malloc((r * b) >> 2);
+  M = (byte*)malloc(mlen = (r * b) >> 2);
   mptr = 0;
 }
 
@@ -390,8 +395,8 @@ extern void update(byte* msg, long msglen)
   long ww = w >> 3;
   long i;
   
-  if (mptr + msglen > M.length)
-    System.arraycopy(M, 0, M = new byte[(M.length + msglen) << 1], 0, mptr);
+  if (mptr + msglen > mlen)
+    System.arraycopy(M, 0, M = new byte[(mlen += msglen) << 1], 0, mptr);
   arraycopy(msg, 0, M, mptr, msglen);
   long len = mptr += msglen;
   len -= len % ((r * b) >> 3);
@@ -485,8 +490,8 @@ extern byte* digest(byte* msg, long msglen)
     message = pad10star1(M, mptr, r);
   else
     {
-      if (mptr + msglen > M.length)
-	System.arraycopy(M, 0, M = new byte[M.length + msglen], 0, mptr);
+      if (mptr + msglen > mlen)
+	System.arraycopy(M, 0, M = new byte[mlen += msglen], 0, mptr);
       arraycopy(msg, 0, M, mptr, msglen);
       message = pad10star1(M, mptr + msglen, r);
     }
