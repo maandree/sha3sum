@@ -25,14 +25,6 @@
  */
 public class SHA3
 {
-    private static String hex(long x)
-    {
-	String a = "00000000" + Long.toString((x >>> 32) & ((1L << 32) - 1), 16);
-	String b = "00000000" + Long.toString(x & ((1L << 32) - 1), 16);
-	a = a.substring(a.length() - 8);
-	b = b.substring(b.length() - 8);
-	return a + b;
-    }
     /**
      * Round contants
      */
