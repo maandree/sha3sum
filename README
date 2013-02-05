@@ -1,6 +1,6 @@
 COMPLETE STATUS:
 	 python  :: optimised
-	 java    :: not correct, not optimised
+	 java    :: not optimised
 	 c       :: planned (after java)
 	 nasm    :: planned (maybe, after c)
 	 haskell :: planned (maybe)

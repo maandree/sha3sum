@@ -25,6 +25,14 @@
  */
 public class SHA3
 {
+    private static String hex(long x)
+    {
+	String a = "00000000" + Long.toString((x >>> 32) & ((1L << 32) - 1), 16);
+	String b = "00000000" + Long.toString(x & ((1L << 32) - 1), 16);
+	a = a.substring(a.length() - 8);
+	b = b.substring(b.length() - 8);
+	return a + b;
+    }
     /**
      * Round contants
      */
@@ -119,7 +127,7 @@ public class SHA3
      * Rotate a word
      * 
      * @param   x  The value to rotate
-     * @param   n  Rotation steps
+     * @param   n  Rotation steps, may not be 0
      * @return     The value rotated
      */
     private static long rotate(long x, int n)
@@ -133,7 +141,7 @@ public class SHA3
      * Rotate a 64-bit word
      * 
      * @param   x  The value to rotate
-     * @param   n  Rotation steps
+     * @param   n  Rotation steps, may not be 0
      * @return     The value rotated
      */
     private static long rotate64(long x, int n)
@@ -179,7 +187,7 @@ public class SHA3
             long de = SHA3.C[3] ^ SHA3.rotate64(SHA3.C[0], 1);
             
             /* ρ and π steps, with last part of θ */
-            SHA3.B[0] = SHA3.rotate64(A[0] ^ da, 0);
+            SHA3.B[0] = A[0] ^ da;
             SHA3.B[1] = SHA3.rotate64(A[15] ^ dd, 28);
             SHA3.B[2] = SHA3.rotate64(A[5] ^ db, 1);
             SHA3.B[3] = SHA3.rotate64(A[20] ^ de, 27);
@@ -224,7 +232,7 @@ public class SHA3
             long de = SHA3.C[3] ^ SHA3.rotate(SHA3.C[0], 1);
             
             /*ρ and π steps, with last part of θ */
-            SHA3.B[0] = SHA3.rotate(A[0] ^ da, 0);
+            SHA3.B[0] = A[0] ^ da;
             SHA3.B[1] = SHA3.rotate(A[15] ^ dd, 28);
             SHA3.B[2] = SHA3.rotate(A[5] ^ db, 1);
             SHA3.B[3] = SHA3.rotate(A[20] ^ de, 27);
@@ -342,9 +350,10 @@ public class SHA3
      */
     private static long toLane(byte[] message, int rr, int ww, int off)
     {
-        int n = Math.min(message.length, rr), rc = 0;
+	long rc = 0;
+        int n = Math.min(message.length, rr);
         for (int i = off + ww - 1; i >= off; i--)
-            rc = (rc << 8) | ((i < n) ? message[i] : 0);
+            rc = (rc << 8) | ((i < n) ? (long)(message[i] & 255) : 0L);
         return rc;
     }
     
@@ -359,15 +368,15 @@ public class SHA3
      */
     private static long toLane64(byte[] message, int rr, int off)
     {
-        int n = Math.min(message.length, rr), rc = 0;
-        return ((off + 7 < n) ? (message[off + 7] << 56) : 0) |
-	       ((off + 6 < n) ? (message[off + 6] << 48) : 0) |
-	       ((off + 5 < n) ? (message[off + 5] << 40) : 0) |
-	       ((off + 4 < n) ? (message[off + 4] << 32) : 0) |
-	       ((off + 3 < n) ? (message[off + 3] << 24) : 0) |
-	       ((off + 2 < n) ? (message[off + 2] << 16) : 0) |
-	       ((off + 1 < n) ? (message[off + 1] <<  8) : 0) |
-	       ((off < n) ? (message[off]) : 0);
+        int n = Math.min(message.length, rr);
+        return ((off + 7 < n) ? ((long)(message[off + 7] & 255) << 56) : 0L) |
+	       ((off + 6 < n) ? ((long)(message[off + 6] & 255) << 48) : 0L) |
+	       ((off + 5 < n) ? ((long)(message[off + 5] & 255) << 40) : 0L) |
+	       ((off + 4 < n) ? ((long)(message[off + 4] & 255) << 32) : 0L) |
+	       ((off + 3 < n) ? ((long)(message[off + 3] & 255) << 24) : 0L) |
+	       ((off + 2 < n) ? ((long)(message[off + 2] & 255) << 16) : 0L) |
+	       ((off + 1 < n) ? ((long)(message[off + 1] & 255) <<  8) : 0L) |
+	       ((off < n) ? ((long)(message[off] & 255)) : 0L);
     }
     
     
@@ -562,7 +571,7 @@ public class SHA3
 	else
 	{
 	    if (SHA3.mptr + msglen > SHA3.M.length)
-		System.arraycopy(SHA3.M, 0, SHA3.M = new byte[SHA3.M.length << 1], 0, SHA3.mptr);
+		System.arraycopy(SHA3.M, 0, SHA3.M = new byte[SHA3.M.length + msglen], 0, SHA3.mptr);
 	    System.arraycopy(msg, 0, SHA3.M, SHA3.mptr, msglen);
 	    message = SHA3.pad10star1(SHA3.M, SHA3.mptr + msglen, SHA3.r);
 	}
