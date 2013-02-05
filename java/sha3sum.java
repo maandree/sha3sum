@@ -22,7 +22,7 @@ import java.util.*;
 
 
 /**
- * SHA-3/Keccak chechsum calculator
+ * SHA-3/Keccak checksum calculator
  * 
  * @author  Mattias Andrée  <a href="mailto:maandree@member.fsf.org">maandree@member.fsf.org</a>
  */
@@ -31,12 +31,24 @@ public class sha3sum
     /**
      * This is the main entry point of the program
      * 
+     * @param   args         Command line arguments
+     * @throws  IOException  On I/O error (such as broken pipes)
+     */
+    public static void main(String[] args) throws IOException
+    {
+	run("sha3sum", args);
+    }
+    
+    
+    /**
+     * Run the program
+     * 
+     * @param   cmd          The command
      * @param   argv         Command line arguments
      * @throws  IOException  On I/O error (such as broken pipes)
      */
-    public static void main(String[] argv) throws IOException
+    public static void run(String cmd, String[] argv) throws IOException
     {
-	String cmd, _cmd = cmd = ""; //FIXME  /proc/self/cmdline split ^@ [0]
 	if (cmd.indexOf('/') >= 0)
 	    cmd = cmd.substring(cmd.lastIndexOf('/') + 1);
 	if (cmd.endsWith(".jar"))
@@ -138,7 +150,7 @@ public class sha3sum
 			i = Integer.parseInt(linger[1]);
 		    else
 		    {
-			System.err.println(_cmd + ": unrecognised option: " + linger[0]);
+			System.err.println(cmd + ": unrecognised option: " + linger[0]);
 			System.exit(1);
 		    }
 		}
@@ -183,7 +195,7 @@ public class sha3sum
 	    files[fptr++] = null;
 	if (i < 1)
 	{
-	    System.err.println(_cmd + ": sorry, I will only do at least one iteration!\n");
+	    System.err.println(cmd + ": sorry, I will only do at least one iteration!\n");
 	    System.exit(3);
 	}
 	
@@ -237,7 +249,7 @@ public class sha3sum
 		}
 	    }
 	    catch (final IOException err)
-	    {   System.err.println(_cmd + ": Cannot read file: " + filename + ": " + err);
+	    {   System.err.println(cmd + ": Cannot read file: " + filename + ": " + err);
 		fail = true;
 	    }
 	    finally
@@ -253,5 +265,6 @@ public class sha3sum
 	if (fail)
 	    System.exit(5);
     }
+    
 }
 
