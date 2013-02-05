@@ -52,7 +52,7 @@ public class sha3sum
 	if (cmd.indexOf('/') >= 0)
 	    cmd = cmd.substring(cmd.lastIndexOf('/') + 1);
 	if (cmd.endsWith(".jar"))
-	    cmd = cmd.substring(0, cmd.length() - 3);
+	    cmd = cmd.substring(0, cmd.length() - 4);
 	cmd = cmd.intern();
 	
 	int _o, o = _o = 512;           /* --outputsize */
@@ -60,7 +60,7 @@ public class sha3sum
 	else if (cmd == "sha3-256sum")  o = _o = 256;
 	else if (cmd == "sha3-384sum")  o = _o = 384;
 	else if (cmd == "sha3-512sum")  o = _o = 512;
-	int _s, s = _s = 1600;          /* --statesiz e */
+	int _s, s = _s = 1600;          /* --statesize  */
 	int _r, r = _r = s - (o << 1);  /* --bitrate    */
 	int _c, c = _c = s - r;         /* --capacity   */
 	int _w, w = _w = s / 25;        /* --wordsize   */
@@ -82,6 +82,7 @@ public class sha3sum
 		linger[0] = linger[0].intern();
 		if ((linger[0] == "-h") || (linger[0] == "--help"))
 		{
+		    System.out.println("");
 		    System.out.println("SHA-3/Keccak checksum calculator");
 		    System.out.println("");
 		    System.out.println("USAGE:	sha3sum [option...] < file");
@@ -127,6 +128,7 @@ public class sha3sum
 		    System.out.println("");
 		    System.out.println("You should have received a copy of the GNU General Public License");
 		    System.out.println("along with this program.  If not, see <http://www.gnu.org/licenses/>.");
+		    System.out.println("");
 		    System.exit(2);
 		}
 		else
@@ -195,7 +197,7 @@ public class sha3sum
 	    files[fptr++] = null;
 	if (i < 1)
 	{
-	    System.err.println(cmd + ": sorry, I will only do at least one iteration!\n");
+	    System.err.println(cmd + ": sorry, I will only do at least one iteration!");
 	    System.exit(3);
 	}
 	
