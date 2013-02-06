@@ -276,7 +276,7 @@ int main(int argc, char** argv)
     char* stdin = null;
     char* filename;
     char* fn;
-    long f, fail = false;
+    long f, fail = false, _;
     
     for (f = 0; f < fptr; f++)
       {
@@ -295,49 +295,74 @@ int main(int argc, char** argv)
 	  }
 	initialise(r, c, o);
 	
-	/* String rc = ""; */
 	int blksize = 4096; /** XXX os.stat(os.path.realpath(fn)).st_size; **/
-	char* chunk = malloc(blksize)
-	  for (;;)
-	    {
-	      long read = fread(chunk, 1, blksize, file);
-	      if (read <= 0)
-		break;
-	      update(chunk, read);
-	    }
+	char* chunk = malloc(blksize);
+	for (;;)
+	  {
+	    long read = fread(chunk, 1, blksize, file);
+	    if (read <= 0)
+	      break;
+	    update(chunk, read);
+	  }
 	free(chunk);
-	byte* bs = digest(null, 0);
-	long bsn = (o + 7) >> 3;
-	for (long _ = 1; _ < i; _++)
+	char* bs = digest(null, 0);
+	long bn = (o + 7) >> 3;
+	for (_ = 1; _ < i; _++)
 	  {
 	    initialise(r, c, o);
-	    bs = digest(bs, bsn);
+	    bs = digest(bs, bn);
 	  }
 	
 	if (binary)
 	  {
+	    long j;
 	    if (filename == null)
-	      stdin = bs;
-	    for (long j = 0; j < bsn; j++)
+	      {
+		stdin = bs;
+		bs = null;
+	      }
+	    for (j = 0; j < bn; j++)
 	      putchar(*(bs + j));
 	    fflush(stdout);
 	  }
 	else
 	  {
-	    for (int b = 0, bn = bs.length; b < bn; b++)
-	      {	rc += "0123456789ABCDEF".charAt((bs[b] >> 4) & 15);
-		rc += "0123456789ABCDEF".charAt(bs[b] & 15);
+	    long flen = 0, rcptr = 0, b = 0;
+	    if (filename != null)
+	      while (*(filename + flen))
+		flen++;
+	    char* rc = malloc((bn << 1) + 3 + (filename == null ? 1 : 0) + flen);
+	    for (b = 0; b < bn; b++)
+	      {
+		*(rc + rcptr++) = "0123456789ABCDEF"[(bs[b] >> 4) & 15];
+		*(rc + rcptr++) = "0123456789ABCDEF"[bs[b] & 15];
 	      }
-	    rc += " " + (filename == null ? "-" : filename) + "\n";
+	    *(rc + rcptr++) = ' ';
 	    if (filename == null)
-	      stdin = rc.getBytes("UTF-8");
-	    System.out.print(rc);
+	      *(rc + rcptr++) = '-';
+	    else
+	      {
+		flen = 0;
+		while (*(filename + flen))
+		  *(rc + rcptr++) = *(filename + flen++);
+	      }
+	    *(rc + rcptr++) = '\n';
+	    *(rc + rcptr++) = 0;
+	    printf("%s", rc);
 	    fflush(stdout);
+	    if (filename == null)
+	      stdin = rc;
+	    else
+	      free(rc);
 	  }
 	
-	free(bs);
+	if (bs != null)
+	  free(bs);
 	fclose(file);
       }
+    
+    if (stdin != null)
+      free(stdin);
     
     fflush(stdout);
     fflush(stderr);
