@@ -251,7 +251,7 @@ public class sha3sum
 		}
 	    }
 	    catch (final IOException err)
-	    {   System.err.println(cmd + ": Cannot read file: " + filename + ": " + err);
+	    {   System.err.println(cmd + ": cannot read file: " + filename + ": " + err);
 		fail = true;
 	    }
 	    finally

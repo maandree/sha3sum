@@ -286,10 +286,57 @@ int main(int argc, char** argv)
 	    continue;
 	  }
 	fn = filename ? filename : "/dev/stdin";
-	/* String rc = ""; */
-	/* InputStream file = null; */
+	FILE* file = fopen(fn, "r");
+	if (file == null)
+	  {
+	    fprintf(stderr, "%s: cannot read file: %s\n", cmd, filename);
+	    fail = true;
+	    continue;
+	  }
+	initialise(r, c, o);
 	
-	/* --------------------------------------------------------------- */
+	/* String rc = ""; */
+	int blksize = 4096; /** XXX os.stat(os.path.realpath(fn)).st_size; **/
+	char* chunk = malloc(blksize)
+	  for (;;)
+	    {
+	      long read = fread(chunk, 1, blksize, file);
+	      if (read <= 0)
+		break;
+	      update(chunk, read);
+	    }
+	free(chunk);
+	byte* bs = digest(null, 0);
+	long bsn = (o + 7) >> 3;
+	for (long _ = 1; _ < i; _++)
+	  {
+	    initialise(r, c, o);
+	    bs = digest(bs, bsn);
+	  }
+	
+	if (binary)
+	  {
+	    if (filename == null)
+	      stdin = bs;
+	    for (long j = 0; j < bsn; j++)
+	      putchar(*(bs + j));
+	    fflush(stdout);
+	  }
+	else
+	  {
+	    for (int b = 0, bn = bs.length; b < bn; b++)
+	      {	rc += "0123456789ABCDEF".charAt((bs[b] >> 4) & 15);
+		rc += "0123456789ABCDEF".charAt(bs[b] & 15);
+	      }
+	    rc += " " + (filename == null ? "-" : filename) + "\n";
+	    if (filename == null)
+	      stdin = rc.getBytes("UTF-8");
+	    System.out.print(rc);
+	    fflush(stdout);
+	  }
+	
+	free(bs);
+	fclose(file);
       }
     
     fflush(stdout);
