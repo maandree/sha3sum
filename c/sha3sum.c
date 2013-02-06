@@ -276,17 +276,22 @@ int main(int argc, char** argv)
     char* stdin = null;
     char* filename;
     char* fn;
-    long f, fail = false, _;
+    long f, fail = false, _, bn;
     
     for (f = 0; f < fptr; f++)
       {
+	FILE* file;
+	long blksize;
+	char* chunk;
+	char* bs;
+	
 	if (((filename = *(files + f)) == null) && stdin)
 	  {
 	    printf("%s", stdin);
 	    continue;
 	  }
 	fn = filename ? filename : "/dev/stdin";
-	FILE* file = fopen(fn, "r");
+	file = fopen(fn, "r");
 	if (file == null)
 	  {
 	    fprintf(stderr, "%s: cannot read file: %s\n", cmd, filename);
@@ -295,8 +300,8 @@ int main(int argc, char** argv)
 	  }
 	initialise(r, c, o);
 	
-	int blksize = 4096; /** XXX os.stat(os.path.realpath(fn)).st_size; **/
-	char* chunk = malloc(blksize);
+	blksize = 4096; /** XXX os.stat(os.path.realpath(fn)).st_size; **/
+	chunk = malloc(blksize);
 	for (;;)
 	  {
 	    long read = fread(chunk, 1, blksize, file);
@@ -305,8 +310,8 @@ int main(int argc, char** argv)
 	    update(chunk, read);
 	  }
 	free(chunk);
-	char* bs = digest(null, 0);
-	long bn = (o + 7) >> 3;
+	bs = digest(null, 0);
+	bn = (o + 7) >> 3;
 	for (_ = 1; _ < i; _++)
 	  {
 	    initialise(r, c, o);
@@ -328,10 +333,11 @@ int main(int argc, char** argv)
 	else
 	  {
 	    long flen = 0, rcptr = 0, b = 0;
+	    char* rc;
 	    if (filename != null)
 	      while (*(filename + flen))
 		flen++;
-	    char* rc = malloc((bn << 1) + 3 + (filename == null ? 1 : 0) + flen);
+	    rc = malloc((bn << 1) + 3 + (filename == null ? 1 : 0) + flen);
 	    for (b = 0; b < bn; b++)
 	      {
 		*(rc + rcptr++) = "0123456789ABCDEF"[(bs[b] >> 4) & 15];
