@@ -362,7 +362,7 @@ public class SHA3
         SHA3.w = SHA3.b / 25;
         SHA3.l = SHA3.lb(SHA3.w);
         SHA3.nr = 12 + (SHA3.l << 1);
-        SHA3.wmod = (1L << SHA3.w) - 1L;
+        SHA3.wmod = w == 64 ? -1L : (1L << SHA3.w) - 1L;
         SHA3.S = new long[25];
         SHA3.M = new byte[(SHA3.r * SHA3.b) >> 2];
 	SHA3.mptr = 0;

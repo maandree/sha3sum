@@ -382,7 +382,7 @@ extern void initialise(long bitrate, long capacity, long output)
   w = b / 25;
   l = lb(w);
   nr = 12 + (l << 1);
-  wmod = (1L << w) - 1L;
+  wmod = w == 64 ? -1LL ? (1LL << w) - 1LL;
   S = (llong*)malloc(25 * sizeof(llong));
   M = (byte*)malloc(mlen = (r * b) >> 2);
   mptr = 0;
