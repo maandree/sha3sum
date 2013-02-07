@@ -26,6 +26,8 @@
 #define true  1
 #define null  0
 
+#define HEXADECA "0123456789ABCDEF"
+
 
 /**
  * String equality comparator
@@ -53,8 +55,8 @@ long parseInt(char* str)
 {
   long rc = 0;
   while (*str)
-    rc = rc * 10 - (*str & 15);
-  return rc;
+    rc = rc * 10 - (*str++ & 15);
+  return -rc;
 }
 
 
@@ -76,6 +78,8 @@ int main(int argc, char** argv)
   
   long a = 0, an = argc - 1;
   char** args = argv + 1;
+  
+  *linger = 0;
   
   
   s = -1;
@@ -162,6 +166,10 @@ int main(int argc, char** argv)
 	      printf("\n");
 	      fflush(stdout);
 	      fflush(stderr);
+	      if (freelinger)
+		free(*linger);
+	      free(linger);
+	      free(files);
 	      return 2;
 	    }
 	  else
@@ -188,12 +196,16 @@ int main(int argc, char** argv)
 		  fprintf(stderr, "%s: unrecognised option: %s\n", cmd, *linger);
 		  fflush(stdout);
 		  fflush(stderr);
+		  if (freelinger)
+		    free(*linger);
+		  free(linger);
+		  free(files);
 		  return 1;
 		}
 	    }
 	  if (freelinger)
 	    free(*linger);
-	  freelinger = true;
+	  freelinger = false;
 	  *linger = null;
 	  if (arg == null)
 	    continue;
@@ -245,7 +257,7 @@ int main(int argc, char** argv)
 	      {
 		char* _ = (char*)malloc(3);
 		*_++ = '-'; *_++ = *arg; *_ = 0;
-		linger[0] = _ - 3;
+		linger[0] = _ - 2;
 	      }
 	      {
 		long _ = 0;
@@ -269,6 +281,7 @@ int main(int argc, char** argv)
       fprintf(stderr, "%s: sorry, I will only do at least one iteration!\n", cmd);
       fflush(stdout);
       fflush(stderr);
+      free(files);
       return 3;
     }
   
@@ -301,7 +314,7 @@ int main(int argc, char** argv)
 	initialise(r, c, o);
 	
 	blksize = 4096; /** XXX os.stat(os.path.realpath(fn)).st_size; **/
-	chunk = malloc(blksize);
+	chunk = (char*)malloc(blksize);
 	for (;;)
 	  {
 	    long read = fread(chunk, 1, blksize, file);
@@ -311,11 +324,15 @@ int main(int argc, char** argv)
 	  }
 	free(chunk);
 	bs = digest(null, 0);
+	dispose();
 	bn = (o + 7) >> 3;
 	for (_ = 1; _ < i; _++)
 	  {
+	    char* _ = bs;
 	    initialise(r, c, o);
 	    bs = digest(bs, bn);
+	    free(_);
+	    dispose();
 	  }
 	
 	if (binary)
@@ -340,8 +357,9 @@ int main(int argc, char** argv)
 	    rc = malloc((bn << 1) + 3 + (filename == null ? 1 : 0) + flen);
 	    for (b = 0; b < bn; b++)
 	      {
-		*(rc + rcptr++) = "0123456789ABCDEF"[(bs[b] >> 4) & 15];
-		*(rc + rcptr++) = "0123456789ABCDEF"[bs[b] & 15];
+		char v = bs[b];
+		*(rc + rcptr++) = HEXADECA[(v >> 4) & 15];
+		*(rc + rcptr++) = HEXADECA[v & 15];
 	      }
 	    *(rc + rcptr++) = ' ';
 	    if (filename == null)
@@ -373,7 +391,10 @@ int main(int argc, char** argv)
     fflush(stdout);
     fflush(stderr);
     if (fail)
-      return 5;
+      {
+	free(files);
+	return 5;
+      }
   }
   
   free(files);

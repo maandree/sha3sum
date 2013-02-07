@@ -34,8 +34,8 @@
 
 
 #define min(X, Y) ((X) < (Y) ? (X) : (Y))
-#define arraycopy(src, soff, dest, doff, length)     {long copyi; for (copyi = 0; copyi < length; copyi++)       dest[copyi + soff] = src[copyi + doff];}
-#define revarraycopy(src, soff, dest, doff, length)  {long copyi; for (copyi = length - 1; copyi >= 0; copyi--)  dest[copyi + soff] = src[copyi + doff];}
+#define arraycopy(src, soff, dest, doff, length)     {long copyi; for (copyi = 0; copyi < length; copyi++)       dest[copyi + doff] = src[copyi + soff];}
+#define revarraycopy(src, soff, dest, doff, length)  {long copyi; for (copyi = length - 1; copyi >= 0; copyi--)  dest[copyi + doff] = src[copyi + soff];}
 
 
 
@@ -354,7 +354,7 @@ static byte* pad10star1(byte* msg, long len, long r, long* outlen)
       message = (byte*)malloc(len);
       message[nrf] = b;
       for (i = nrf + 1; i < len; i++)
-          message[i + nrf] = 0;
+          message[i] = 0;
       message[len - 1] = -128;
     }
   arraycopy(msg, 0, message, 0, nrf);
@@ -373,6 +373,8 @@ static byte* pad10star1(byte* msg, long len, long r, long* outlen)
  */
 extern void initialise(long bitrate, long capacity, long output)
 {
+  long i;
+  
   r = bitrate;
   n = output;
   c = capacity;
@@ -384,8 +386,27 @@ extern void initialise(long bitrate, long capacity, long output)
   S = (llong*)malloc(25 * sizeof(llong));
   M = (byte*)malloc(mlen = (r * b) >> 2);
   mptr = 0;
+  
+  for (i = 0; i < 25; i++)
+    *(S + i) = 0;
 }
 
+/**
+ * Dispose of the Keccak sponge
+ */
+extern void dispose()
+{
+  if (S != null)
+    {
+      free(S);
+      S = null;
+    }
+  if (M != null)
+    {
+      free(M);
+      M = null;
+    }
+}
 
 /**
  * Absorb the more of the message message to the Keccak sponge
@@ -476,6 +497,8 @@ extern void update(byte* msg, long msglen)
 	S[24] ^= toLane(message, len, rr, ww, i + 24 * w);
 	keccakF(S);
       }
+  
+  free(message);
 }
     
 
@@ -573,6 +596,8 @@ extern byte* digest(byte* msg, long msglen)
 	S[24] ^= toLane(message, len, rr, ww, i + 24 * w);
 	keccakF(S);
       }
+  
+  free(message);
   
   /* Squeezing phase */
   olen = n;

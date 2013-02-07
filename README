@@ -1,7 +1,7 @@
 COMPLETE STATUS:
-	 Pure Java 1.2+ :: optimised
+	 Pure Java 1.2+ :: incorrect, optimised
 	 Python 3       :: optimised
-	 C ISO C90      :: under development
+	 C ISO C90      :: incorrect(as java), not optimised
 	 Java/C JNI     :: planned (after c)
 	 NASM           :: planned (maybe, after jni)
 	 Haskell        :: planned (maybe)

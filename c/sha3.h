@@ -31,6 +31,12 @@ extern void initialise(long bitrate, long capacity, long output);
 
 
 /**
+ * Dispose of the Keccak sponge
+ */
+extern void dispose();
+
+
+/**
  * Absorb the more of the message message to the Keccak sponge
  * 
  * @param  msg     The partial message
