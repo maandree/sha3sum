@@ -318,7 +318,7 @@ public class SHA3
      */
     private static byte[] pad10star1(byte[] msg, int len, int r)
     {
-        int nrf = len >> 3;
+        int nrf = (len <<= 3) >> 3;
         int nbrf = len & 7;
         int ll = len % r;
         
@@ -336,8 +336,6 @@ public class SHA3
 	    len = ((len - (len % r) + (r - 8)) >> 3) + 1;
 	    message = new byte[len];
 	    message[nrf] = b;
-	    //for (long i = nrf + 1; i < len; i++)
-	    //    message[i + nrf] = 0;
 	    message[len - 1] = -128;
 	}
 	System.arraycopy(msg, 0, message, 0, nrf);

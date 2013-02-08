@@ -338,13 +338,13 @@ int main(int argc, char** argv)
 	if (binary)
 	  {
 	    long j;
+	    for (j = 0; j < bn; j++)
+	      putchar(*(bs + j));
 	    if (filename == null)
 	      {
 		stdin = bs;
 		bs = null;
 	      }
-	    for (j = 0; j < bn; j++)
-	      putchar(*(bs + j));
 	    fflush(stdout);
 	  }
 	else

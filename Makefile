@@ -8,20 +8,36 @@
 # [GNU All Permissive License]
 
 JAVAC=javac
+JAVADIRS=-s "pure-java" -d "bin/pure-java" -cp "pure-java"
+JAVAFLAGS=-Xlint
+JAVA_FLAGS=$(JAVADIRS) $(JAVAFLAGS)
+
+CFLAGS=-W{all,extra} -pedantic
+CPPFLAGS=
+LDFLAGS=
+C_FLAGS=$(CFLAGS) $(CPPFLAGS) $(LDFLAGS)
 
 
 JAVA_CLASSES = $(shell find "pure-java" | grep '\.java$$' | sed -e 's_^_bin/_g' -e 's_java$$_class_g')
+C_OBJS = $(shell find "c" | grep '\.h$$' | sed -e 's_^_bin/_g' -e 's_h$$_o_g')
+C_BINS = bin/c/sha3sum
 
-
-all: pure-java
+all: pure-java c
 
 
 pure-java: $(JAVA_CLASSES)
 bin/pure-java/%.class: pure-java/%.java
 	mkdir -p "bin/pure-java"
-	$(JAVAC) -s "pure-java" -d "bin/pure-java" -cp "pure-java" "pure-java/$*.java"
+	$(JAVAC) $(JAVA_FLAGS) "pure-java/$*.java"
 
-
+c: $(C_OBJS) $(C_BINS)
+bin/c/%.o: c/%.h c/%.c
+	mkdir -p "bin/c"
+	$(CC) $(C_FLAGS) -c "c/$*".{c,h}
+	mv "$*.o" "c/$*.o"
+bin/c/%: c/%.c
+	mkdir -p "bin/c"
+	$(CC) $(C_FLAGS) -o "$@" "c/$*".c "c/"*.o
 
 
 .PHONY: clean

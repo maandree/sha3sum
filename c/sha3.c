@@ -335,7 +335,7 @@ static byte* pad10star1(byte* msg, long len, long r, long* outlen)
 {
   byte* message;
   
-  long nrf = len >> 3;
+  long nrf = (len <<= 3) >> 3;
   long nbrf = len & 7;
   long ll = len % r;
   long i;
@@ -382,7 +382,14 @@ extern void initialise(long bitrate, long capacity, long output)
   w = b / 25;
   l = lb(w);
   nr = 12 + (l << 1);
-  wmod = w == 64 ? -1LL ? (1LL << w) - 1LL;
+  if (w == 64)
+    wmod = -1;
+  else
+    {
+      wmod = 1;
+      wmod <<= w;
+      wmod--;
+    }
   S = (llong*)malloc(25 * sizeof(llong));
   M = (byte*)malloc(mlen = (r * b) >> 2);
   mptr = 0;

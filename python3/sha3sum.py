@@ -324,7 +324,7 @@ class SHA3:
         @param     r:int    The bitrate
         @return     :str    The message padded
         '''
-        nnn = len(msg)
+        nnn = len(msg) << 3
         
         nrf = nnn >> 3
         nbrf = nnn & 7
@@ -341,8 +341,6 @@ class SHA3:
             message = [0] * (nnn - nrf)
             message[0] = bbbb
             nnn -= nrf
-            #for i in range(1, nnn):
-            #    message[i] = 0
             message[nnn - 1] = 0x80
         
         return msg[:nrf] + bytes(message)
@@ -698,7 +696,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         fn = '/dev/stdin' if filename is None else filename
         with open(fn, 'rb') as file:
             SHA3.initialise(r, c, o)
-            blksize = os.stat(os.path.realpath(fn)).st_size
+            blksize = (o + 7) >> 3
+            try:
+                blksize = os.stat(os.path.realpath(fn)).st_size
+            except:
+                pass
             while True:
                 chunk = file.read(blksize)
                 if len(chunk) == 0:
