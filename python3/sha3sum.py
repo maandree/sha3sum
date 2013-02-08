@@ -98,7 +98,7 @@ class SHA3:
         @param   n:int  Rotation steps
         @return   :int  The value rotated
         '''
-        return ((x >> (SHA3.w - n)) + (x << n)) & 0xFFFFFFFFFFFFFFFF
+        return ((x >> (64 - n)) + (x << n)) & 0xFFFFFFFFFFFFFFFF
     
     
     @staticmethod

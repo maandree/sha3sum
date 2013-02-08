@@ -33,10 +33,7 @@
 #define false   0
 
 
-#define min(X, Y) ((X) < (Y) ? (X) : (Y))
-#define arraycopy(src, soff, dest, doff, length)     {long copyi; for (copyi = 0; copyi < length; copyi++)       dest[copyi + doff] = src[copyi + soff];}
-#define revarraycopy(src, soff, dest, doff, length)  {long copyi; for (copyi = length - 1; copyi >= 0; copyi--)  dest[copyi + doff] = src[copyi + soff];}
-
+#define min(X, Y)  ((X) < (Y) ? (X) : (Y))
 
 
 /**
@@ -123,139 +120,177 @@ static long mptr = 0;
 static long mlen = 0;
 
 
+/**
+ * Copy an array segment into an array in start to end order
+ * 
+ * @param  src     The source array
+ * @param  soff    The source array offset
+ * @param  dest    The destination array
+ * @param  doff    The destination array offset
+ * @param  length  The number of elements to copy
+ */
+inline void arraycopy(byte* src, long soff, byte* dest, long doff, long length)
+{
+  long i;
+  src += soff;
+  dest += doff;
+  
+  #define __(X)  src[X] = dest[X]
+  #define __0  *src = *dest
+  #define __1  __(0x01)
+  #define __2  __(0x02); __(0x03)
+  #define __3  __(0x04); __(0x05); __(0x06); __(0x07)
+  #define __4  __(0x08); __(0x09); __(0x0A); __(0x0B); __(0x0C); __(0x0D); __(0x0E); __(0x0F)
+  #define __5  __(0x10); __(0x11); __(0x12); __(0x13); __(0x14); __(0x15); __(0x16); __(0x17); __(0x18); __(0x19); __(0x1A); __(0x1B); __(0x1C); __(0x1D); __(0x1E); __(0x1F)
+  #define __6  __(0x20); __(0x21); __(0x22); __(0x23); __(0x24); __(0x25); __(0x26); __(0x27); __(0x28); __(0x29); __(0x2A); __(0x2B); __(0x2C); __(0x2D); __(0x2E); __(0x2F); \
+               __(0x30); __(0x31); __(0x32); __(0x33); __(0x34); __(0x35); __(0x36); __(0x37); __(0x38); __(0x39); __(0x3A); __(0x3B); __(0x3C); __(0x3D); __(0x3E); __(0x3F)
+  #define __7  __(0x40); __(0x41); __(0x42); __(0x43); __(0x44); __(0x45); __(0x46); __(0x47); __(0x48); __(0x49); __(0x4A); __(0x4B); __(0x4C); __(0x4D); __(0x4E); __(0x4F); \
+               __(0x50); __(0x51); __(0x52); __(0x53); __(0x54); __(0x55); __(0x56); __(0x57); __(0x58); __(0x59); __(0x5A); __(0x5B); __(0x5C); __(0x5D); __(0x5E); __(0x5F); \
+               __(0x60); __(0x61); __(0x62); __(0x63); __(0x64); __(0x65); __(0x66); __(0x67); __(0x68); __(0x69); __(0x6A); __(0x6B); __(0x6C); __(0x6D); __(0x6E); __(0x6F); \
+               __(0x70); __(0x71); __(0x72); __(0x73); __(0x74); __(0x75); __(0x76); __(0x77); __(0x78); __(0x79); __(0x7A); __(0x7B); __(0x7C); __(0x7D); __(0x7E); __(0x7F)
+  #define __8  __(0x80); __(0x81); __(0x82); __(0x83); __(0x84); __(0x85); __(0x86); __(0x87); __(0x88); __(0x89); __(0x8A); __(0x8B); __(0x8C); __(0x8D); __(0x8E); __(0x8F); \
+               __(0x90); __(0x91); __(0x92); __(0x93); __(0x94); __(0x95); __(0x96); __(0x97); __(0x98); __(0x99); __(0x9A); __(0x9B); __(0x9C); __(0x9D); __(0x9E); __(0x9F); \
+               __(0xA0); __(0xA1); __(0xA2); __(0xA3); __(0xA4); __(0xA5); __(0xA6); __(0xA7); __(0xA8); __(0xA9); __(0xAA); __(0xAB); __(0xAC); __(0xAD); __(0xAE); __(0xAF); \
+               __(0xB0); __(0xB1); __(0xB2); __(0xB3); __(0xB4); __(0xB5); __(0xB6); __(0xB7); __(0xB8); __(0xB9); __(0xBA); __(0xBB); __(0xBC); __(0xBD); __(0xBE); __(0xBF); \
+               __(0xC0); __(0xC1); __(0xC2); __(0xC3); __(0xC4); __(0xC5); __(0xC6); __(0xC7); __(0xC8); __(0xC9); __(0xCA); __(0xCB); __(0xCC); __(0xCD); __(0xCE); __(0xCF); \
+               __(0xD0); __(0xD1); __(0xD2); __(0xD3); __(0xD4); __(0xD5); __(0xD6); __(0xD7); __(0xD8); __(0xD9); __(0xDA); __(0xDB); __(0xDC); __(0xDD); __(0xDE); __(0xDF); \
+               __(0xE0); __(0xE1); __(0xE2); __(0xE3); __(0xE4); __(0xE5); __(0xE6); __(0xE7); __(0xE8); __(0xE9); __(0xEA); __(0xEB); __(0xEC); __(0xED); __(0xEE); __(0xEF); \
+               __(0xF0); __(0xF1); __(0xF2); __(0xF3); __(0xF4); __(0xF5); __(0xF6); __(0xF7); __(0xF8); __(0xF9); __(0xFA); __(0xFB); __(0xFC); __(0xFD); __(0xFE); __(0xFF)
+  
+  if ((length & 15))
+    {
+      if ((length &   1))  {  __0;   src += 1;  dest += 1;  }
+      if ((length &   2))  {  __0;  __1;   src += 2;  dest += 2;  }
+      if ((length &   4))  {  __0;  __1;  __2;   src += 4;  dest += 4;  }
+      if ((length &   8))  {  __0;  __1;  __2;  __3;   src += 8;  dest += 8;  }
+    }
+  if ((length & 240))
+    {
+      if ((length &  16))  {  __0;  __1;  __2;  __3;  __4;   src += 16;  dest += 16;  }
+      if ((length &  32))  {  __0;  __1;  __2;  __3;  __4;  __5;   src += 32;  dest += 32;  }
+      if ((length &  64))  {  __0;  __1;  __2;  __3;  __4;  __5;  __6;   src += 64;  dest += 64;  }
+      if ((length & 128))  {  __0;  __1;  __2;  __3;  __4;  __5;  __6;  __7;   src += 128;  dest += 256;  }
+    }
+  length &= ~255;
+  for (i = 0; i < length; i += 256)
+    {
+      __0;  __1;  __2;  __3;  __4;  __5;  __6;  __7;  __8;   src += 256;  dest += 256;
+    }
+  
+  #undef __8
+  #undef __7
+  #undef __6
+  #undef __5
+  #undef __4
+  #undef __3
+  #undef __2
+  #undef __1
+  #undef __0
+  #undef __
+}
+
+/**
+ * Copy an array segment into an array in end to start order
+ * 
+ * @param  src     The source array
+ * @param  soff    The source array offset
+ * @param  dest    The destination array
+ * @param  doff    The destination array offset
+ * @param  length  The number of elements to copy
+ */
+inline void revarraycopy(byte* src, long soff, byte* dest, long doff, long length)
+{
+  long copyi;
+  for (copyi = length - 1; copyi >= 0; copyi--)
+    dest[copyi + doff] = src[copyi + soff];
+}
+
 
 /**
  * Rotate a word
  * 
- * @param   x  The value to rotate
- * @param   n  Rotation steps, may not be 0
- * @return     The value rotated
+ * @param   X:long  The value to rotate
+ * @param   N:long  Rotation steps, may not be 0
+ * @return   :long  The value rotated
  */
-static llong rotate(llong x, long n)
-{
-  llong m = n % w;
-  return ((x >> (w - m)) + (x << m)) & wmod;
-}
+#define rotate(X, N)  (((X >> (w - (N % w))) + (X << (N % w))) & wmod)
 
 
 /**
  * Rotate a 64-bit word
  * 
- * @param   x  The value to rotate
- * @param   n  Rotation steps, may not be 0
- * @return     The value rotated
+ * @param   X:long  The value to rotate
+ * @param   N:long  Rotation steps, may not be 0
+ * @return   :long  The value rotated
  */
-static llong rotate64(llong x, long n)
-{
-  return (llong)((unsigned llong)x >> (w - n)) + (x << n);
-}
+#define rotate64(X, N)  ((llong)((unsigned llong)X >> (64 - N)) + (X << N))
 
 
 /**
  * Binary logarithm
  * 
- * @param   x  The value of which to calculate the binary logarithm
- * @return     The binary logarithm
+ * @param   X:long  The value of which to calculate the binary logarithm
+ * @return   :long  The binary logarithm
  */
-static long lb(long x)
-{
-  return (((x & 0xFF00) == 0 ? 0 : 8) +
-          ((x & 0xF0F0) == 0 ? 0 : 4)) +
-         (((x & 0xCCCC) == 0 ? 0 : 2) +
-	  ((x & 0xAAAA) == 0 ? 0 : 1));
-}
+#define lb(X)  ((((X & 0xFF00) == 0 ? 0 : 8) + ((X & 0xF0F0) == 0 ? 0 : 4)) + (((X & 0xCCCC) == 0 ? 0 : 2) + ((X & 0xAAAA) == 0 ? 0 : 1)))
 
 
 /**
  * Perform one round of computation
- * 
+* 
  * @param  A   The current state
  * @param  rc  Round constant
  */
 static void keccakFRound(llong* A, llong rc)
 {
   llong da, db, dc, dd, de;
-  long i, j;
   
-  /* θ step (step 1 of 3) */
-  for (i = 0, j = 0; i < 5; i++, j += 5)
-    C[i] = (A[j] ^ A[j + 1]) ^ (A[j + 2] ^ A[j + 3]) ^ A[j + 4];
+  /* θ step (step 1 and 2 of 3) */
+  #define __C(I, J0, J1, J2, J3, J4)  C[I] = (A[J0] ^ A[J1]) ^ (A[J2] ^ A[J3]) ^ A[J4]
+  __C(0,   0,  1,  2,  3,  4);
+  __C(1,   5,  6,  7,  8,  9);
+  __C(2,  10, 11, 12, 13, 14);
+  __C(3,  15, 16, 17, 18, 19);
+  __C(4,  20, 21, 22, 23, 24);
+  #undef __C
+  
+  da = C[4] ^ rotate64(C[1], 1);
+  dd = C[2] ^ rotate64(C[4], 1);
+  db = C[0] ^ rotate64(C[2], 1);
+  de = C[3] ^ rotate64(C[0], 1);
+  dc = C[1] ^ rotate64(C[3], 1);
   
   if (w == 64)
     {
       /* ρ and π steps, with last two part of θ */
-      B[0] =          A[ 0] ^ (da = C[4] ^ rotate64(C[1], 1));
-      B[1] = rotate64(A[15] ^ (dd = C[2] ^ rotate64(C[4], 1)), 28);
-      B[2] = rotate64(A[ 5] ^ (db = C[0] ^ rotate64(C[2], 1)),  1);
-      B[3] = rotate64(A[20] ^ (de = C[3] ^ rotate64(C[0], 1)), 27);
-      B[4] = rotate64(A[10] ^ (dc = C[1] ^ rotate64(C[3], 1)), 62);
-      
-      B[5] = rotate64(A[ 6] ^ db, 44);
-      B[6] = rotate64(A[21] ^ de, 20);
-      B[7] = rotate64(A[11] ^ dc,  6);
-      B[8] = rotate64(A[ 1] ^ da, 36);
-      B[9] = rotate64(A[16] ^ dd, 55);
-      
-      B[10] = rotate64(A[12] ^ dc, 43);
-      B[11] = rotate64(A[ 2] ^ da,  3);
-      B[12] = rotate64(A[17] ^ dd, 25);
-      B[13] = rotate64(A[ 7] ^ db, 10);
-      B[14] = rotate64(A[22] ^ de, 39);
-      
-      B[15] = rotate64(A[18] ^ dd, 21);
-      B[16] = rotate64(A[ 8] ^ db, 45);
-      B[17] = rotate64(A[23] ^ de,  8);
-      B[18] = rotate64(A[13] ^ dc, 15);
-      B[19] = rotate64(A[ 3] ^ da, 41);
-      
-      B[20] = rotate64(A[24] ^ de, 14);
-      B[21] = rotate64(A[14] ^ dc, 61);
-      B[22] = rotate64(A[ 4] ^ da, 18);
-      B[23] = rotate64(A[19] ^ dd, 56);
-      B[24] = rotate64(A[ 9] ^ db,  2);
+      #define __B(Bi, Ai, Dv, R)  B[Bi] = rotate64(A[Ai] ^ Dv, R)
+      B[0] = A[0] ^ da;     __B( 1, 15, dd, 28);  __B( 2,  5, db,  1);  __B( 3, 20, de, 27);  __B( 4, 10, dc, 62);
+      __B( 5,  6, db, 44);  __B( 6, 21, de, 20);  __B( 7, 11, dc,  6);  __B( 8,  1, da, 36);  __B( 9, 16, dd, 55);
+      __B(10, 12, dc, 43);  __B(11,  2, da,  3);  __B(12, 17, dd, 25);  __B(13,  7, db, 10);  __B(14, 22, de, 39);
+      __B(15, 18, dd, 21);  __B(16,  8, db, 45);  __B(17, 23, de,  8);  __B(18, 13, dc, 15);  __B(19,  3, da, 41);
+      __B(20, 24, de, 14);  __B(21, 14, dc, 61);  __B(22,  4, da, 18);  __B(23, 19, dd, 56);  __B(24,  9, db,  2);
+      #undef __B
     }
   else
     {
       /* ρ and π steps, with last two part of θ */
-      B[0] =        A[ 0] ^ (da = C[4] ^ rotate(C[1], 1));
-      B[1] = rotate(A[15] ^ (dd = C[2] ^ rotate(C[4], 1)), 28);
-      B[2] = rotate(A[ 5] ^ (db = C[0] ^ rotate(C[2], 1)),  1);
-      B[3] = rotate(A[20] ^ (de = C[3] ^ rotate(C[0], 1)), 27);
-      B[4] = rotate(A[10] ^ (dc = C[1] ^ rotate(C[3], 1)), 62);
-      
-      B[5] = rotate(A[ 6] ^ db, 44);
-      B[6] = rotate(A[21] ^ de, 20);
-      B[7] = rotate(A[11] ^ dc,  6);
-      B[8] = rotate(A[ 1] ^ da, 36);
-      B[9] = rotate(A[16] ^ dd, 55);
-      
-      B[10] = rotate(A[12] ^ dc, 43);
-      B[11] = rotate(A[ 2] ^ da,  3);
-      B[12] = rotate(A[17] ^ dd, 25);
-      B[13] = rotate(A[ 7] ^ db, 10);
-      B[14] = rotate(A[22] ^ de, 39);
-      
-      B[15] = rotate(A[18] ^ dd, 21);
-      B[16] = rotate(A[ 8] ^ db, 45);
-      B[17] = rotate(A[23] ^ de,  8);
-      B[18] = rotate(A[13] ^ dc, 15);
-      B[19] = rotate(A[ 3] ^ da, 41);
-      
-      B[20] = rotate(A[24] ^ de, 14);
-      B[21] = rotate(A[14] ^ dc, 61);
-      B[22] = rotate(A[ 4] ^ da, 18);
-      B[23] = rotate(A[19] ^ dd, 56);
-      B[24] = rotate(A[ 9] ^ db,  2);
+      #define __B(Bi, Ai, Dv, R)  B[Bi] = rotate(A[Ai] ^ Dv, R)
+      B[0] = A[0] ^ da;     __B( 1, 15, dd, 28);  __B( 2,  5, db,  1);  __B( 3, 20, de, 27);  __B( 4, 10, dc, 62);
+      __B( 5,  6, db, 44);  __B( 6, 21, de, 20);  __B( 7, 11, dc,  6);  __B( 8,  1, da, 36);  __B( 9, 16, dd, 55);
+      __B(10, 12, dc, 43);  __B(11,  2, da,  3);  __B(12, 17, dd, 25);  __B(13,  7, db, 10);  __B(14, 22, de, 39);
+      __B(15, 18, dd, 21);  __B(16,  8, db, 45);  __B(17, 23, de,  8);  __B(18, 13, dc, 15);  __B(19,  3, da, 41);
+      __B(20, 24, de, 14);  __B(21, 14, dc, 61);  __B(22,  4, da, 18);  __B(23, 19, dd, 56);  __B(24,  9, db,  2);
+      #undef __B
     }
   
   /* ξ step */
-  for (i = 0; i < 15; i++)
-    A[i     ] = B[i     ] ^ ((~(B[i +  5])) & B[i + 10]);
-  for (i = 0; i < 5; i++)
-    {
-      A[i + 15] = B[i + 15] ^ ((~(B[i + 20])) & B[i     ]);
-      A[i + 20] = B[i + 20] ^ ((~(B[i     ])) & B[i +  5]);
-    }
+  #define __A(X, X5, X10) A[X] = B[X] ^ ((~(B[X5])) & B[X10])
+  __A( 0,  5,  0);  __A( 1,  6,  1);  __A( 2,  7,  2);  __A( 3,  8,  3);  __A( 4,  9,  4);
+  __A( 5, 10,  5);  __A( 6, 11,  6);  __A( 7, 12,  7);  __A( 8, 13,  8);  __A( 9, 14,  9);
+  __A(10, 15, 10);  __A(11, 16, 11);  __A(12, 17, 12);  __A(13, 18, 13);  __A(14, 19, 14);
+  __A(15, 20, 15);  __A(16, 21, 16);  __A(17, 22, 17);  __A(18, 23, 18);  __A(19, 24, 19);
+  __A(20,  0, 20);  __A(21,  1, 21);  __A(22,  2, 22);  __A(23,  3, 23);  __A(24,  4, 24);
+  #undef __A
   
   /* ι step */
   A[0] ^= rc;
@@ -271,8 +306,32 @@ static void keccakF(llong* A)
 {
   long i;
   if (nr == 24)
-    for (i = 0; i < nr; i++)
-      keccakFRound(A, RC[i]);
+    {
+      keccakFRound(A, 0x0000000000000001);
+      keccakFRound(A, 0x0000000000008082);
+      keccakFRound(A, 0x800000000000808A);
+      keccakFRound(A, 0x8000000080008000);
+      keccakFRound(A, 0x000000000000808B);
+      keccakFRound(A, 0x0000000080000001);
+      keccakFRound(A, 0x8000000080008081);
+      keccakFRound(A, 0x8000000000008009);
+      keccakFRound(A, 0x000000000000008A);
+      keccakFRound(A, 0x0000000000000088);
+      keccakFRound(A, 0x0000000080008009);
+      keccakFRound(A, 0x000000008000000A);
+      keccakFRound(A, 0x000000008000808B);
+      keccakFRound(A, 0x800000000000008B);
+      keccakFRound(A, 0x8000000000008089);
+      keccakFRound(A, 0x8000000000008003);
+      keccakFRound(A, 0x8000000000008002);
+      keccakFRound(A, 0x8000000000000080);
+      keccakFRound(A, 0x000000000000800A);
+      keccakFRound(A, 0x800000008000000A);
+      keccakFRound(A, 0x8000000080008081);
+      keccakFRound(A, 0x8000000000008080);
+      keccakFRound(A, 0x0000000080000001);
+      keccakFRound(A, 0x8000000080008008);
+    }
   else
     for (i = 0; i < nr; i++)
       keccakFRound(A, RC[i] & wmod);
@@ -289,12 +348,12 @@ static void keccakF(llong* A)
  * @param   off      The offset in the message
  * @return           Lane
  */
-static llong toLane(byte* message, long msglen, long rr, long ww, long off)
+inline llong toLane(byte* message, long msglen, long rr, long ww, long off)
 {
   llong rc = 0;
   long n = min(msglen, rr), i;
   for (i = off + ww - 1; i >= off; i--)
-    rc = (rc << 8) | ((i < n) ? (llong)(message[i] & 255) : 0L);
+    rc = (rc << 8) | ((i < n) ? (llong)(message[i]) : 0L);
   return rc;
 }
 
@@ -308,17 +367,17 @@ static llong toLane(byte* message, long msglen, long rr, long ww, long off)
  * @param   off      The offset in the message
  * @return           Lane
  */
-static llong toLane64(byte* message, long msglen, long rr, long off)
+inline llong toLane64(byte* message, long msglen, long rr, long off)
 {
   long n = min(msglen, rr);
-  return ((off + 7 < n) ? ((llong)(message[off + 7] & 255) << 56) : 0L) |
-         ((off + 6 < n) ? ((llong)(message[off + 6] & 255) << 48) : 0L) |
-         ((off + 5 < n) ? ((llong)(message[off + 5] & 255) << 40) : 0L) |
-         ((off + 4 < n) ? ((llong)(message[off + 4] & 255) << 32) : 0L) |
-         ((off + 3 < n) ? ((llong)(message[off + 3] & 255) << 24) : 0L) |
-         ((off + 2 < n) ? ((llong)(message[off + 2] & 255) << 16) : 0L) |
-         ((off + 1 < n) ? ((llong)(message[off + 1] & 255) <<  8) : 0L) |
-         ((off < n) ? ((llong)(message[off] & 255)) : 0L);
+  return ((off + 7 < n) ? ((llong)(message[off + 7]) << 56) : 0L) |
+         ((off + 6 < n) ? ((llong)(message[off + 6]) << 48) : 0L) |
+         ((off + 5 < n) ? ((llong)(message[off + 5]) << 40) : 0L) |
+         ((off + 4 < n) ? ((llong)(message[off + 4]) << 32) : 0L) |
+         ((off + 3 < n) ? ((llong)(message[off + 3]) << 24) : 0L) |
+         ((off + 2 < n) ? ((llong)(message[off + 2]) << 16) : 0L) |
+         ((off + 1 < n) ? ((llong)(message[off + 1]) <<  8) : 0L) |
+         ((off < n) ? ((llong)(message[off])) : 0L);
 }
 
 
@@ -331,7 +390,7 @@ static llong toLane64(byte* message, long msglen, long rr, long off)
  * @param   outlen  The length of the padded message (out parameter)
  * @return          The message padded
  */
-static byte* pad10star1(byte* msg, long len, long r, long* outlen)
+inline byte* pad10star1(byte* msg, long len, long r, long* outlen)
 {
   byte* message;
   
@@ -349,12 +408,68 @@ static byte* pad10star1(byte* msg, long len, long r, long* outlen)
     }
   else
     {
+      char* M;
+      long N;
       len = (nrf + 1) << 3;
       len = ((len - (len % r) + (r - 8)) >> 3) + 1;
       message = (byte*)malloc(len);
       message[nrf] = b;
-      for (i = nrf + 1; i < len; i++)
-          message[i] = 0;
+      N = len - nrf - 1;
+      M = message + nrf + 1;
+      
+      #define __(X)  M[X] = 0
+      #define __0  *M = 0
+      #define __1  __(0x01)
+      #define __2  __(0x02); __(0x03)
+      #define __3  __(0x04); __(0x05); __(0x06); __(0x07)
+      #define __4  __(0x08); __(0x09); __(0x0A); __(0x0B); __(0x0C); __(0x0D); __(0x0E); __(0x0F)
+      #define __5  __(0x10); __(0x11); __(0x12); __(0x13); __(0x14); __(0x15); __(0x16); __(0x17); __(0x18); __(0x19); __(0x1A); __(0x1B); __(0x1C); __(0x1D); __(0x1E); __(0x1F)
+      #define __6  __(0x20); __(0x21); __(0x22); __(0x23); __(0x24); __(0x25); __(0x26); __(0x27); __(0x28); __(0x29); __(0x2A); __(0x2B); __(0x2C); __(0x2D); __(0x2E); __(0x2F); \
+                   __(0x30); __(0x31); __(0x32); __(0x33); __(0x34); __(0x35); __(0x36); __(0x37); __(0x38); __(0x39); __(0x3A); __(0x3B); __(0x3C); __(0x3D); __(0x3E); __(0x3F)
+      #define __7  __(0x40); __(0x41); __(0x42); __(0x43); __(0x44); __(0x45); __(0x46); __(0x47); __(0x48); __(0x49); __(0x4A); __(0x4B); __(0x4C); __(0x4D); __(0x4E); __(0x4F); \
+                   __(0x50); __(0x51); __(0x52); __(0x53); __(0x54); __(0x55); __(0x56); __(0x57); __(0x58); __(0x59); __(0x5A); __(0x5B); __(0x5C); __(0x5D); __(0x5E); __(0x5F); \
+                   __(0x60); __(0x61); __(0x62); __(0x63); __(0x64); __(0x65); __(0x66); __(0x67); __(0x68); __(0x69); __(0x6A); __(0x6B); __(0x6C); __(0x6D); __(0x6E); __(0x6F); \
+                   __(0x70); __(0x71); __(0x72); __(0x73); __(0x74); __(0x75); __(0x76); __(0x77); __(0x78); __(0x79); __(0x7A); __(0x7B); __(0x7C); __(0x7D); __(0x7E); __(0x7F)
+      #define __8  __(0x80); __(0x81); __(0x82); __(0x83); __(0x84); __(0x85); __(0x86); __(0x87); __(0x88); __(0x89); __(0x8A); __(0x8B); __(0x8C); __(0x8D); __(0x8E); __(0x8F); \
+                   __(0x90); __(0x91); __(0x92); __(0x93); __(0x94); __(0x95); __(0x96); __(0x97); __(0x98); __(0x99); __(0x9A); __(0x9B); __(0x9C); __(0x9D); __(0x9E); __(0x9F); \
+                   __(0xA0); __(0xA1); __(0xA2); __(0xA3); __(0xA4); __(0xA5); __(0xA6); __(0xA7); __(0xA8); __(0xA9); __(0xAA); __(0xAB); __(0xAC); __(0xAD); __(0xAE); __(0xAF); \
+                   __(0xB0); __(0xB1); __(0xB2); __(0xB3); __(0xB4); __(0xB5); __(0xB6); __(0xB7); __(0xB8); __(0xB9); __(0xBA); __(0xBB); __(0xBC); __(0xBD); __(0xBE); __(0xBF); \
+                   __(0xC0); __(0xC1); __(0xC2); __(0xC3); __(0xC4); __(0xC5); __(0xC6); __(0xC7); __(0xC8); __(0xC9); __(0xCA); __(0xCB); __(0xCC); __(0xCD); __(0xCE); __(0xCF); \
+                   __(0xD0); __(0xD1); __(0xD2); __(0xD3); __(0xD4); __(0xD5); __(0xD6); __(0xD7); __(0xD8); __(0xD9); __(0xDA); __(0xDB); __(0xDC); __(0xDD); __(0xDE); __(0xDF); \
+                   __(0xE0); __(0xE1); __(0xE2); __(0xE3); __(0xE4); __(0xE5); __(0xE6); __(0xE7); __(0xE8); __(0xE9); __(0xEA); __(0xEB); __(0xEC); __(0xED); __(0xEE); __(0xEF); \
+                   __(0xF0); __(0xF1); __(0xF2); __(0xF3); __(0xF4); __(0xF5); __(0xF6); __(0xF7); __(0xF8); __(0xF9); __(0xFA); __(0xFB); __(0xFC); __(0xFD); __(0xFE); __(0xFF)
+      
+      if ((N & 15))
+	{
+	  if ((N &   1))  {  __0;   M += 1;  }
+	  if ((N &   2))  {  __0;  __1;   M += 2;  }
+	  if ((N &   4))  {  __0;  __1;  __2;   M += 4;  }
+	  if ((N &   8))  {  __0;  __1;  __2;  __3;   M += 8;  }
+	}
+      if ((N & 240))
+	{
+	  if ((N &  16))  {  __0;  __1;  __2;  __3;  __4;   M += 16;  }
+	  if ((N &  32))  {  __0;  __1;  __2;  __3;  __4;  __5;   M += 32;  }
+	  if ((N &  64))  {  __0;  __1;  __2;  __3;  __4;  __5;  __6;   M += 64;  }
+	  if ((N & 128))  {  __0;  __1;  __2;  __3;  __4;  __5;  __6;  __7;   M += 128;  }
+	}
+      N &= ~255;
+      for (i = 0; i < N; i += 256)
+	{
+	  __0;  __1;  __2;  __3;  __4;  __5;  __6;  __7;  __8;   M += 256;
+	}
+      
+      #undef __8
+      #undef __7
+      #undef __6
+      #undef __5
+      #undef __4
+      #undef __3
+      #undef __2
+      #undef __1
+      #undef __0
+      #undef __
+      
       message[len - 1] = -128;
     }
   arraycopy(msg, 0, message, 0, nrf);
@@ -447,61 +562,25 @@ extern void update(byte* msg, long msglen)
   if (ww == 8)
     for (i = 0; i < len; i += rr)
       {
-	S[ 0] ^= toLane64(message, len, rr, i + 0);
-	S[ 5] ^= toLane64(message, len, rr, i + 8);
-	S[10] ^= toLane64(message, len, rr, i + 16);
-	S[15] ^= toLane64(message, len, rr, i + 24);
-	S[20] ^= toLane64(message, len, rr, i + 32);
-	S[ 1] ^= toLane64(message, len, rr, i + 40);
-	S[ 6] ^= toLane64(message, len, rr, i + 48);
-	S[11] ^= toLane64(message, len, rr, i + 56);
-	S[16] ^= toLane64(message, len, rr, i + 64);
-	S[21] ^= toLane64(message, len, rr, i + 72);
-	S[ 2] ^= toLane64(message, len, rr, i + 80);
-	S[ 7] ^= toLane64(message, len, rr, i + 88);
-	S[12] ^= toLane64(message, len, rr, i + 96);
-	S[17] ^= toLane64(message, len, rr, i + 104);
-	S[22] ^= toLane64(message, len, rr, i + 112);
-	S[ 3] ^= toLane64(message, len, rr, i + 120);
-	S[ 8] ^= toLane64(message, len, rr, i + 128);
-	S[13] ^= toLane64(message, len, rr, i + 136);
-	S[18] ^= toLane64(message, len, rr, i + 144);
-	S[23] ^= toLane64(message, len, rr, i + 152);
-	S[ 4] ^= toLane64(message, len, rr, i + 160);
-	S[ 9] ^= toLane64(message, len, rr, i + 168);
-	S[14] ^= toLane64(message, len, rr, i + 176);
-	S[19] ^= toLane64(message, len, rr, i + 184);
-	S[24] ^= toLane64(message, len, rr, i + 192);
+	#define __S(Si, OFF)  S[Si] ^= toLane64(message, len, rr, i + OFF)
+	__S( 0,   0);  __S( 5,   8);  __S(10,  16);  __S(15,  24);  __S(20,  32);
+	__S( 1,  40);  __S( 6,  48);  __S(11,  56);  __S(16,  64);  __S(21,  72);
+	__S( 2,  80);  __S( 7,  88);  __S(12,  96);  __S(17, 104);  __S(22, 112);
+	__S( 3, 120);  __S( 8, 128);  __S(13, 136);  __S(18, 144);  __S(23, 152);
+	__S( 4, 160);  __S( 9, 168);  __S(14, 176);  __S(19, 184);  __S(24, 192);
+        #undef __S
 	keccakF(S);
       }
   else
     for (i = 0; i < len; i += rr)
       {
-	S[ 0] ^= toLane(message, len, rr, ww, i +  0    );
-	S[ 5] ^= toLane(message, len, rr, ww, i +      w);
-	S[10] ^= toLane(message, len, rr, ww, i +  2 * w);
-	S[15] ^= toLane(message, len, rr, ww, i +  3 * w);
-	S[20] ^= toLane(message, len, rr, ww, i +  4 * w);
-	S[ 1] ^= toLane(message, len, rr, ww, i +  5 * w);
-	S[ 6] ^= toLane(message, len, rr, ww, i +  6 * w);
-	S[11] ^= toLane(message, len, rr, ww, i +  7 * w);
-	S[16] ^= toLane(message, len, rr, ww, i +  8 * w);
-	S[21] ^= toLane(message, len, rr, ww, i +  9 * w);
-	S[ 2] ^= toLane(message, len, rr, ww, i + 10 * w);
-	S[ 7] ^= toLane(message, len, rr, ww, i + 11 * w);
-	S[12] ^= toLane(message, len, rr, ww, i + 12 * w);
-	S[17] ^= toLane(message, len, rr, ww, i + 13 * w);
-	S[22] ^= toLane(message, len, rr, ww, i + 14 * w);
-	S[ 3] ^= toLane(message, len, rr, ww, i + 15 * w);
-	S[ 8] ^= toLane(message, len, rr, ww, i + 16 * w);
-	S[13] ^= toLane(message, len, rr, ww, i + 17 * w);
-	S[18] ^= toLane(message, len, rr, ww, i + 18 * w);
-	S[23] ^= toLane(message, len, rr, ww, i + 19 * w);
-	S[ 4] ^= toLane(message, len, rr, ww, i + 20 * w);
-	S[ 9] ^= toLane(message, len, rr, ww, i + 21 * w);
-	S[14] ^= toLane(message, len, rr, ww, i + 22 * w);
-	S[19] ^= toLane(message, len, rr, ww, i + 23 * w);
-	S[24] ^= toLane(message, len, rr, ww, i + 24 * w);
+	#define __S(Si, OFF)  S[Si] ^= toLane(message, len, rr, ww, i + OFF * w)
+	__S( 0,  0);  __S( 5,  1);  __S(10,  2);  __S(15,  3);  __S(20,  4);
+	__S( 1,  5);  __S( 6,  6);  __S(11,  7);  __S(16,  8);  __S(21,  9);
+	__S( 2, 10);  __S( 7, 11);  __S(12, 12);  __S(17, 13);  __S(22, 14);
+	__S( 3, 15);  __S( 8, 16);  __S(13, 17);  __S(18, 18);  __S(23, 19);
+	__S( 4, 20);  __S( 9, 21);  __S(14, 22);  __S(19, 23);  __S(24, 24);
+        #undef __S
 	keccakF(S);
       }
   
@@ -546,61 +625,25 @@ extern byte* digest(byte* msg, long msglen)
   if (ww == 8)
     for (i = 0; i < len; i += rr)
       {
-	S[ 0] ^= toLane64(message, len, rr, i + 0);
-	S[ 5] ^= toLane64(message, len, rr, i + 8);
-	S[10] ^= toLane64(message, len, rr, i + 16);
-	S[15] ^= toLane64(message, len, rr, i + 24);
-	S[20] ^= toLane64(message, len, rr, i + 32);
-	S[ 1] ^= toLane64(message, len, rr, i + 40);
-	S[ 6] ^= toLane64(message, len, rr, i + 48);
-	S[11] ^= toLane64(message, len, rr, i + 56);
-	S[16] ^= toLane64(message, len, rr, i + 64);
-	S[21] ^= toLane64(message, len, rr, i + 72);
-	S[ 2] ^= toLane64(message, len, rr, i + 80);
-	S[ 7] ^= toLane64(message, len, rr, i + 88);
-	S[12] ^= toLane64(message, len, rr, i + 96);
-	S[17] ^= toLane64(message, len, rr, i + 104);
-	S[22] ^= toLane64(message, len, rr, i + 112);
-	S[ 3] ^= toLane64(message, len, rr, i + 120);
-	S[ 8] ^= toLane64(message, len, rr, i + 128);
-	S[13] ^= toLane64(message, len, rr, i + 136);
-	S[18] ^= toLane64(message, len, rr, i + 144);
-	S[23] ^= toLane64(message, len, rr, i + 152);
-	S[ 4] ^= toLane64(message, len, rr, i + 160);
-	S[ 9] ^= toLane64(message, len, rr, i + 168);
-	S[14] ^= toLane64(message, len, rr, i + 176);
-	S[19] ^= toLane64(message, len, rr, i + 184);
-	S[24] ^= toLane64(message, len, rr, i + 192);
+	#define __S(Si, OFF)  S[Si] ^= toLane64(message, len, rr, i + OFF)
+	__S( 0,   0);  __S( 5,   8);  __S(10,  16);  __S(15,  24);  __S(20,  32);
+	__S( 1,  40);  __S( 6,  48);  __S(11,  56);  __S(16,  64);  __S(21,  72);
+	__S( 2,  80);  __S( 7,  88);  __S(12,  96);  __S(17, 104);  __S(22, 112);
+	__S( 3, 120);  __S( 8, 128);  __S(13, 136);  __S(18, 144);  __S(23, 152);
+	__S( 4, 160);  __S( 9, 168);  __S(14, 176);  __S(19, 184);  __S(24, 192);
+        #undef __S
 	keccakF(S);
       }
   else
     for (i = 0; i < len; i += rr)
       {
-	S[ 0] ^= toLane(message, len, rr, ww, i +  0    );
-	S[ 5] ^= toLane(message, len, rr, ww, i +      w);
-	S[10] ^= toLane(message, len, rr, ww, i +  2 * w);
-	S[15] ^= toLane(message, len, rr, ww, i +  3 * w);
-	S[20] ^= toLane(message, len, rr, ww, i +  4 * w);
-	S[ 1] ^= toLane(message, len, rr, ww, i +  5 * w);
-	S[ 6] ^= toLane(message, len, rr, ww, i +  6 * w);
-	S[11] ^= toLane(message, len, rr, ww, i +  7 * w);
-	S[16] ^= toLane(message, len, rr, ww, i +  8 * w);
-	S[21] ^= toLane(message, len, rr, ww, i +  9 * w);
-	S[ 2] ^= toLane(message, len, rr, ww, i + 10 * w);
-	S[ 7] ^= toLane(message, len, rr, ww, i + 11 * w);
-	S[12] ^= toLane(message, len, rr, ww, i + 12 * w);
-	S[17] ^= toLane(message, len, rr, ww, i + 13 * w);
-	S[22] ^= toLane(message, len, rr, ww, i + 14 * w);
-	S[ 3] ^= toLane(message, len, rr, ww, i + 15 * w);
-	S[ 8] ^= toLane(message, len, rr, ww, i + 16 * w);
-	S[13] ^= toLane(message, len, rr, ww, i + 17 * w);
-	S[18] ^= toLane(message, len, rr, ww, i + 18 * w);
-	S[23] ^= toLane(message, len, rr, ww, i + 19 * w);
-	S[ 4] ^= toLane(message, len, rr, ww, i + 20 * w);
-	S[ 9] ^= toLane(message, len, rr, ww, i + 21 * w);
-	S[14] ^= toLane(message, len, rr, ww, i + 22 * w);
-	S[19] ^= toLane(message, len, rr, ww, i + 23 * w);
-	S[24] ^= toLane(message, len, rr, ww, i + 24 * w);
+	#define __S(Si, OFF)  S[Si] ^= toLane(message, len, rr, ww, i + OFF * w)
+	__S( 0,  0);  __S( 5,  1);  __S(10,  2);  __S(15,  3);  __S(20,  4);
+	__S( 1,  5);  __S( 6,  6);  __S(11,  7);  __S(16,  8);  __S(21,  9);
+	__S( 2, 10);  __S( 7, 11);  __S(12, 12);  __S(17, 13);  __S(22, 14);
+	__S( 3, 15);  __S( 8, 16);  __S(13, 17);  __S(18, 18);  __S(23, 19);
+	__S( 4, 20);  __S( 9, 21);  __S(14, 22);  __S(19, 23);  __S(24, 24);
+        #undef __S
 	keccakF(S);
       }
   

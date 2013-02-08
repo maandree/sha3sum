@@ -12,7 +12,8 @@ JAVADIRS=-s "pure-java" -d "bin/pure-java" -cp "pure-java"
 JAVAFLAGS=-Xlint
 JAVA_FLAGS=$(JAVADIRS) $(JAVAFLAGS)
 
-CFLAGS=-W{all,extra} -pedantic
+# NB!  Do not forget to test against -O0, -O4 to -O6 is not safe
+CFLAGS=-W{all,extra} -pedantic -O6
 CPPFLAGS=
 LDFLAGS=
 C_FLAGS=$(CFLAGS) $(CPPFLAGS) $(LDFLAGS)

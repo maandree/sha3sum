@@ -138,7 +138,7 @@ public class SHA3
      */
     private static long rotate64(long x, int n)
     {
-        return (x >>> (SHA3.w - n)) + (x << n);
+        return (x >>> (64 - n)) + (x << n);
     }
     
     
@@ -259,7 +259,7 @@ public class SHA3
     private static void keccakF(long[] A)
     {
         if (SHA3.nr == 24)
-            for (int i = 0; i < SHA3.nr; i++)
+            for (int i = 0; i < 24; i++)
 		SHA3.keccakFRound(A, SHA3.RC[i]);
         else
             for (int i = 0; i < SHA3.nr; i++)
