@@ -2,7 +2,7 @@ COMPLETE STATUS:
 	 Pure Java 1.2+ :: optimised
 	 Python 3       :: optimised
 	 C ISO C90      :: optimised
-	 Java/C JNI     :: planned (after c)
+	 Java/C JNI     :: under development
 	 NASM           :: planned (maybe, after jni)
 	 Haskell        :: planned (maybe)
 	 Python 2       :: planned (maybe)
