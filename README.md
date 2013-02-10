@@ -4,10 +4,12 @@ COMPLETE STATUS:
     Python 3       :: optimised
     C ISO C90      :: optimised
     Java/C JNI     :: under development
+    Vala           :: under development
     NASM           :: planned (maybe, after jni)
     Haskell        :: planned (maybe)
     Python 2       :: planned (maybe)
     Perl           :: planned (maybe)
+    D              :: planned (maybe)
     Common Lisp    :: planned (perhaps)
     Scala          :: planned (perhaps)
 
