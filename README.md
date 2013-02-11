@@ -12,6 +12,7 @@ COMPLETE STATUS:
     D              :: planned (maybe)
     Common Lisp    :: planned (perhaps)
     Scala          :: planned (perhaps)
+    Magic          :: planned (perhaps)
 
 
 **SHA-3/Keccak checksum calculator**
