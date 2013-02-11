@@ -45,3 +45,10 @@ COMPLETE STATUS:
     -b
     --binary       Print the checksum in binary, rather than hexadecimal.
 
+
+If you want to contribute with an implementation in another
+language, please try do some in the earliest version of the
+language officially supported on GNU/Linux, unless there are
+backwards incompatibilities (as is the case with Python.)
+This helps for embedded devices.
+
