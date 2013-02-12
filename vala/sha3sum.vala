@@ -37,6 +37,26 @@ static void arraycopy(int8[] src, int soff, int8[] dest, int doff, int length)
 			dest[doff + i] = src[soff + i];
 }
 
+	
+/**
+ * Copy an array segment into an array
+ * 
+ * @param  src     The source array
+ * @param  soff    The source array offset
+ * @param  dest    The destination array
+ * @param  doff    The destination array offset
+ * @param  length  The number of elements to copy
+ */
+static void arraycopy_string(string[] src, int soff, string[] dest, int doff, int length)
+{
+	if (soff + length < doff)
+		for (int i = 0; i < length; i++)
+			dest[doff + i] = src[soff + i];
+	else
+		for (int i = length - 1; i >= 0; i--)
+			dest[doff + i] = src[soff + i];
+}
+
 
 /**
  * SHA-3/Keccak hash algorithm implementation
@@ -599,15 +619,16 @@ class SHA3 : Object
  */
 static int main(string[] cmdargs)
 {
+	string[] HEXADECA = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"};
+	
 	string cmd = cmdargs[0];
 	string[] argv = new string[cmdargs.length - 1];
-	arraycopy(cmdargs, 1, argv, 0, argv.length);
+	arraycopy_string(cmdargs, 1, argv, 0, argv.length);
 	
-	if (cmd.indexOf('/') >= 0)
-	    cmd = cmd.substring(cmd.lastIndexOf('/') + 1);
-	if (cmd.endsWith(".jar"))
-	    cmd = cmd.substring(0, cmd.length() - 4);
-	cmd = cmd.intern();
+	if (cmd.contains("/"))
+	    cmd = cmd.substring(cmd.last_index_of("/") + 1);
+	if (cmd.has_suffix(".jar"))
+	    cmd = cmd.substring(0, cmd.length - 4);
 	
 	int _o, o = _o = 512;           /* --outputsize */
 	if      (cmd == "sha3-224sum")  o = _o = 224;
@@ -627,62 +648,60 @@ static int main(string[] cmdargs)
 	string[] linger = null;
 	
 	string[] args = new string[argv.length + 1];
-	arraycopy(argv, 0, args, 0, argv.length);
+	arraycopy_string(argv, 0, args, 0, argv.length);
 	for (int a = 0, an = args.length; a < an; a++)
 	{   string arg = args[a];
-	    arg = arg == null ? null : arg.intern();
 	    if (linger != null)
 	    {
-			linger[0] = linger[0].intern();
 			if ((linger[0] == "-h") || (linger[0] == "--help"))
 			{
-				printf("\n");
-				printf("SHA-3/Keccak checksum calculator\n");
-				printf("\n");
-				printf("USAGE:	sha3sum [option...] < file\n");
-				printf("	sha3sum [option...] file...\n");
-				printf("\n");
-				printf("\n");
-				printf("OPTIONS:\n");
-				printf("        -r BITRATE\n");
-				printf("        --bitrate       The bitrate to use for SHA-3.           (default: " + _r + ")\n");
-				printf("        \n");
-				printf("        -c CAPACITY\n");
-				printf("        --capacity      The capacity to use for SHA-3.          (default: " + _c + ")\n");
-				printf("        \n");
-				printf("        -w WORDSIZE\n");
-				printf("        --wordsize      The word size to use for SHA-3.         (default: " + _w + ")\n");
-				printf("        \n");
-				printf("        -o OUTPUTSIZE\n");
-				printf("        --outputsize    The output size to use for SHA-3.       (default: " + _o + ")\n");
-				printf("        \n");
-				printf("        -s STATESIZE\n");
-				printf("        --statesize     The state size to use for SHA-3.        (default: " + _s + ")\n");
-				printf("        \n");
-				printf("        -i ITERATIONS\n");
-				printf("        --iterations    The number of hash iterations to run.   (default: " + _i + ")\n");
-				printf("        \n");
-				printf("        -b\n");
-				printf("        --binary        Print the checksum in binary, rather than hexadecimal.\n");
-				printf("\n");
-				printf("\n");
-				printf("COPYRIGHT:\n");
-				printf("\n");
-				printf("Copyright © 2013  Mattias Andrée (maandree@member.fsf.org)\n");
-				printf("\n");
-				printf("This program is free software: you can redistribute it and/or modify\n");
-				printf("it under the terms of the GNU General Public License as published by\n");
-				printf("the Free Software Foundation, either version 3 of the License, or\n");
-				printf("(at your option) any later version.\n");
-				printf("\n");
-				printf("This program is distributed in the hope that it will be useful,\n");
-				printf("but WITHOUT ANY WARRANTY; without even the implied warranty of\n");
-				printf("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n");
-				printf("GNU General Public License for more details.\n");
-				printf("\n");
-				printf("You should have received a copy of the GNU General Public License\n");
-				printf("along with this program.  If not, see <http://www.gnu.org/licenses/>.\n");
-				printf("\n");
+				stdout.printf("\n");
+				stdout.printf("SHA-3/Keccak checksum calculator\n");
+				stdout.printf("\n");
+				stdout.printf("USAGE:	sha3sum [option...] < file\n");
+				stdout.printf("	sha3sum [option...] file...\n");
+				stdout.printf("\n");
+				stdout.printf("\n");
+				stdout.printf("OPTIONS:\n");
+				stdout.printf("        -r BITRATE\n");
+				stdout.printf("        --bitrate       The bitrate to use for SHA-3.           (default: %i)\n", _r);
+				stdout.printf("        \n");
+				stdout.printf("        -c CAPACITY\n");
+				stdout.printf("        --capacity      The capacity to use for SHA-3.          (default: %i)\n", _c);
+				stdout.printf("        \n");
+				stdout.printf("        -w WORDSIZE\n");
+				stdout.printf("        --wordsize      The word size to use for SHA-3.         (default: %i)\n", _w);
+				stdout.printf("        \n");
+				stdout.printf("        -o OUTPUTSIZE\n");
+				stdout.printf("        --outputsize    The output size to use for SHA-3.       (default: %i)\n", _o);
+				stdout.printf("        \n");
+				stdout.printf("        -s STATESIZE\n");
+				stdout.printf("        --statesize     The state size to use for SHA-3.        (default: %i)\n", _s);
+				stdout.printf("        \n");
+				stdout.printf("        -i ITERATIONS\n");
+				stdout.printf("        --iterations    The number of hash iterations to run.   (default: %i)\n", _i);
+				stdout.printf("        \n");
+				stdout.printf("        -b\n");
+				stdout.printf("        --binary        Print the checksum in binary, rather than hexadecimal.\n");
+				stdout.printf("\n");
+				stdout.printf("\n");
+				stdout.printf("COPYRIGHT:\n");
+				stdout.printf("\n");
+				stdout.printf("Copyright © 2013  Mattias Andrée (maandree@member.fsf.org)\n");
+				stdout.printf("\n");
+				stdout.printf("This program is free software: you can redistribute it and/or modify\n");
+				stdout.printf("it under the terms of the GNU General Public License as published by\n");
+				stdout.printf("the Free Software Foundation, either version 3 of the License, or\n");
+				stdout.printf("(at your option) any later version.\n");
+				stdout.printf("\n");
+				stdout.printf("This program is distributed in the hope that it will be useful,\n");
+				stdout.printf("but WITHOUT ANY WARRANTY; without even the implied warranty of\n");
+				stdout.printf("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n");
+				stdout.printf("GNU General Public License for more details.\n");
+				stdout.printf("\n");
+				stdout.printf("You should have received a copy of the GNU General Public License\n");
+				stdout.printf("along with this program.  If not, see <http://www.gnu.org/licenses/>.\n");
+				stdout.printf("\n");
 				return 2;
 			}
 			else
@@ -693,20 +712,20 @@ static int main(string[] cmdargs)
 					arg = null;
 				}
 				if ((linger[0] == "-r") || (linger[0] == "--bitrate"))
-					o = (s - (r = Integer.parseInt(linger[1]))) >> 1;
+					o = (s - (r = int.parse(linger[1]))) >> 1;
 				else if ((linger[0] == "-c") || (linger[0] == "--capacity"))
-					r = s - (c = Integer.parseInt(linger[1]));
+					r = s - (c = int.parse(linger[1]));
 				else if ((linger[0] == "-w") || (linger[0] == "--wordsize"))
-					s = (w = Integer.parseInt(linger[1])) * 25;
+					s = (w = int.parse(linger[1])) * 25;
 				else if ((linger[0] == "-o") || (linger[0] == "--outputsize"))
-					r = s - ((o = Integer.parseInt(linger[1])) << 1);
+					r = s - ((o = int.parse(linger[1])) << 1);
 				else if ((linger[0] == "-s") || (linger[0] == "--statesize"))
-					r = (s = Integer.parseInt(linger[1])) - (o << 1);
+					r = (s = int.parse(linger[1])) - (o << 1);
 				else if ((linger[0] == "-i") || (linger[0] == "--iterations"))
-					i = Integer.parseInt(linger[1]);
+					i = int.parse(linger[1]);
 				else
 				{
-					printf("%s: unrecognised option: %s\n", cmd, linger[0]);
+					stdout.printf("%s: unrecognised option: %s\n", cmd, linger[0]);
 					return 1;
 				}
 			}
@@ -722,26 +741,26 @@ static int main(string[] cmdargs)
 			dashed = true;
 	    else if (arg == "-")
 			files[fptr++] = null;
-	    else if (arg.startsWith("--"))
-			if (arg.indexOf('=') >= 0)
-	            linger = new string[] { arg.substring(0, arg.indexOf('=')), arg.substring(arg.indexOf('=') + 1) };
+	    else if (arg.has_prefix("--"))
+			if (arg.contains("="))
+	            linger = new string[] { arg.substring(0, arg.index_of("=")), arg.substring(arg.index_of("=") + 1) };
 			else
 				if (arg == "--binary")
 	                binary = true;
 				else
 					linger = new string[] { arg, null };
-	    else if (arg.startsWith("-"))
+	    else if (arg.has_prefix("-"))
 	    {
 			arg = arg.substring(1);
-			if (arg.charAt(0) == 'b')
+			if (arg[0] == 'b')
 			{
 				binary = true;
 				arg = arg.substring(1);
 			}
-			else if (arg.length() == 1)
+			else if (arg.length == 1)
 				linger = new string[] { "-" + arg, null };
 			else
-				linger = new string[] { "-" + arg.charAt(0), arg.substring(1) };
+				linger = new string[] { "-" + arg[0].to_string(), arg.substring(1) };
 	    }
 		else
 			files[fptr++] = arg;
@@ -751,8 +770,8 @@ static int main(string[] cmdargs)
 	    files[fptr++] = null;
 	if (i < 1)
 	{
-	    System.err.println(cmd + ": sorry, I will only do at least one iteration!");
-	    System.exit(3);
+	    stderr.printf("%s: sorry, I will only do at least one iteration!\n", cmd);
+	    return 3;
 	}
 	
 	int8[] stdin = null;
@@ -766,10 +785,16 @@ static int main(string[] cmdargs)
 	    }
 	    string rc = "";
 	    string fn = filename == null ? "/dev/stdin" : filename;
-	    FileInputStream file = null;
+	    FileStream file = null;
 	    try
 	    {
-			file = new FileInputStream(fn);
+			file = FileStream.open(fn, "r");
+			if (file == null)
+			{
+				stderr.printf("%s: cannot read file: %s\n", cmd, filename);
+				fail = true;
+				continue;
+			}
 			SHA3.initialise(r, c, o);
 			int blksize = 4096; /** XXX os.stat(os.path.realpath(fn)).st_size; **/
 			int8[] chunk = new int8[blksize];
@@ -780,44 +805,53 @@ static int main(string[] cmdargs)
 					break;
 				SHA3.update(chunk, read);
 			}
-			int8[] bs = SHA3.digest();
+			int8[] bs = SHA3.digest(null, 0);
 			for (int _ = 1; _ < i; _++)
 			{
 				SHA3.initialise(r, c, o);
-				bs = SHA3.digest(bs);
+				bs = SHA3.digest(bs, bs.length);
 			}
 			if (binary)
 			{   if (filename == null)
 					stdin = bs;
 				System.out.write(bs);
-				System.out.flush();
+				stdout.flush();
 			}
 			else
 			{   for (int b = 0, bn = bs.length; b < bn; b++)
-				{	rc += "0123456789ABCDEF".charAt((bs[b] >> 4) & 15);
-					rc += "0123456789ABCDEF".charAt(bs[b] & 15);
+				{
+					rc += HEXADECA[(bs[b] >> 4) & 15];
+				    rc += HEXADECA[bs[b] & 15];
 				}
 				rc += " " + (filename == null ? "-" : filename) + "\n";
 				if (filename == null)
 					stdin = rc.getBytes("UTF-8");
-				System.out.print(rc);
-				System.out.flush();
+				stdout.printf("%s", rc);
+				stdout.flush();
 			}
 	    }
 	    catch
-	    {   System.err.println(cmd + ": cannot read file: " + filename);
+	    {
+			stderr.printf("%s: cannot read file: %s\n", cmd, filename);
 			fail = true;
 	    }
 	    finally
-	    {   if (file != null)
+	    {
+			if (file != null)
+			{
 				try
-		    {	file.close();
-		    }
-		    catch
-		    {   //ignore
-			}   }	    }
+				{
+					file.close();
+				}
+				catch
+				{
+					/* ignore */
+				}
+			}
+		}
+	}
 	
-	System.out.flush();
+    stdout.flush();
 	if (fail)
 	    return 5;
 	
