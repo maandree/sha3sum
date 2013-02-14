@@ -783,7 +783,7 @@ static int main(string[] cmdargs)
 	    }
 	    string rc = "";
 		string fn = filename == null ? "/dev/stdin" : filename;
-	    FileStream file = null;
+		FileStream file = null;
 	    try
 	    {
 			file = FileStream.open(fn, "r");
@@ -814,14 +814,15 @@ static int main(string[] cmdargs)
 				stdout.flush();
 			}
 			else
-			{   for (int b = 0, bn = bs.length; b < bn; b++)
+			{
+				for (int b = 0, bn = bs.length; b < bn; b++)
 				{
 					rc += HEXADECA[(bs[b] >> 4) & 15];
 				    rc += HEXADECA[bs[b] & 15];
 				}
 				rc += " " + (filename == null ? "-" : filename) + "\n";
 				if (filename == null)
-					stdin_ = (uint8[])(rc.to_utf8);
+					stdin_ = (uint8[])(rc.to_utf8());
 				stdout.printf("%s", rc);
 				stdout.flush();
 			}
@@ -839,4 +840,7 @@ static int main(string[] cmdargs)
 	
 	return 0;
 }
+
+
+/* P.S. I utterly hate Vala more than C++ and JavaScript combined.  Happy Hearts and Hooves Day! */
 
