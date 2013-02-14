@@ -27,7 +27,7 @@
  * @param  doff    The destination array offset
  * @param  length  The number of elements to copy
  */
-static void arraycopy(int8[] src, int soff, int8[] dest, int doff, int length)
+static void arraycopy(uint8[] src, int soff, uint8[] dest, int doff, int length)
 {
 	if (soff + length < doff)
 		for (int i = 0; i < length; i++)
@@ -136,7 +136,7 @@ class SHA3 : Object
     /**
      * Left over water to fill the sponge with at next update
      */
-    private static int8[] M = null;
+    private static uint8[] M = null;
     
     /**
      * Pointer for {@link #M}
@@ -316,7 +316,7 @@ class SHA3 : Object
      * @param   off      The offset in the message
      * @return           Lane
      */
-    private static int64 toLane(int8[] message, int rr, int ww, int off)
+    private static int64 toLane(uint8[] message, int rr, int ww, int off)
     {
 		int64 rc = 0;
 		int n = message.length < rr ? message.length : rr;
@@ -334,7 +334,7 @@ class SHA3 : Object
      * @param   off      The offset in the message
      * @return           Lane
      */
-    private static int64 toLane64(int8[] message, int rr, int off)
+    private static int64 toLane64(uint8[] message, int rr, int off)
     {
 		int n = message.length < rr ? message.length : rr;
         return ((off + 7 < n) ? ((int64)(message[off + 7] & 255) << 56) : 0L) |
@@ -356,27 +356,27 @@ class SHA3 : Object
      * @param   r    The bitrate
      * @return       The message padded
      */
-    private static int8[] pad10star1(int8[] msg, int len, int r)
+    private static uint8[] pad10star1(uint8[] msg, int len, int r)
     {
         int nrf = (len <<= 3) >> 3;
         int nbrf = len & 7;
         int ll = len % r;
         
-        int8 b = (int8)(nbrf == 0 ? 1 : ((msg[nrf] >> (8 - nbrf)) | (1 << nbrf)));
+        uint8 b = (uint8)(nbrf == 0 ? 1 : ((msg[nrf] >> (8 - nbrf)) | (1 << nbrf)));
         
-        int8[] message;
+        uint8[] message;
         if ((r - 8 <= ll) && (ll <= r - 2))
 		{
-			message = new int8[len = nrf + 1];
-            message[nrf] = (int8)(b ^ 128);
+			message = new uint8[len = nrf + 1];
+            message[nrf] = (uint8)(b ^ 128);
 		}
         else
 		{
 			len = (nrf + 1) << 3;
 			len = ((len - (len % r) + (r - 8)) >> 3) + 1;
-			message = new int8[len];
+			message = new uint8[len];
 			message[nrf] = b;
-			message[len - 1] = (int8)(-128);
+			message[len - 1] = (uint8)(-128);
 		}
 		arraycopy(msg, 0, message, 0, nrf);
         
@@ -402,7 +402,7 @@ class SHA3 : Object
         SHA3.nr = 12 + (SHA3.l << 1);
         SHA3.wmod = w == 64 ? -1L : (1L << SHA3.w) - 1L;
         SHA3.S = new int64[25];
-        SHA3.M = new int8[(SHA3.r * SHA3.b) >> 2];
+        SHA3.M = new uint8[(SHA3.r * SHA3.b) >> 2];
 		SHA3.mptr = 0;
     }
     
@@ -413,18 +413,18 @@ class SHA3 : Object
      * @param  msg     The partial message
      * @param  msglen  The length of the partial message
      */
-    public static void update(int8[] msg, int msglen)
+    public static void update(uint8[] msg, int msglen)
     {
         int rr = SHA3.r >> 3;
         int ww = SHA3.w >> 3;
         
 		if (SHA3.mptr + msglen > SHA3.M.length)
-			arraycopy(SHA3.M, 0, SHA3.M = new int8[(SHA3.M.length + msglen) << 1], 0, SHA3.mptr);
+			arraycopy(SHA3.M, 0, SHA3.M = new uint8[(SHA3.M.length + msglen) << 1], 0, SHA3.mptr);
 		arraycopy(msg, 0, SHA3.M, SHA3.mptr, msglen);
         int len = SHA3.mptr += msglen;
         len -= len % ((SHA3.r * SHA3.b) >> 3);
-        int8[] message;
-		arraycopy(SHA3.M, 0, message = new int8[len], 0, len);
+        uint8[] message;
+		arraycopy(SHA3.M, 0, message = new uint8[len], 0, len);
 		arraycopy(SHA3.M, len, SHA3.M, 0, SHA3.mptr -= len);
 	
         /* Absorbing phase */
@@ -497,21 +497,21 @@ class SHA3 : Object
      * @param  msg     The rest of the message
      * @param  msglen  The length of the partial message
      */
-    public static int8[] digest(int8[] msg, int msglen)
+    public static uint8[] digest(uint8[] msg, int msglen)
     {
-		int8[] message;
+		uint8[] message;
 		if ((msg == null) || (msglen == 0))
             message = SHA3.pad10star1(SHA3.M, SHA3.mptr, SHA3.r);
 		else
 		{
 			if (SHA3.mptr + msglen > SHA3.M.length)
-				arraycopy(SHA3.M, 0, SHA3.M = new int8[SHA3.M.length + msglen], 0, SHA3.mptr);
+				arraycopy(SHA3.M, 0, SHA3.M = new uint8[SHA3.M.length + msglen], 0, SHA3.mptr);
 			arraycopy(msg, 0, SHA3.M, SHA3.mptr, msglen);
 			message = SHA3.pad10star1(SHA3.M, SHA3.mptr + msglen, SHA3.r);
 		}
         SHA3.M = null;
         int len = message.length;
-        int8[] rc = new int8[(SHA3.n + 7) >> 3];
+        uint8[] rc = new uint8[(SHA3.n + 7) >> 3];
         int ptr = 0;
         
         int rr = SHA3.r >> 3;
@@ -594,7 +594,7 @@ class SHA3 : Object
 				{
                     if (j < nn)
 					{
-						rc[ptr] = (int8)v;
+						rc[ptr] = (uint8)v;
                         ptr += 1;
 					}
                     v >>= 8;
@@ -774,17 +774,19 @@ static int main(string[] cmdargs)
 	    return 3;
 	}
 	
-	int8[] stdin = null;
+	uint8[] stdin_ = null;
 	bool fail = false;
 	string filename;
 
 	for (int f = 0; f < fptr; f++)
-	{   if (((filename = files[f]) == null) && (stdin != null))
-	    {	System.out.write(stdin);
+	{
+		if (((filename = files[f]) == null) && (stdin_ != null))
+	    {
+			stdout.write(stdin_, stdin_.length); 
 			continue;
 	    }
 	    string rc = "";
-	    string fn = filename == null ? "/dev/stdin" : filename;
+		string fn = filename == null ? "/dev/stdin" : filename;
 	    FileStream file = null;
 	    try
 	    {
@@ -797,15 +799,13 @@ static int main(string[] cmdargs)
 			}
 			SHA3.initialise(r, c, o);
 			int blksize = 4096; /** XXX os.stat(os.path.realpath(fn)).st_size; **/
-			int8[] chunk = new int8[blksize];
-			for (;;)
+			uint8[] chunk = new uint8[blksize];
+            while (file.eof() == false)
 			{
-				int read = file.read(chunk, 0, blksize);
-				if (read <= 0)
-					break;
-				SHA3.update(chunk, read);
+				int readn = (int)(file.read(chunk, blksize));
+				SHA3.update(chunk, readn);
 			}
-			int8[] bs = SHA3.digest(null, 0);
+			uint8[] bs = SHA3.digest(null, 0);
 			for (int _ = 1; _ < i; _++)
 			{
 				SHA3.initialise(r, c, o);
@@ -813,8 +813,8 @@ static int main(string[] cmdargs)
 			}
 			if (binary)
 			{   if (filename == null)
-					stdin = bs;
-				System.out.write(bs);
+					stdin_ = bs;
+				stdout.write(bs, bs.length);
 				stdout.flush();
 			}
 			else
@@ -825,7 +825,7 @@ static int main(string[] cmdargs)
 				}
 				rc += " " + (filename == null ? "-" : filename) + "\n";
 				if (filename == null)
-					stdin = rc.getBytes("UTF-8");
+					stdin_ = (uint8[])(rc.to_utf8);
 				stdout.printf("%s", rc);
 				stdout.flush();
 			}
@@ -835,20 +835,6 @@ static int main(string[] cmdargs)
 			stderr.printf("%s: cannot read file: %s\n", cmd, filename);
 			fail = true;
 	    }
-	    finally
-	    {
-			if (file != null)
-			{
-				try
-				{
-					file.close();
-				}
-				catch
-				{
-					/* ignore */
-				}
-			}
-		}
 	}
 	
     stdout.flush();
