@@ -79,79 +79,73 @@ class SHA3 : Object
     /**
      * Keccak-f round temporary
      */
-    private static int64[] B = new int64[25];
+    private int64[] B = new int64[25];
     
     /**
      * Keccak-f round temporary
      */
-    private static int64[] C = new int64[5];
+    private int64[] C = new int64[5];
     
     
     /**
      * The bitrate
      */
-    private static int r = 0;
+    private int r = 0;
     
     /**
      * The capacity
      */
-    private static int c = 0;
+    private int c = 0;
     
     /**
      * The output size
      */
-    private static int n = 0;
+    private int n = 0;
     
     /**
      * The state size
      */
-    private static int b = 0;
+    private int b = 0;
     
     /**
      * The word size
      */
-    private static int w = 0;
+    private int w = 0;
     
     /**
      * The word mask
      */
-    private static int64 wmod = 0;
+    private int64 wmod = 0;
     
     /**
      * ℓ, the binary logarithm of the word size
      */
-    private static int l = 0;
+    private int l = 0;
     
     /**
      * 12 + 2ℓ, the number of rounds
      */
-    private static int nr = 0;
+    private int nr = 0;
     
     
     /**
      * The current state
      */
-    private static int64[] S = null;
+    private int64[] S = null;
     
     /**
      * Left over water to fill the sponge with at next update
      */
-    private static uint8[] M = null;
+    private uint8[] M = null;
     
     /**
      * Pointer for {@link #M}
      */
-    private static int mptr = 0;
+    private int mptr = 0;
     
     
     
-    /**
-     * Hidden constructor
-     */
-    private SHA3()
-    {
-		// Inhibit instansiation
-    }
+    // Has default constructor
     
 	
     
@@ -162,10 +156,10 @@ class SHA3 : Object
      * @param   n  Rotation steps, may not be 0
      * @return     The value rotated
      */
-    private static int64 rotate(int64 x, int n)
+    private int64 rotate(int64 x, int n)
     {
-        int64 m = n % SHA3.w;
-        return (((x >> (SHA3.w - m)) & ((1 << m) - 1)) + (x << m)) & SHA3.wmod;
+        int64 m = n % this.w;
+        return (((x >> (this.w - m)) & ((1 << m) - 1)) + (x << m)) & this.wmod;
     }
     
     
@@ -176,7 +170,7 @@ class SHA3 : Object
      * @param   n  Rotation steps, may not be 0
      * @return     The value rotated
      */
-    private static int64 rotate64(int64 x, int n)
+    private int64 rotate64(int64 x, int n)
     {
         return ((x >> (64 - n)) & ((1 << n) - 1)) + (x << n);
     }
@@ -188,7 +182,7 @@ class SHA3 : Object
      * @param   x  The value of which to calculate the binary logarithm
      * @return     The binary logarithm
      */
-    private static int lb(int x)
+    private int lb(int x)
     {
         return (((x & 0xFF00) == 0 ? 0 : 8) +
 				((x & 0xF0F0) == 0 ? 0 : 4)) +
@@ -202,88 +196,88 @@ class SHA3 : Object
      * @param  A   The current state
      * @param  rc  Round constant
      */
-    private static void keccakFRound(int64[] A, int64 rc)
+    private void keccakFRound(int64[] A, int64 rc)
     {
 		/* θ step (step 1 of 3) */
 		for (int i = 0, j = 0; i < 5; i++, j += 5)
-			SHA3.C[i] = (A[j] ^ A[j + 1]) ^ (A[j + 2] ^ A[j + 3]) ^ A[j + 4];
+			this.C[i] = A[j] ^ A[j + 1] ^ A[j + 2] ^ A[j + 3] ^ A[j + 4];
 	
 		int64 da, db, dc, dd, de;
 	
-        if (SHA3.w == 64)
+        if (this.w == 64)
 		{
             /* ρ and π steps, with last two part of θ */
-            SHA3.B[0] =               A[ 0] ^ (da = SHA3.C[4] ^ SHA3.rotate64(SHA3.C[1], 1));
-            SHA3.B[1] = SHA3.rotate64(A[15] ^ (dd = SHA3.C[2] ^ SHA3.rotate64(SHA3.C[4], 1)), 28);
-            SHA3.B[2] = SHA3.rotate64(A[ 5] ^ (db = SHA3.C[0] ^ SHA3.rotate64(SHA3.C[2], 1)),  1);
-            SHA3.B[3] = SHA3.rotate64(A[20] ^ (de = SHA3.C[3] ^ SHA3.rotate64(SHA3.C[0], 1)), 27);
-            SHA3.B[4] = SHA3.rotate64(A[10] ^ (dc = SHA3.C[1] ^ SHA3.rotate64(SHA3.C[3], 1)), 62);
+            this.B[0] =               A[ 0] ^ (da = this.C[4] ^ this.rotate64(this.C[1], 1));
+            this.B[1] = this.rotate64(A[15] ^ (dd = this.C[2] ^ this.rotate64(this.C[4], 1)), 28);
+            this.B[2] = this.rotate64(A[ 5] ^ (db = this.C[0] ^ this.rotate64(this.C[2], 1)),  1);
+            this.B[3] = this.rotate64(A[20] ^ (de = this.C[3] ^ this.rotate64(this.C[0], 1)), 27);
+            this.B[4] = this.rotate64(A[10] ^ (dc = this.C[1] ^ this.rotate64(this.C[3], 1)), 62);
             
-            SHA3.B[5] = SHA3.rotate64(A[ 6] ^ db, 44);
-            SHA3.B[6] = SHA3.rotate64(A[21] ^ de, 20);
-            SHA3.B[7] = SHA3.rotate64(A[11] ^ dc,  6);
-            SHA3.B[8] = SHA3.rotate64(A[ 1] ^ da, 36);
-            SHA3.B[9] = SHA3.rotate64(A[16] ^ dd, 55);
+            this.B[5] = this.rotate64(A[ 6] ^ db, 44);
+            this.B[6] = this.rotate64(A[21] ^ de, 20);
+            this.B[7] = this.rotate64(A[11] ^ dc,  6);
+            this.B[8] = this.rotate64(A[ 1] ^ da, 36);
+            this.B[9] = this.rotate64(A[16] ^ dd, 55);
             
-            SHA3.B[10] = SHA3.rotate64(A[12] ^ dc, 43);
-            SHA3.B[11] = SHA3.rotate64(A[ 2] ^ da,  3);
-            SHA3.B[12] = SHA3.rotate64(A[17] ^ dd, 25);
-            SHA3.B[13] = SHA3.rotate64(A[ 7] ^ db, 10);
-            SHA3.B[14] = SHA3.rotate64(A[22] ^ de, 39);
+            this.B[10] = this.rotate64(A[12] ^ dc, 43);
+            this.B[11] = this.rotate64(A[ 2] ^ da,  3);
+            this.B[12] = this.rotate64(A[17] ^ dd, 25);
+            this.B[13] = this.rotate64(A[ 7] ^ db, 10);
+            this.B[14] = this.rotate64(A[22] ^ de, 39);
             
-            SHA3.B[15] = SHA3.rotate64(A[18] ^ dd, 21);
-            SHA3.B[16] = SHA3.rotate64(A[ 8] ^ db, 45);
-            SHA3.B[17] = SHA3.rotate64(A[23] ^ de,  8);
-            SHA3.B[18] = SHA3.rotate64(A[13] ^ dc, 15);
-            SHA3.B[19] = SHA3.rotate64(A[ 3] ^ da, 41);
+            this.B[15] = this.rotate64(A[18] ^ dd, 21);
+            this.B[16] = this.rotate64(A[ 8] ^ db, 45);
+            this.B[17] = this.rotate64(A[23] ^ de,  8);
+            this.B[18] = this.rotate64(A[13] ^ dc, 15);
+            this.B[19] = this.rotate64(A[ 3] ^ da, 41);
             
-            SHA3.B[20] = SHA3.rotate64(A[24] ^ de, 14);
-            SHA3.B[21] = SHA3.rotate64(A[14] ^ dc, 61);
-            SHA3.B[22] = SHA3.rotate64(A[ 4] ^ da, 18);
-            SHA3.B[23] = SHA3.rotate64(A[19] ^ dd, 56);
-            SHA3.B[24] = SHA3.rotate64(A[ 9] ^ db,  2);
+            this.B[20] = this.rotate64(A[24] ^ de, 14);
+            this.B[21] = this.rotate64(A[14] ^ dc, 61);
+            this.B[22] = this.rotate64(A[ 4] ^ da, 18);
+            this.B[23] = this.rotate64(A[19] ^ dd, 56);
+            this.B[24] = this.rotate64(A[ 9] ^ db,  2);
 		}
         else
 		{
 			/* ρ and π steps, with last two part of θ */
-            SHA3.B[0] =             A[ 0] ^ (da = SHA3.C[4] ^ SHA3.rotate(SHA3.C[1], 1));
-            SHA3.B[1] = SHA3.rotate(A[15] ^ (dd = SHA3.C[2] ^ SHA3.rotate(SHA3.C[4], 1)), 28);
-            SHA3.B[2] = SHA3.rotate(A[ 5] ^ (db = SHA3.C[0] ^ SHA3.rotate(SHA3.C[2], 1)),  1);
-            SHA3.B[3] = SHA3.rotate(A[20] ^ (de = SHA3.C[3] ^ SHA3.rotate(SHA3.C[0], 1)), 27);
-            SHA3.B[4] = SHA3.rotate(A[10] ^ (dc = SHA3.C[1] ^ SHA3.rotate(SHA3.C[3], 1)), 62);
+            this.B[0] =             A[ 0] ^ (da = this.C[4] ^ this.rotate(this.C[1], 1));
+            this.B[1] = this.rotate(A[15] ^ (dd = this.C[2] ^ this.rotate(this.C[4], 1)), 28);
+            this.B[2] = this.rotate(A[ 5] ^ (db = this.C[0] ^ this.rotate(this.C[2], 1)),  1);
+            this.B[3] = this.rotate(A[20] ^ (de = this.C[3] ^ this.rotate(this.C[0], 1)), 27);
+            this.B[4] = this.rotate(A[10] ^ (dc = this.C[1] ^ this.rotate(this.C[3], 1)), 62);
             
-            SHA3.B[5] = SHA3.rotate(A[ 6] ^ db, 44);
-            SHA3.B[6] = SHA3.rotate(A[21] ^ de, 20);
-            SHA3.B[7] = SHA3.rotate(A[11] ^ dc,  6);
-            SHA3.B[8] = SHA3.rotate(A[ 1] ^ da, 36);
-            SHA3.B[9] = SHA3.rotate(A[16] ^ dd, 55);
+            this.B[5] = this.rotate(A[ 6] ^ db, 44);
+            this.B[6] = this.rotate(A[21] ^ de, 20);
+            this.B[7] = this.rotate(A[11] ^ dc,  6);
+            this.B[8] = this.rotate(A[ 1] ^ da, 36);
+            this.B[9] = this.rotate(A[16] ^ dd, 55);
             
-            SHA3.B[10] = SHA3.rotate(A[12] ^ dc, 43);
-            SHA3.B[11] = SHA3.rotate(A[ 2] ^ da,  3);
-            SHA3.B[12] = SHA3.rotate(A[17] ^ dd, 25);
-			SHA3.B[13] = SHA3.rotate(A[ 7] ^ db, 10);
-            SHA3.B[14] = SHA3.rotate(A[22] ^ de, 39);
+            this.B[10] = this.rotate(A[12] ^ dc, 43);
+            this.B[11] = this.rotate(A[ 2] ^ da,  3);
+            this.B[12] = this.rotate(A[17] ^ dd, 25);
+			this.B[13] = this.rotate(A[ 7] ^ db, 10);
+            this.B[14] = this.rotate(A[22] ^ de, 39);
             
-            SHA3.B[15] = SHA3.rotate(A[18] ^ dd, 21);
-            SHA3.B[16] = SHA3.rotate(A[ 8] ^ db, 45);
-            SHA3.B[17] = SHA3.rotate(A[23] ^ de,  8);
-            SHA3.B[18] = SHA3.rotate(A[13] ^ dc, 15);
-            SHA3.B[19] = SHA3.rotate(A[ 3] ^ da, 41);
+            this.B[15] = this.rotate(A[18] ^ dd, 21);
+            this.B[16] = this.rotate(A[ 8] ^ db, 45);
+            this.B[17] = this.rotate(A[23] ^ de,  8);
+            this.B[18] = this.rotate(A[13] ^ dc, 15);
+            this.B[19] = this.rotate(A[ 3] ^ da, 41);
             
-            SHA3.B[20] = SHA3.rotate(A[24] ^ de, 14);
-            SHA3.B[21] = SHA3.rotate(A[14] ^ dc, 61);
-            SHA3.B[22] = SHA3.rotate(A[ 4] ^ da, 18);
-            SHA3.B[23] = SHA3.rotate(A[19] ^ dd, 56);
-            SHA3.B[24] = SHA3.rotate(A[ 9] ^ db,  2);
+            this.B[20] = this.rotate(A[24] ^ de, 14);
+            this.B[21] = this.rotate(A[14] ^ dc, 61);
+            this.B[22] = this.rotate(A[ 4] ^ da, 18);
+            this.B[23] = this.rotate(A[19] ^ dd, 56);
+            this.B[24] = this.rotate(A[ 9] ^ db,  2);
 		}
 	
         /* ξ step */
 		for (int i = 0; i < 15; i++)
-			A[i     ] = SHA3.B[i     ] ^ ((~(SHA3.B[i +  5])) & SHA3.B[i + 10]);
+			A[i     ] = this.B[i     ] ^ ((~(this.B[i +  5])) & this.B[i + 10]);
 		for (int i = 0; i < 5; i++)
 		{
-			A[i + 15] = SHA3.B[i + 15] ^ ((~(SHA3.B[i + 20])) & SHA3.B[i     ]);
-			A[i + 20] = SHA3.B[i + 20] ^ ((~(SHA3.B[i     ])) & SHA3.B[i +  5]);
+			A[i + 15] = this.B[i + 15] ^ ((~(this.B[i + 20])) & this.B[i     ]);
+			A[i + 20] = this.B[i + 20] ^ ((~(this.B[i     ])) & this.B[i +  5]);
 		}
 	
         /* ι step */
@@ -296,14 +290,14 @@ class SHA3 : Object
      * 
      * @param  A  The current state
      */
-    private static void keccakF(int64[] A)
+    private void keccakF(int64[] A)
     {
-        if (SHA3.nr == 24)
+        if (this.nr == 24)
             for (int i = 0; i < 24; i++)
-				SHA3.keccakFRound(A, SHA3.RC[i]);
+				this.keccakFRound(A, SHA3.RC[i]);
         else
-            for (int i = 0; i < SHA3.nr; i++)
-				SHA3.keccakFRound(A, SHA3.RC[i] & SHA3.wmod);
+            for (int i = 0; i < this.nr; i++)
+				this.keccakFRound(A, SHA3.RC[i] & this.wmod);
     }
     
     
@@ -316,7 +310,7 @@ class SHA3 : Object
      * @param   off      The offset in the message
      * @return           Lane
      */
-    private static int64 toLane(uint8[] message, int rr, int ww, int off)
+    private int64 toLane(uint8[] message, int rr, int ww, int off)
     {
 		int64 rc = 0;
 		int n = message.length < rr ? message.length : rr;
@@ -334,7 +328,7 @@ class SHA3 : Object
      * @param   off      The offset in the message
      * @return           Lane
      */
-    private static int64 toLane64(uint8[] message, int rr, int off)
+    private int64 toLane64(uint8[] message, int rr, int off)
     {
 		int n = message.length < rr ? message.length : rr;
         return ((off + 7 < n) ? ((int64)(message[off + 7] & 255) << 56) : 0L) |
@@ -356,7 +350,7 @@ class SHA3 : Object
      * @param   r    The bitrate
      * @return       The message padded
      */
-    private static uint8[] pad10star1(uint8[] msg, int len, int r)
+    private uint8[] pad10star1(uint8[] msg, int len, int r)
     {
         int nrf = (len <<= 3) >> 3;
         int nbrf = len & 7;
@@ -391,19 +385,19 @@ class SHA3 : Object
      * @param  c  The capacity
      * @param  n  The output size
      */
-    public static void initialise(int r, int c, int n)
+    public void initialise(int r, int c, int n)
     {
-        SHA3.r = r;
-        SHA3.c = c;
-        SHA3.n = n;
-        SHA3.b = r + c;
-        SHA3.w = SHA3.b / 25;
-        SHA3.l = SHA3.lb(SHA3.w);
-        SHA3.nr = 12 + (SHA3.l << 1);
-        SHA3.wmod = w == 64 ? -1L : (1L << SHA3.w) - 1L;
-        SHA3.S = new int64[25];
-        SHA3.M = new uint8[(SHA3.r * SHA3.b) >> 2];
-		SHA3.mptr = 0;
+        this.r = r;
+        this.c = c;
+        this.n = n;
+        this.b = r + c;
+        this.w = this.b / 25;
+        this.l = this.lb(this.w);
+        this.nr = 12 + (this.l << 1);
+        this.wmod = w == 64 ? -1L : (1L << this.w) - 1L;
+        this.S = new int64[25];
+        this.M = new uint8[(this.r * this.b) >> 2];
+		this.mptr = 0;
     }
     
     
@@ -413,80 +407,80 @@ class SHA3 : Object
      * @param  msg     The partial message
      * @param  msglen  The length of the partial message
      */
-    public static void update(uint8[] msg, int msglen)
+    public void update(uint8[] msg, int msglen)
     {
-        int rr = SHA3.r >> 3;
-        int ww = SHA3.w >> 3;
+        int rr = this.r >> 3;
+        int ww = this.w >> 3;
         
-		if (SHA3.mptr + msglen > SHA3.M.length)
-			arraycopy(SHA3.M, 0, SHA3.M = new uint8[(SHA3.M.length + msglen) << 1], 0, SHA3.mptr);
-		arraycopy(msg, 0, SHA3.M, SHA3.mptr, msglen);
-        int len = SHA3.mptr += msglen;
-        len -= len % ((SHA3.r * SHA3.b) >> 3);
+		if (this.mptr + msglen > this.M.length)
+			arraycopy(this.M, 0, this.M = new uint8[(this.M.length + msglen) << 1], 0, this.mptr);
+		arraycopy(msg, 0, this.M, this.mptr, msglen);
+        int len = this.mptr += msglen;
+        len -= len % ((this.r * this.b) >> 3);
         uint8[] message;
-		arraycopy(SHA3.M, 0, message = new uint8[len], 0, len);
-		arraycopy(SHA3.M, len, SHA3.M, 0, SHA3.mptr -= len);
+		arraycopy(this.M, 0, message = new uint8[len], 0, len);
+		arraycopy(this.M, len, this.M, 0, this.mptr -= len);
 	
         /* Absorbing phase */
         if (ww == 8)
             for (int i = 0; i < len; i += rr)
 			{
-				SHA3.S[ 0] ^= SHA3.toLane64(message, rr, i + 0);
-				SHA3.S[ 5] ^= SHA3.toLane64(message, rr, i + 8);
-				SHA3.S[10] ^= SHA3.toLane64(message, rr, i + 16);
-                SHA3.S[15] ^= SHA3.toLane64(message, rr, i + 24);
-                SHA3.S[20] ^= SHA3.toLane64(message, rr, i + 32);
-                SHA3.S[ 1] ^= SHA3.toLane64(message, rr, i + 40);
-                SHA3.S[ 6] ^= SHA3.toLane64(message, rr, i + 48);
-                SHA3.S[11] ^= SHA3.toLane64(message, rr, i + 56);
-                SHA3.S[16] ^= SHA3.toLane64(message, rr, i + 64);
-                SHA3.S[21] ^= SHA3.toLane64(message, rr, i + 72);
-                SHA3.S[ 2] ^= SHA3.toLane64(message, rr, i + 80);
-                SHA3.S[ 7] ^= SHA3.toLane64(message, rr, i + 88);
-				SHA3.S[12] ^= SHA3.toLane64(message, rr, i + 96);
-				SHA3.S[17] ^= SHA3.toLane64(message, rr, i + 104);
-				SHA3.S[22] ^= SHA3.toLane64(message, rr, i + 112);
-				SHA3.S[ 3] ^= SHA3.toLane64(message, rr, i + 120);
-				SHA3.S[ 8] ^= SHA3.toLane64(message, rr, i + 128);
-				SHA3.S[13] ^= SHA3.toLane64(message, rr, i + 136);
-				SHA3.S[18] ^= SHA3.toLane64(message, rr, i + 144);
-				SHA3.S[23] ^= SHA3.toLane64(message, rr, i + 152);
-                SHA3.S[ 4] ^= SHA3.toLane64(message, rr, i + 160);
-                SHA3.S[ 9] ^= SHA3.toLane64(message, rr, i + 168);
-                SHA3.S[14] ^= SHA3.toLane64(message, rr, i + 176);
-                SHA3.S[19] ^= SHA3.toLane64(message, rr, i + 184);
-                SHA3.S[24] ^= SHA3.toLane64(message, rr, i + 192);
-				SHA3.keccakF(SHA3.S);
+				this.S[ 0] ^= this.toLane64(message, rr, i + 0);
+				this.S[ 5] ^= this.toLane64(message, rr, i + 8);
+				this.S[10] ^= this.toLane64(message, rr, i + 16);
+                this.S[15] ^= this.toLane64(message, rr, i + 24);
+                this.S[20] ^= this.toLane64(message, rr, i + 32);
+                this.S[ 1] ^= this.toLane64(message, rr, i + 40);
+                this.S[ 6] ^= this.toLane64(message, rr, i + 48);
+                this.S[11] ^= this.toLane64(message, rr, i + 56);
+                this.S[16] ^= this.toLane64(message, rr, i + 64);
+                this.S[21] ^= this.toLane64(message, rr, i + 72);
+                this.S[ 2] ^= this.toLane64(message, rr, i + 80);
+                this.S[ 7] ^= this.toLane64(message, rr, i + 88);
+				this.S[12] ^= this.toLane64(message, rr, i + 96);
+				this.S[17] ^= this.toLane64(message, rr, i + 104);
+				this.S[22] ^= this.toLane64(message, rr, i + 112);
+				this.S[ 3] ^= this.toLane64(message, rr, i + 120);
+				this.S[ 8] ^= this.toLane64(message, rr, i + 128);
+				this.S[13] ^= this.toLane64(message, rr, i + 136);
+				this.S[18] ^= this.toLane64(message, rr, i + 144);
+				this.S[23] ^= this.toLane64(message, rr, i + 152);
+                this.S[ 4] ^= this.toLane64(message, rr, i + 160);
+                this.S[ 9] ^= this.toLane64(message, rr, i + 168);
+                this.S[14] ^= this.toLane64(message, rr, i + 176);
+                this.S[19] ^= this.toLane64(message, rr, i + 184);
+                this.S[24] ^= this.toLane64(message, rr, i + 192);
+				this.keccakF(this.S);
 			}
         else
 			for (int i = 0; i < len; i += rr)
 			{
-				SHA3.S[ 0] ^= SHA3.toLane(message, rr, ww, i +  0    );
-				SHA3.S[ 5] ^= SHA3.toLane(message, rr, ww, i +      w);
-				SHA3.S[10] ^= SHA3.toLane(message, rr, ww, i +  2 * w);
-                SHA3.S[15] ^= SHA3.toLane(message, rr, ww, i +  3 * w);
-                SHA3.S[20] ^= SHA3.toLane(message, rr, ww, i +  4 * w);
-                SHA3.S[ 1] ^= SHA3.toLane(message, rr, ww, i +  5 * w);
-                SHA3.S[ 6] ^= SHA3.toLane(message, rr, ww, i +  6 * w);
-                SHA3.S[11] ^= SHA3.toLane(message, rr, ww, i +  7 * w);
-                SHA3.S[16] ^= SHA3.toLane(message, rr, ww, i +  8 * w);
-                SHA3.S[21] ^= SHA3.toLane(message, rr, ww, i +  9 * w);
-                SHA3.S[ 2] ^= SHA3.toLane(message, rr, ww, i + 10 * w);
-                SHA3.S[ 7] ^= SHA3.toLane(message, rr, ww, i + 11 * w);
-				SHA3.S[12] ^= SHA3.toLane(message, rr, ww, i + 12 * w);
-				SHA3.S[17] ^= SHA3.toLane(message, rr, ww, i + 13 * w);
-				SHA3.S[22] ^= SHA3.toLane(message, rr, ww, i + 14 * w);
-				SHA3.S[ 3] ^= SHA3.toLane(message, rr, ww, i + 15 * w);
-				SHA3.S[ 8] ^= SHA3.toLane(message, rr, ww, i + 16 * w);
-				SHA3.S[13] ^= SHA3.toLane(message, rr, ww, i + 17 * w);
-				SHA3.S[18] ^= SHA3.toLane(message, rr, ww, i + 18 * w);
-				SHA3.S[23] ^= SHA3.toLane(message, rr, ww, i + 19 * w);
-                SHA3.S[ 4] ^= SHA3.toLane(message, rr, ww, i + 20 * w);
-                SHA3.S[ 9] ^= SHA3.toLane(message, rr, ww, i + 21 * w);
-                SHA3.S[14] ^= SHA3.toLane(message, rr, ww, i + 22 * w);
-                SHA3.S[19] ^= SHA3.toLane(message, rr, ww, i + 23 * w);
-                SHA3.S[24] ^= SHA3.toLane(message, rr, ww, i + 24 * w);
-				SHA3.keccakF(SHA3.S);
+				this.S[ 0] ^= this.toLane(message, rr, ww, i +  0    );
+				this.S[ 5] ^= this.toLane(message, rr, ww, i +      w);
+				this.S[10] ^= this.toLane(message, rr, ww, i +  2 * w);
+                this.S[15] ^= this.toLane(message, rr, ww, i +  3 * w);
+                this.S[20] ^= this.toLane(message, rr, ww, i +  4 * w);
+                this.S[ 1] ^= this.toLane(message, rr, ww, i +  5 * w);
+                this.S[ 6] ^= this.toLane(message, rr, ww, i +  6 * w);
+                this.S[11] ^= this.toLane(message, rr, ww, i +  7 * w);
+                this.S[16] ^= this.toLane(message, rr, ww, i +  8 * w);
+                this.S[21] ^= this.toLane(message, rr, ww, i +  9 * w);
+                this.S[ 2] ^= this.toLane(message, rr, ww, i + 10 * w);
+                this.S[ 7] ^= this.toLane(message, rr, ww, i + 11 * w);
+				this.S[12] ^= this.toLane(message, rr, ww, i + 12 * w);
+				this.S[17] ^= this.toLane(message, rr, ww, i + 13 * w);
+				this.S[22] ^= this.toLane(message, rr, ww, i + 14 * w);
+				this.S[ 3] ^= this.toLane(message, rr, ww, i + 15 * w);
+				this.S[ 8] ^= this.toLane(message, rr, ww, i + 16 * w);
+				this.S[13] ^= this.toLane(message, rr, ww, i + 17 * w);
+				this.S[18] ^= this.toLane(message, rr, ww, i + 18 * w);
+				this.S[23] ^= this.toLane(message, rr, ww, i + 19 * w);
+                this.S[ 4] ^= this.toLane(message, rr, ww, i + 20 * w);
+                this.S[ 9] ^= this.toLane(message, rr, ww, i + 21 * w);
+                this.S[14] ^= this.toLane(message, rr, ww, i + 22 * w);
+                this.S[19] ^= this.toLane(message, rr, ww, i + 23 * w);
+                this.S[24] ^= this.toLane(message, rr, ww, i + 24 * w);
+				this.keccakF(this.S);
 			}
     }
     
@@ -497,91 +491,91 @@ class SHA3 : Object
      * @param  msg     The rest of the message
      * @param  msglen  The length of the partial message
      */
-    public static uint8[] digest(uint8[] msg, int msglen)
+    public uint8[] digest(uint8[]? msg, int msglen)
     {
 		uint8[] message;
 		if ((msg == null) || (msglen == 0))
-            message = SHA3.pad10star1(SHA3.M, SHA3.mptr, SHA3.r);
+            message = this.pad10star1(this.M, this.mptr, this.r);
 		else
 		{
-			if (SHA3.mptr + msglen > SHA3.M.length)
-				arraycopy(SHA3.M, 0, SHA3.M = new uint8[SHA3.M.length + msglen], 0, SHA3.mptr);
-			arraycopy(msg, 0, SHA3.M, SHA3.mptr, msglen);
-			message = SHA3.pad10star1(SHA3.M, SHA3.mptr + msglen, SHA3.r);
+			if (this.mptr + msglen > this.M.length)
+				arraycopy(this.M, 0, this.M = new uint8[this.M.length + msglen], 0, this.mptr);
+			arraycopy(msg, 0, this.M, this.mptr, msglen);
+			message = this.pad10star1(this.M, this.mptr + msglen, this.r);
 		}
-        SHA3.M = null;
+        this.M = null;
         int len = message.length;
-        uint8[] rc = new uint8[(SHA3.n + 7) >> 3];
+        uint8[] rc = new uint8[(this.n + 7) >> 3];
         int ptr = 0;
         
-        int rr = SHA3.r >> 3;
-        int nn = SHA3.n >> 3;
-        int ww = SHA3.w >> 3;
+        int rr = this.r >> 3;
+        int nn = this.n >> 3;
+        int ww = this.w >> 3;
         
         /* Absorbing phase */
         if (ww == 8)
             for (int i = 0; i < len; i += rr)
 			{
-				SHA3.S[ 0] ^= SHA3.toLane64(message, rr, i + 0);
-				SHA3.S[ 5] ^= SHA3.toLane64(message, rr, i + 8);
-				SHA3.S[10] ^= SHA3.toLane64(message, rr, i + 16);
-                SHA3.S[15] ^= SHA3.toLane64(message, rr, i + 24);
-                SHA3.S[20] ^= SHA3.toLane64(message, rr, i + 32);
-                SHA3.S[ 1] ^= SHA3.toLane64(message, rr, i + 40);
-                SHA3.S[ 6] ^= SHA3.toLane64(message, rr, i + 48);
-                SHA3.S[11] ^= SHA3.toLane64(message, rr, i + 56);
-                SHA3.S[16] ^= SHA3.toLane64(message, rr, i + 64);
-                SHA3.S[21] ^= SHA3.toLane64(message, rr, i + 72);
-                SHA3.S[ 2] ^= SHA3.toLane64(message, rr, i + 80);
-                SHA3.S[ 7] ^= SHA3.toLane64(message, rr, i + 88);
-				SHA3.S[12] ^= SHA3.toLane64(message, rr, i + 96);
-				SHA3.S[17] ^= SHA3.toLane64(message, rr, i + 104);
-				SHA3.S[22] ^= SHA3.toLane64(message, rr, i + 112);
-				SHA3.S[ 3] ^= SHA3.toLane64(message, rr, i + 120);
-				SHA3.S[ 8] ^= SHA3.toLane64(message, rr, i + 128);
-				SHA3.S[13] ^= SHA3.toLane64(message, rr, i + 136);
-				SHA3.S[18] ^= SHA3.toLane64(message, rr, i + 144);
-				SHA3.S[23] ^= SHA3.toLane64(message, rr, i + 152);
-                SHA3.S[ 4] ^= SHA3.toLane64(message, rr, i + 160);
-                SHA3.S[ 9] ^= SHA3.toLane64(message, rr, i + 168);
-                SHA3.S[14] ^= SHA3.toLane64(message, rr, i + 176);
-                SHA3.S[19] ^= SHA3.toLane64(message, rr, i + 184);
-                SHA3.S[24] ^= SHA3.toLane64(message, rr, i + 192);
-                SHA3.keccakF(SHA3.S);
+				this.S[ 0] ^= this.toLane64(message, rr, i + 0);
+				this.S[ 5] ^= this.toLane64(message, rr, i + 8);
+				this.S[10] ^= this.toLane64(message, rr, i + 16);
+                this.S[15] ^= this.toLane64(message, rr, i + 24);
+                this.S[20] ^= this.toLane64(message, rr, i + 32);
+                this.S[ 1] ^= this.toLane64(message, rr, i + 40);
+                this.S[ 6] ^= this.toLane64(message, rr, i + 48);
+                this.S[11] ^= this.toLane64(message, rr, i + 56);
+                this.S[16] ^= this.toLane64(message, rr, i + 64);
+                this.S[21] ^= this.toLane64(message, rr, i + 72);
+                this.S[ 2] ^= this.toLane64(message, rr, i + 80);
+                this.S[ 7] ^= this.toLane64(message, rr, i + 88);
+				this.S[12] ^= this.toLane64(message, rr, i + 96);
+				this.S[17] ^= this.toLane64(message, rr, i + 104);
+				this.S[22] ^= this.toLane64(message, rr, i + 112);
+				this.S[ 3] ^= this.toLane64(message, rr, i + 120);
+				this.S[ 8] ^= this.toLane64(message, rr, i + 128);
+				this.S[13] ^= this.toLane64(message, rr, i + 136);
+				this.S[18] ^= this.toLane64(message, rr, i + 144);
+				this.S[23] ^= this.toLane64(message, rr, i + 152);
+                this.S[ 4] ^= this.toLane64(message, rr, i + 160);
+                this.S[ 9] ^= this.toLane64(message, rr, i + 168);
+                this.S[14] ^= this.toLane64(message, rr, i + 176);
+                this.S[19] ^= this.toLane64(message, rr, i + 184);
+                this.S[24] ^= this.toLane64(message, rr, i + 192);
+                this.keccakF(this.S);
 			}
         else
 			for (int i = 0; i < len; i += rr)
 			{
-				SHA3.S[ 0] ^= SHA3.toLane(message, rr, ww, i +  0    );
-				SHA3.S[ 5] ^= SHA3.toLane(message, rr, ww, i +      w);
-				SHA3.S[10] ^= SHA3.toLane(message, rr, ww, i +  2 * w);
-                SHA3.S[15] ^= SHA3.toLane(message, rr, ww, i +  3 * w);
-                SHA3.S[20] ^= SHA3.toLane(message, rr, ww, i +  4 * w);
-                SHA3.S[ 1] ^= SHA3.toLane(message, rr, ww, i +  5 * w);
-                SHA3.S[ 6] ^= SHA3.toLane(message, rr, ww, i +  6 * w);
-                SHA3.S[11] ^= SHA3.toLane(message, rr, ww, i +  7 * w);
-                SHA3.S[16] ^= SHA3.toLane(message, rr, ww, i +  8 * w);
-                SHA3.S[21] ^= SHA3.toLane(message, rr, ww, i +  9 * w);
-                SHA3.S[ 2] ^= SHA3.toLane(message, rr, ww, i + 10 * w);
-                SHA3.S[ 7] ^= SHA3.toLane(message, rr, ww, i + 11 * w);
-				SHA3.S[12] ^= SHA3.toLane(message, rr, ww, i + 12 * w);
-				SHA3.S[17] ^= SHA3.toLane(message, rr, ww, i + 13 * w);
-				SHA3.S[22] ^= SHA3.toLane(message, rr, ww, i + 14 * w);
-				SHA3.S[ 3] ^= SHA3.toLane(message, rr, ww, i + 15 * w);
-				SHA3.S[ 8] ^= SHA3.toLane(message, rr, ww, i + 16 * w);
-				SHA3.S[13] ^= SHA3.toLane(message, rr, ww, i + 17 * w);
-				SHA3.S[18] ^= SHA3.toLane(message, rr, ww, i + 18 * w);
-				SHA3.S[23] ^= SHA3.toLane(message, rr, ww, i + 19 * w);
-                SHA3.S[ 4] ^= SHA3.toLane(message, rr, ww, i + 20 * w);
-                SHA3.S[ 9] ^= SHA3.toLane(message, rr, ww, i + 21 * w);
-                SHA3.S[14] ^= SHA3.toLane(message, rr, ww, i + 22 * w);
-                SHA3.S[19] ^= SHA3.toLane(message, rr, ww, i + 23 * w);
-                SHA3.S[24] ^= SHA3.toLane(message, rr, ww, i + 24 * w);
-				SHA3.keccakF(SHA3.S);
+				this.S[ 0] ^= this.toLane(message, rr, ww, i +  0    );
+				this.S[ 5] ^= this.toLane(message, rr, ww, i +      w);
+				this.S[10] ^= this.toLane(message, rr, ww, i +  2 * w);
+                this.S[15] ^= this.toLane(message, rr, ww, i +  3 * w);
+                this.S[20] ^= this.toLane(message, rr, ww, i +  4 * w);
+                this.S[ 1] ^= this.toLane(message, rr, ww, i +  5 * w);
+                this.S[ 6] ^= this.toLane(message, rr, ww, i +  6 * w);
+                this.S[11] ^= this.toLane(message, rr, ww, i +  7 * w);
+                this.S[16] ^= this.toLane(message, rr, ww, i +  8 * w);
+                this.S[21] ^= this.toLane(message, rr, ww, i +  9 * w);
+                this.S[ 2] ^= this.toLane(message, rr, ww, i + 10 * w);
+                this.S[ 7] ^= this.toLane(message, rr, ww, i + 11 * w);
+				this.S[12] ^= this.toLane(message, rr, ww, i + 12 * w);
+				this.S[17] ^= this.toLane(message, rr, ww, i + 13 * w);
+				this.S[22] ^= this.toLane(message, rr, ww, i + 14 * w);
+				this.S[ 3] ^= this.toLane(message, rr, ww, i + 15 * w);
+				this.S[ 8] ^= this.toLane(message, rr, ww, i + 16 * w);
+				this.S[13] ^= this.toLane(message, rr, ww, i + 17 * w);
+				this.S[18] ^= this.toLane(message, rr, ww, i + 18 * w);
+				this.S[23] ^= this.toLane(message, rr, ww, i + 19 * w);
+                this.S[ 4] ^= this.toLane(message, rr, ww, i + 20 * w);
+                this.S[ 9] ^= this.toLane(message, rr, ww, i + 21 * w);
+                this.S[14] ^= this.toLane(message, rr, ww, i + 22 * w);
+                this.S[19] ^= this.toLane(message, rr, ww, i + 23 * w);
+                this.S[24] ^= this.toLane(message, rr, ww, i + 24 * w);
+				this.keccakF(this.S);
 			}
         
         /* Squeezing phase */
-        int olen = SHA3.n;
+        int olen = this.n;
         int j = 0;
         int ni = 25 < rr ? 25 : rr;
         while (olen > 0)
@@ -589,7 +583,7 @@ class SHA3 : Object
             int i = 0;
 			while ((i < ni) && (j < nn))
 			{
-				int64 v = SHA3.S[(i % 5) * 5 + i / 5];
+				int64 v = this.S[(i % 5) * 5 + i / 5];
 				for (int _ = 0; _ < ww; _++)
 				{
                     if (j < nn)
@@ -602,9 +596,9 @@ class SHA3 : Object
 				}
                 i += 1;
 			}
-            olen -= SHA3.r;
+            olen -= this.r;
 			if (olen > 0)
-				SHA3.keccakF(S);
+				this.keccakF(S);
 		}
         return rc;
     }
@@ -777,7 +771,9 @@ static int main(string[] cmdargs)
 	uint8[] stdin_ = null;
 	bool fail = false;
 	string filename;
-
+	
+	SHA3 sha3 = new SHA3();
+	
 	for (int f = 0; f < fptr; f++)
 	{
 		if (((filename = files[f]) == null) && (stdin_ != null))
@@ -797,19 +793,19 @@ static int main(string[] cmdargs)
 				fail = true;
 				continue;
 			}
-			SHA3.initialise(r, c, o);
+			sha3.initialise(r, c, o);
 			int blksize = 4096; /** XXX os.stat(os.path.realpath(fn)).st_size; **/
 			uint8[] chunk = new uint8[blksize];
             while (file.eof() == false)
 			{
 				int readn = (int)(file.read(chunk, blksize));
-				SHA3.update(chunk, readn);
+				sha3.update(chunk, readn);
 			}
-			uint8[] bs = SHA3.digest(null, 0);
+			uint8[] bs = sha3.digest(null, 0);
 			for (int _ = 1; _ < i; _++)
 			{
-				SHA3.initialise(r, c, o);
-				bs = SHA3.digest(bs, bs.length);
+				sha3.initialise(r, c, o);
+				bs = sha3.digest(bs, bs.length);
 			}
 			if (binary)
 			{   if (filename == null)
