@@ -159,7 +159,7 @@ class SHA3 : Object
     private int64 rotate(int64 x, int n)
     {
         int64 m = n % this.w;
-        return (((x >> (this.w - m)) & ((1 << m) - 1)) + (x << m)) & this.wmod;
+        return ((int64)((uint64)x >> (this.w - m)) + (x << m)) & this.wmod;
     }
     
     
@@ -172,7 +172,7 @@ class SHA3 : Object
      */
     private int64 rotate64(int64 x, int n)
     {
-        return ((x >> (64 - n)) & ((1 << n) - 1)) + (x << n);
+        return (int64)((uint64)x >> (64 - n)) + (x << n);
     }
     
     
