@@ -145,8 +145,8 @@ inline void arraycopy(byte* src, long soff, byte* dest, long doff, long length)
   src += soff;
   dest += doff;
   
-  #define __(X)  src[X] = dest[X]
-  #define __0  *src = *dest
+  #define __(X)  dest[X] = src[X]
+  #define __0  *dest = *src
   #define __1  __(0x01)
   #define __2  __(0x02); __(0x03)
   #define __3  __(0x04); __(0x05); __(0x06); __(0x07)
@@ -179,7 +179,7 @@ inline void arraycopy(byte* src, long soff, byte* dest, long doff, long length)
       if ((length &  16))  {  __0;  __1;  __2;  __3;  __4;   src += 16;  dest += 16;  }
       if ((length &  32))  {  __0;  __1;  __2;  __3;  __4;  __5;   src += 32;  dest += 32;  }
       if ((length &  64))  {  __0;  __1;  __2;  __3;  __4;  __5;  __6;   src += 64;  dest += 64;  }
-      if ((length & 128))  {  __0;  __1;  __2;  __3;  __4;  __5;  __6;  __7;   src += 128;  dest += 256;  }
+      if ((length & 128))  {  __0;  __1;  __2;  __3;  __4;  __5;  __6;  __7;   src += 128;  dest += 128;  }
     }
   length &= ~255;
   for (i = 0; i < length; i += 256)
