@@ -33,8 +33,6 @@
 #define false   0
 
 
-#define min(X, Y)  ((X) < (Y) ? (X) : (Y))
-
 
 /**
  * Round contants
@@ -120,6 +118,18 @@ static long mptr = 0;
 static long mlen = 0;
 
 
+
+/**
+ * Gets the smallest, in value, of the arguments
+ * 
+ * @param   X  The first candidate
+ * @param   Y  The second candidate
+ * @return     The lowest candidate
+ */
+#define min(X, Y)  ((X) < (Y) ? (X) : (Y))
+
+
+
 /**
  * Copy an array segment into an array in start to end order
  * 
@@ -189,6 +199,7 @@ inline void arraycopy(byte* src, long soff, byte* dest, long doff, long length)
   #undef __
 }
 
+
 /**
  * Copy an array segment into an array in end to start order
  * 
@@ -206,24 +217,25 @@ inline void revarraycopy(byte* src, long soff, byte* dest, long doff, long lengt
 }
 
 
+
 /**
  * Rotate a word
  * 
- * @param   X:long  The value to rotate
- * @param   N:long  Rotation steps, may not be 0
- * @return   :long  The value rotated
+ * @param   X:llong  The value to rotate
+ * @param   N:long   Rotation steps, may not be 0
+ * @return   :llong  The value rotated
  */
-#define rotate(X, N)  (((X >> (w - (N % w))) + (X << (N % w))) & wmod)
+#define rotate(X, N)  ((((X) >> (w - ((N) % w))) + ((X) << ((N) % w))) & wmod)
 
 
 /**
  * Rotate a 64-bit word
  * 
- * @param   X:long  The value to rotate
- * @param   N:long  Rotation steps, may not be 0
- * @return   :long  The value rotated
+ * @param   X:llong  The value to rotate
+ * @param   N:long   Rotation steps, may not be 0
+ * @return   :llong  The value rotated
  */
-#define rotate64(X, N)  ((llong)((unsigned llong)X >> (64 - N)) + (X << N))
+#define rotate64(X, N)  ((llong)((unsigned llong)(X) >> (64 - (N))) + ((X) << (N)))
 
 
 /**
@@ -237,7 +249,7 @@ inline void revarraycopy(byte* src, long soff, byte* dest, long doff, long lengt
 
 /**
  * Perform one round of computation
-* 
+ * 
  * @param  A   The current state
  * @param  rc  Round constant
  */
@@ -284,12 +296,12 @@ static void keccakFRound(llong* A, llong rc)
     }
   
   /* ξ step */
-  #define __A(X, X5, X10) A[X] = B[X] ^ ((~(B[X5])) & B[X10])
-  __A( 0,  5,  0);  __A( 1,  6,  1);  __A( 2,  7,  2);  __A( 3,  8,  3);  __A( 4,  9,  4);
-  __A( 5, 10,  5);  __A( 6, 11,  6);  __A( 7, 12,  7);  __A( 8, 13,  8);  __A( 9, 14,  9);
-  __A(10, 15, 10);  __A(11, 16, 11);  __A(12, 17, 12);  __A(13, 18, 13);  __A(14, 19, 14);
-  __A(15, 20, 15);  __A(16, 21, 16);  __A(17, 22, 17);  __A(18, 23, 18);  __A(19, 24, 19);
-  __A(20,  0, 20);  __A(21,  1, 21);  __A(22,  2, 22);  __A(23,  3, 23);  __A(24,  4, 24);
+  #define __A(X, X5, X10)  A[X] = B[X] ^ ((~(B[X5])) & B[X10])
+  __A( 0,  5, 10);  __A( 1,  6, 11);  __A( 2,  7, 12);  __A( 3,  8, 13);  __A( 4,  9, 14);
+  __A( 5, 10, 15);  __A( 6, 11, 16);  __A( 7, 12, 17);  __A( 8, 13, 18);  __A( 9, 14, 19);
+  __A(10, 15, 20);  __A(11, 16, 21);  __A(12, 17, 22);  __A(13, 18, 23);  __A(14, 19, 24);
+  __A(15, 20,  0);  __A(16, 21,  1);  __A(17, 22,  2);  __A(18, 23,  3);  __A(19, 24,  4);
+  __A(20,  0,  5);  __A(21,  1,  6);  __A(22,  2,  7);  __A(23,  3,  8);  __A(24,  4,  9);
   #undef __A
   
   /* ι step */
@@ -377,7 +389,7 @@ inline llong toLane64(byte* message, long msglen, long rr, long off)
          ((off + 3 < n) ? ((llong)(message[off + 3]) << 24) : 0L) |
          ((off + 2 < n) ? ((llong)(message[off + 2]) << 16) : 0L) |
          ((off + 1 < n) ? ((llong)(message[off + 1]) <<  8) : 0L) |
-         ((off < n) ? ((llong)(message[off])) : 0L);
+         ((off     < n) ? ((llong)(message[off    ])      ) : 0L);
 }
 
 
@@ -661,10 +673,7 @@ extern byte* digest(byte* msg, long msglen)
 	  for (_ = 0; _ < ww; _++)
 	    {
 	      if (j < nn)
-		{
-		  rc[ptr] = (byte)v;
-		  ptr += 1;
-		}
+		rc[ptr++] = (byte)v;
 	      v >>= 8;
 	      j += 1;
 	    }
