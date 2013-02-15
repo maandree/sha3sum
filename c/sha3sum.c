@@ -41,7 +41,7 @@ long eq(char* a, char* b)
   while (*a)
     if (*a++ != *b++)
       return false;
-  return true;
+  return !*b;
 }
 
 
