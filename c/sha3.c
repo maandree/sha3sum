@@ -365,7 +365,7 @@ inline llong toLane(byte* message, long msglen, long rr, long ww, long off)
   llong rc = 0;
   long n = min(msglen, rr), i;
   for (i = off + ww - 1; i >= off; i--)
-    rc = (rc << 8) | ((i < n) ? (llong)(message[i]) : 0L);
+    rc = (rc << 8) | ((i < n) ? (llong)(message[i] & 255) : 0L);
   return rc;
 }
 
@@ -382,14 +382,14 @@ inline llong toLane(byte* message, long msglen, long rr, long ww, long off)
 inline llong toLane64(byte* message, long msglen, long rr, long off)
 {
   long n = min(msglen, rr);
-  return ((off + 7 < n) ? ((llong)(message[off + 7]) << 56) : 0L) |
-         ((off + 6 < n) ? ((llong)(message[off + 6]) << 48) : 0L) |
-         ((off + 5 < n) ? ((llong)(message[off + 5]) << 40) : 0L) |
-         ((off + 4 < n) ? ((llong)(message[off + 4]) << 32) : 0L) |
-         ((off + 3 < n) ? ((llong)(message[off + 3]) << 24) : 0L) |
-         ((off + 2 < n) ? ((llong)(message[off + 2]) << 16) : 0L) |
-         ((off + 1 < n) ? ((llong)(message[off + 1]) <<  8) : 0L) |
-         ((off     < n) ? ((llong)(message[off    ])      ) : 0L);
+  return ((off + 7 < n) ? ((llong)(message[off + 7] & 255) << 56) : 0L) |
+         ((off + 6 < n) ? ((llong)(message[off + 6] & 255) << 48) : 0L) |
+         ((off + 5 < n) ? ((llong)(message[off + 5] & 255) << 40) : 0L) |
+         ((off + 4 < n) ? ((llong)(message[off + 4] & 255) << 32) : 0L) |
+         ((off + 3 < n) ? ((llong)(message[off + 3] & 255) << 24) : 0L) |
+         ((off + 2 < n) ? ((llong)(message[off + 2] & 255) << 16) : 0L) |
+         ((off + 1 < n) ? ((llong)(message[off + 1] & 255) <<  8) : 0L) |
+         ((off     < n) ? ((llong)(message[off    ] & 255)      ) : 0L);
 }
 
 

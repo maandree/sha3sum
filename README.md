@@ -2,7 +2,7 @@ COMPLETE STATUS:
 
     Pure Java 1.2+ :: optimised
     Python 3       :: optimised
-    C ISO C90      :: optimised  -- ERROR ON NON-ASCII DATA AND WITH ITERATIONS --
+    C ISO C90      :: optimised
     Java/C JNI     :: under development
     Vala           :: correct, under development
     NASM           :: planned (maybe, after jni)
