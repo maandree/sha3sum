@@ -21,9 +21,9 @@
 
 
 #if __x86_64__ || __ppc64__
-    #define llong long int
+#define llong long int
 #else
-    #define llong long long int
+#define llong long long int
 #endif
 
 
@@ -41,12 +41,12 @@
  * Round contants
  */
 static const llong RC[] = {
-	    0x0000000000000001L, 0x0000000000008082L, 0x800000000000808AL, 0x8000000080008000L,
-	    0x000000000000808BL, 0x0000000080000001L, 0x8000000080008081L, 0x8000000000008009L,
-	    0x000000000000008AL, 0x0000000000000088L, 0x0000000080008009L, 0x000000008000000AL,
-	    0x000000008000808BL, 0x800000000000008BL, 0x8000000000008089L, 0x8000000000008003L,
-	    0x8000000000008002L, 0x8000000000000080L, 0x000000000000800AL, 0x800000008000000AL,
-	    0x8000000080008081L, 0x8000000000008080L, 0x0000000080000001L, 0x8000000080008008L};
+  0x0000000000000001L, 0x0000000000008082L, 0x800000000000808AL, 0x8000000080008000L,
+  0x000000000000808BL, 0x0000000080000001L, 0x8000000080008081L, 0x8000000000008009L,
+  0x000000000000008AL, 0x0000000000000088L, 0x0000000080008009L, 0x000000008000000AL,
+  0x000000008000808BL, 0x800000000000008BL, 0x8000000000008089L, 0x8000000000008003L,
+  0x8000000000008002L, 0x8000000000000080L, 0x000000000000800AL, 0x800000008000000AL,
+  0x8000000080008081L, 0x8000000000008080L, 0x0000000080000001L, 0x8000000080008008L};
 
 /**
  * Keccak-f round temporary
@@ -98,7 +98,7 @@ static long l = 0;
  * 12 + 2ℓ, the number of rounds
  */
 static long nr = 0;
-    
+
 
 /**
  * The current state
@@ -109,7 +109,7 @@ static llong* S = null;
  * Left over water to fill the sponge with at next update
  */
 static byte* M = null;
-    
+
 /**
  * Pointer for {@link #M}
  */
@@ -136,8 +136,8 @@ inline void arraycopy(byte* src, long soff, byte* dest, long doff, long length)
   src += soff;
   dest += doff;
   
-  #define __(X)  src[X] = dest[X]
-  #define __0  *src = *dest
+  #define __(X)  dest[X] = src[X]
+  #define __0  *dest = *src
   #define __1  __(0x01)
   #define __2  __(0x02); __(0x03)
   #define __3  __(0x04); __(0x05); __(0x06); __(0x07)
@@ -238,7 +238,7 @@ inline void revarraycopy(byte* src, long soff, byte* dest, long doff, long lengt
 
 /**
  * Perform one round of computation
-* 
+ * 
  * @param  A   The current state
  * @param  rc  Round constant
  */
@@ -354,7 +354,7 @@ inline llong toLane(byte* message, long msglen, long rr, long ww, long off)
   llong rc = 0;
   long n = min(msglen, rr), i;
   for (i = off + ww - 1; i >= off; i--)
-    rc = (rc << 8) | ((i < n) ? (llong)(message[i]) : 0L);
+    rc = (rc << 8) | ((i < n) ? (llong)(message[i] & 255) : 0L);
   return rc;
 }
 
@@ -371,14 +371,14 @@ inline llong toLane(byte* message, long msglen, long rr, long ww, long off)
 inline llong toLane64(byte* message, long msglen, long rr, long off)
 {
   long n = min(msglen, rr);
-  return ((off + 7 < n) ? ((llong)(message[off + 7]) << 56) : 0L) |
-         ((off + 6 < n) ? ((llong)(message[off + 6]) << 48) : 0L) |
-         ((off + 5 < n) ? ((llong)(message[off + 5]) << 40) : 0L) |
-         ((off + 4 < n) ? ((llong)(message[off + 4]) << 32) : 0L) |
-         ((off + 3 < n) ? ((llong)(message[off + 3]) << 24) : 0L) |
-         ((off + 2 < n) ? ((llong)(message[off + 2]) << 16) : 0L) |
-         ((off + 1 < n) ? ((llong)(message[off + 1]) <<  8) : 0L) |
-         ((off < n) ? ((llong)(message[off])) : 0L);
+  return ((off + 7 < n) ? ((llong)(message[off + 7] & 255) << 56) : 0L) |
+         ((off + 6 < n) ? ((llong)(message[off + 6] & 255) << 48) : 0L) |
+         ((off + 5 < n) ? ((llong)(message[off + 5] & 255) << 40) : 0L) |
+         ((off + 4 < n) ? ((llong)(message[off + 4] & 255) << 32) : 0L) |
+         ((off + 3 < n) ? ((llong)(message[off + 3] & 255) << 24) : 0L) |
+         ((off + 2 < n) ? ((llong)(message[off + 2] & 255) << 16) : 0L) |
+         ((off + 1 < n) ? ((llong)(message[off + 1] & 255) <<  8) : 0L) |
+         ((off     < n) ? ((llong)(message[off    ] & 255)      ) : 0L);
 }
 
 
@@ -563,7 +563,7 @@ void update(byte* msg, jint msglen)
   if (ww == 8)
     for (i = 0; i < len; i += rr)
       {
-	#define __S(Si, OFF)  S[Si] ^= toLane64(message, len, rr, i + OFF)
+        #define __S(Si, OFF)  S[Si] ^= toLane64(message, len, rr, i + OFF)
 	__S( 0,   0);  __S( 5,   8);  __S(10,  16);  __S(15,  24);  __S(20,  32);
 	__S( 1,  40);  __S( 6,  48);  __S(11,  56);  __S(16,  64);  __S(21,  72);
 	__S( 2,  80);  __S( 7,  88);  __S(12,  96);  __S(17, 104);  __S(22, 112);
@@ -575,7 +575,7 @@ void update(byte* msg, jint msglen)
   else
     for (i = 0; i < len; i += rr)
       {
-	#define __S(Si, OFF)  S[Si] ^= toLane(message, len, rr, ww, i + OFF * w)
+        #define __S(Si, OFF)  S[Si] ^= toLane(message, len, rr, ww, i + OFF * w)
 	__S( 0,  0);  __S( 5,  1);  __S(10,  2);  __S(15,  3);  __S(20,  4);
 	__S( 1,  5);  __S( 6,  6);  __S(11,  7);  __S(16,  8);  __S(21,  9);
 	__S( 2, 10);  __S( 7, 11);  __S(12, 12);  __S(17, 13);  __S(22, 14);
@@ -587,7 +587,7 @@ void update(byte* msg, jint msglen)
   
   free(message);
 }
-    
+
 
 /**
  * Absorb the last part of the message and squeeze the Keccak sponge
@@ -626,7 +626,7 @@ byte* digest(byte* msg, jint msglen)
   if (ww == 8)
     for (i = 0; i < len; i += rr)
       {
-	#define __S(Si, OFF)  S[Si] ^= toLane64(message, len, rr, i + OFF)
+        #define __S(Si, OFF)  S[Si] ^= toLane64(message, len, rr, i + OFF)
 	__S( 0,   0);  __S( 5,   8);  __S(10,  16);  __S(15,  24);  __S(20,  32);
 	__S( 1,  40);  __S( 6,  48);  __S(11,  56);  __S(16,  64);  __S(21,  72);
 	__S( 2,  80);  __S( 7,  88);  __S(12,  96);  __S(17, 104);  __S(22, 112);
@@ -638,7 +638,7 @@ byte* digest(byte* msg, jint msglen)
   else
     for (i = 0; i < len; i += rr)
       {
-	#define __S(Si, OFF)  S[Si] ^= toLane(message, len, rr, ww, i + OFF * w)
+        #define __S(Si, OFF)  S[Si] ^= toLane(message, len, rr, ww, i + OFF * w)
 	__S( 0,  0);  __S( 5,  1);  __S(10,  2);  __S(15,  3);  __S(20,  4);
 	__S( 1,  5);  __S( 6,  6);  __S(11,  7);  __S(16,  8);  __S(21,  9);
 	__S( 2, 10);  __S( 7, 11);  __S(12, 12);  __S(17, 13);  __S(22, 14);
@@ -662,10 +662,7 @@ byte* digest(byte* msg, jint msglen)
 	  for (_ = 0; _ < ww; _++)
 	    {
 	      if (j < nn)
-		{
-		  rc[ptr] = (byte)v;
-		  ptr += 1;
-		}
+		rc[ptr++] = (byte)v;
 	      v >>= 8;
 	      j += 1;
 	    }
@@ -691,18 +688,19 @@ JNIEXPORT void JNICALL Java_SHA3_initialise(JNIEnv* env, jclass class, jint bitr
 
 JNIEXPORT void JNICALL Java_SHA3_update(JNIEnv* env, jclass class, jbyteArray msg, jint msglen)
 {
-  (void) env;
   (void) class;
   
-  // FIXME
+  update((*env)->GetByteArrayElements(env, msg, 0), msglen);
 }
 
 
 JNIEXPORT jbyteArray JNICALL Java_SHA3_digest(JNIEnv* env, jclass class, jbyteArray msg, jint msglen)
 {
-  (void) env;
   (void) class;
   
-  // FIXME
+  byte* rcn = digest((*env)->GetByteArrayElements(env, msg, 0), msglen);
+  jbyteArray rcj = (*env)->NewByteArray(env, (n + 7) >> 3);
+  (*env)->SetByteArrayRegion(env, rcj, 0, (n + 7) >> 3, rcn);
+  return rcj;
 }
 
