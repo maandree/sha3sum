@@ -18,12 +18,15 @@ CPPFLAGS=
 LDFLAGS=
 C_FLAGS=$(CFLAGS) $(CPPFLAGS) $(LDFLAGS)
 
+JNI_INCLUDE=-I$${JAVA_HOME}/include
+JNI_FLAGS=$(JNI_INCLUDE) -fPIC -shared
+
 
 JAVA_CLASSES = $(shell find "pure-java" | grep '\.java$$' | sed -e 's_^_bin/_g' -e 's_java$$_class_g')
 C_OBJS = $(shell find "c" | grep '\.h$$' | sed -e 's_^_bin/_g' -e 's_h$$_o_g')
 C_BINS = bin/c/sha3sum
 
-all: pure-java c
+all: pure-java c java-c-jni
 
 
 pure-java: $(JAVA_CLASSES)
@@ -39,6 +42,11 @@ bin/c/%.o: c/%.h c/%.c
 bin/c/%: c/%.c
 	mkdir -p "bin/c"
 	$(CC) $(C_FLAGS) -o "$@" "c/$*".c "c/"*.o
+
+java-c-jni: bin/java-c-jni/SHA3.so
+bin/java-c-jni/%.so: java-c-jni/%.c
+	mkdir -p "bin/java-c-jni"
+	gcc $(C_FLAGS) $(JNI_FLAGS) "java-c-jni/$*.c" -o "bin/java-c-jni/$*.so"
 
 
 .PHONY: clean
