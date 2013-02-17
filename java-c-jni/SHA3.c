@@ -28,7 +28,7 @@
 
 
 #define null    0
-#define byte    char
+#define byte    jbyte
 #define boolean long
 #define true    1
 #define false   0
@@ -409,7 +409,7 @@ inline byte* pad10star1(byte* msg, long len, long r, long* outlen)
     }
   else
     {
-      char* M;
+      byte* M;
       long N;
       len = (nrf + 1) << 3;
       len = ((len - (len % r) + (r - 8)) >> 3) + 1;
@@ -696,10 +696,12 @@ JNIEXPORT void JNICALL Java_SHA3_update(JNIEnv* env, jclass class, jbyteArray ms
 
 JNIEXPORT jbyteArray JNICALL Java_SHA3_digest(JNIEnv* env, jclass class, jbyteArray msg, jint msglen)
 {
+  byte* rcn;
+  jbyteArray rcj;
   (void) class;
   
-  byte* rcn = digest((*env)->GetByteArrayElements(env, msg, 0), msglen);
-  jbyteArray rcj = (*env)->NewByteArray(env, (n + 7) >> 3);
+  rcn = digest((*env)->GetByteArrayElements(env, msg, 0), msglen);
+  rcj = (*env)->NewByteArray(env, (n + 7) >> 3);
   (*env)->SetByteArrayRegion(env, rcj, 0, (n + 7) >> 3, rcn);
   return rcj;
 }

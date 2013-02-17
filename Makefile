@@ -38,10 +38,9 @@ c: $(C_OBJS) $(C_BINS)
 bin/c/%.o: c/%.h c/%.c
 	mkdir -p "bin/c"
 	$(CC) $(C_FLAGS) -c "c/$*".{c,h}
-	mv "$*.o" "c/$*.o"
+	mv "$*.o" "bin/c/$*.o"
 bin/c/%: c/%.c
-	mkdir -p "bin/c"
-	$(CC) $(C_FLAGS) -o "$@" "c/$*".c "c/"*.o
+	$(CC) $(C_FLAGS) -o "$@" "c/$*".c "bin/c/"*.o
 
 java-c-jni: bin/java-c-jni/SHA3.so
 bin/java-c-jni/%.so: java-c-jni/%.c
