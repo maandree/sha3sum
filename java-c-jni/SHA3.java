@@ -40,7 +40,7 @@ public class SHA3
      */
     static
     {
-	/* TODO load lib here */
+	System.loadLibrary("SHA3");
     }
     
     

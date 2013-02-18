@@ -7,9 +7,11 @@
 # 
 # [GNU All Permissive License]
 
+LIB_EXT=so
+
 JAVAC=javac
 JAVADIRS=-s "pure-java" -d "bin/pure-java" -cp "pure-java"
-JAVAFLAGS=-Xlint
+JAVAFLAGS=-Xlint -O
 JAVA_FLAGS=$(JAVADIRS) $(JAVAFLAGS)
 
 # NB!  Do not forget to test against -O0, -O4 to -O6 is not safe
@@ -18,21 +20,27 @@ CPPFLAGS=
 LDFLAGS=
 C_FLAGS=$(CFLAGS) $(CPPFLAGS) $(LDFLAGS)
 
-JNI_INCLUDE=-I$${JAVA_HOME}/include
-JNI_FLAGS=$(JNI_INCLUDE) -fPIC -shared
+JNI_C_INCLUDE=-I$${JAVA_HOME}/include
+JNI_C_FLAGS=$(JNI_INCLUDE) -fPIC -shared
+JNI_JAVADIRS=-s "java-c-jni" -d "bin/java-c-jni" -cp "java-c-jni"
+JNI_JAVAFLAGS=-Xlint -O
+JNI_JAVA_FLAGS=$(JNI_JAVADIRS) $(JNI_JAVAFLAGS)
 
 
 JAVA_CLASSES = $(shell find "pure-java" | grep '\.java$$' | sed -e 's_^_bin/_g' -e 's_java$$_class_g')
 C_OBJS = $(shell find "c" | grep '\.h$$' | sed -e 's_^_bin/_g' -e 's_h$$_o_g')
 C_BINS = bin/c/sha3sum
+JNI_CLASSES = $(shell find "java-c-jni" | grep '\.java$$' | sed -e 's_^_bin/_g' -e 's_java$$_class_g')
 
 all: pure-java c java-c-jni
+
 
 
 pure-java: $(JAVA_CLASSES)
 bin/pure-java/%.class: pure-java/%.java
 	mkdir -p "bin/pure-java"
 	$(JAVAC) $(JAVA_FLAGS) "pure-java/$*.java"
+
 
 c: $(C_OBJS) $(C_BINS)
 bin/c/%.o: c/%.h c/%.c
@@ -42,10 +50,15 @@ bin/c/%.o: c/%.h c/%.c
 bin/c/%: c/%.c
 	$(CC) $(C_FLAGS) -o "$@" "c/$*".c "bin/c/"*.o
 
-java-c-jni: bin/java-c-jni/SHA3.so
+
+java-c-jni: bin/java-c-jni/SHA3.$(LIB_EXT) $(JNI_CLASSES)
 bin/java-c-jni/%.so: java-c-jni/%.c
 	mkdir -p "bin/java-c-jni"
-	gcc $(C_FLAGS) $(JNI_FLAGS) "java-c-jni/$*.c" -o "bin/java-c-jni/$*.so"
+	gcc $(C_FLAGS) $(JNI_C_FLAGS) "java-c-jni/$*.c" -o "bin/java-c-jni/$*.$(LIB_EXT)"
+bin/java-c-jni/%.class: java-c-jni/%.java
+	 mkdir -p "bin/java-c-jni"
+	$(JAVAC) $(JNI_JAVA_FLAGS) "java-c-jni/$*.java"
+
 
 
 .PHONY: clean
