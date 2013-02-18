@@ -16,6 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import java.io.*;
+import java.util.*;
 
 
 /**
@@ -40,7 +42,14 @@ public class SHA3
      */
     static
     {
-	System.loadLibrary("SHA3");
+	try
+	{
+	    System.load((new File("./SHA3.so")).getCanonicalPath());
+	}
+	catch (IOException err)
+	{
+	    throw new Error("SHA3 library cannot be found");
+	}
     }
     
     
@@ -104,3 +113,4 @@ public class SHA3
     public static native byte[] digest(byte[] msg, int msglen);
     
 }
+
