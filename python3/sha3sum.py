@@ -698,7 +698,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             SHA3.initialise(r, c, o)
             blksize = (o + 7) >> 3
             try:
-                blksize = os.stat(os.path.realpath(fn)).st_size
+                blksize = os.stat(os.path.realpath(fn)).st_blksize
             except:
                 pass
             while True:
