@@ -109,7 +109,12 @@ class SHA3:
         @param   x:int  The value of which to calculate the binary logarithm
         @return   :int  The binary logarithm
         '''
-        return ((0 if (x & 0xFF00) == 0 else 8) + (0 if (x & 0xF0F0) == 0 else 4)) + ((0 if (x & 0xCCCC) == 0 else 2) + (0 if (x & 0xAAAA) == 0 else 1))
+        rc = 0
+        if (x & 0xFF00) != 0:  rc +=  8 ;  x >>=  8
+        if (x & 0x00F0) != 0:  rc +=  4 ;  x >>=  4
+        if (x & 0x000C) != 0:  rc +=  2 ;  x >>=  2
+        if (x & 0x0002) != 0:  rc +=  1
+        return rc
     
     
     @staticmethod

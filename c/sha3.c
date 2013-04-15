@@ -241,10 +241,18 @@ inline void revarraycopy(byte* src, long soff, byte* dest, long doff, long lengt
 /**
  * Binary logarithm
  * 
- * @param   X:long  The value of which to calculate the binary logarithm
- * @return   :long  The binary logarithm
+ * @param   x  The value of which to calculate the binary logarithm
+ * @return     The binary logarithm
  */
-#define lb(X)  ((((X & 0xFF00) == 0 ? 0 : 8) + ((X & 0xF0F0) == 0 ? 0 : 4)) + (((X & 0xCCCC) == 0 ? 0 : 2) + ((X & 0xAAAA) == 0 ? 0 : 1)))
+static long lb(long x)
+{
+  long rc = 0;
+  if ((x & 0xFF00) != 0)  { rc +=  8;  x >>=  8; }
+  if ((x & 0x00F0) != 0)  { rc +=  4;  x >>=  4; }
+  if ((x & 0x000C) != 0)  { rc +=  2;  x >>=  2; }
+  if ((x & 0x0002) != 0)    rc +=  1;
+  return rc;
+}
 
 
 /**
