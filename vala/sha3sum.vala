@@ -184,10 +184,12 @@ class SHA3 : Object
      */
     private int lb(int x)
     {
-        return (((x & 0xFF00) == 0 ? 0 : 8) +
-				((x & 0xF0F0) == 0 ? 0 : 4)) +
-		       (((x & 0xCCCC) == 0 ? 0 : 2) +
-				((x & 0xAAAA) == 0 ? 0 : 1));
+		int rc = 0;
+		if ((x & 0xFF00) != 0)  { rc +=  8;  x >>=  8; }
+		if ((x & 0x00F0) != 0)  { rc +=  4;  x >>=  4; }
+		if ((x & 0x000C) != 0)  { rc +=  2;  x >>=  2; }
+		if ((x & 0x0002) != 0)    rc +=  1;
+		return rc;
     }
     
     /**
