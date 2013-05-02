@@ -55,17 +55,20 @@ public class sha3sum
 	    cmd = cmd.substring(0, cmd.length() - 4);
 	cmd = cmd.intern();
 	
-	int _o, o = _o = 512;           /* --outputsize */
+	Integer O = null; int _o = 512;             /* --outputsize */
+	Integer S = null; int _s = 1600;            /* --statesize  */
+	Integer R = null; int _r = _s - (_o << 1);  /* --bitrate    */
+	Integer C = null; int _c = _s - _r;         /* --capacity   */
+	Integer W = null; int _w = _s / 25;         /* --wordsize   */
+	Integer I = null; int _i = 1;               /* --iterations */
+	int o = 0, s = 0, r = 0, c = 0, w = 0, i = 0;
+	
 	if      (cmd == "sha3-224sum")  o = _o = 224;
 	else if (cmd == "sha3-256sum")  o = _o = 256;
 	else if (cmd == "sha3-384sum")  o = _o = 384;
 	else if (cmd == "sha3-512sum")  o = _o = 512;
-	int _s, s = _s = 1600;          /* --statesize  */
-	int _r, r = _r = s - (o << 1);  /* --bitrate    */
-	int _c, c = _c = s - r;         /* --capacity   */
-	int _w, w = _w = s / 25;        /* --wordsize   */
-	int _i, i = _i = 1;             /* --iterations */
 	boolean binary = false;
+	boolean multi = false;
 	
 	String[] files = new String[argv.length + 1];
 	int fptr = 0;
@@ -110,6 +113,9 @@ public class sha3sum
 		    System.out.println("        ");
 		    System.out.println("        -b");
 		    System.out.println("        --binary        Print the checksum in binary, rather than hexadecimal.");
+		    System.out.println("        ");
+		    System.out.println("        -m");
+		    System.out.println("        --multi         Print the chechsum at all iterations.");
 		    System.out.println("");
 		    System.out.println("");
 		    System.out.println("COPYRIGHT:");
@@ -139,17 +145,17 @@ public class sha3sum
 			arg = null;
 		    }
 		    if ((linger[0] == "-r") || (linger[0] == "--bitrate"))
-			o = (s - (r = Integer.parseInt(linger[1]))) >> 1;
+			R = Integer.valueOf(linger[1]);
 		    else if ((linger[0] == "-c") || (linger[0] == "--capacity"))
-			r = s - (c = Integer.parseInt(linger[1]));
+			C = Integer.valueOf(linger[1]);
 		    else if ((linger[0] == "-w") || (linger[0] == "--wordsize"))
-			s = (w = Integer.parseInt(linger[1])) * 25;
+			W = Integer.valueOf(linger[1]);
 		    else if ((linger[0] == "-o") || (linger[0] == "--outputsize"))
-			r = s - ((o = Integer.parseInt(linger[1])) << 1);
+			O = Integer.valueOf(linger[1]);
 		    else if ((linger[0] == "-s") || (linger[0] == "--statesize"))
-			r = (s = Integer.parseInt(linger[1])) - (o << 1);
+			S = Integer.valueOf(linger[1]);
 		    else if ((linger[0] == "-i") || (linger[0] == "--iterations"))
-			i = Integer.parseInt(linger[1]);
+			I = Integer.valueOf(linger[1]);
 		    else
 		    {
 			System.err.println(cmd + ": unrecognised option: " + linger[0]);
@@ -174,6 +180,8 @@ public class sha3sum
 		else
 		    if (arg == "--binary")
 	                binary = true;
+		    else if (arg == "--multi")
+	                multi = true;
 		    else
 			linger = new String[] { arg, null };
 	    else if (arg.startsWith("-"))
@@ -184,6 +192,11 @@ public class sha3sum
                     binary = true;
 		    arg = arg.substring(1);
 		}
+                else if (arg.charAt(0) == 'm')
+		{
+                    multi = true;
+		    arg = arg.substring(1);
+		}
                 else if (arg.length() == 1)
 		    linger = new String[] { "-" + arg, null };
                 else
@@ -192,6 +205,96 @@ public class sha3sum
             else
                 files[fptr++] = arg;
 	}
+	
+	
+	i = I == null ? _i : I.intValue();
+	
+	if (S != null)
+	{   s = S.intValue();
+	    if ((s <= 0) || (s > 1600) || (s % 25 != 0))
+	    {	System.err.println("The state size must be a positive multiple of 25 and is limited to 1600.");
+		System.exit(6);
+	}   }
+	
+	if (W != null)
+	{   w = W.intValue();
+	    if ((w <= 0) || (w > 64))
+	    {	System.err.println("The word size must be positive and is limited to 64.");
+		System.exit(6);
+	    }
+	    if ((S != null) && (s != w * 25))
+	    {	System.err.println("The state size must be 25 times of the word size.");
+		System.exit(6);
+	    }
+	    else if (S == null)
+		s = new Integer(w * 25);
+	}
+	
+	if (C != null)
+	{   c = C.intValue();
+	    if ((c <= 0) || ((c & 7) != 0))
+	    {	System.err.println("The capacity must be a positive multiple of 8.");
+		System.exit(6);
+	}   }
+	
+	if (R != null)
+	{   r = R.intValue();
+	    if ((r <= 0) || ((r & 7) != 0))
+	    {	System.err.println("The bitrate must be a positive multiple of 8.");
+		System.exit(6);
+	}   }
+	
+	if (O != null)
+	{   o = O.intValue();
+	    if (o <= 0)
+	    {	System.err.println("The output size must be positive.");
+		System.exit(6);
+	}   }
+	
+	
+	if ((R == null) && (C == null) && (O == null)) // s?
+	{   r = ((c = (o = ((((s = S == null ? _s : s) << 5) / 100 + 7) >> 3) << 3) << 1) - s);
+	    o = o < 8 ? 8 : o;
+	}
+	else if ((R == null) && (C == null)) // !o s?
+	{   r = _r;
+	    c = _c;
+	    s = S == null ? (r + c) : s;
+	}
+	else if (R == null) // !c o? s?
+	{   r = (s = S == null ? _s : s) - c;
+	    o = O == null ? (c == 8 ? 8 : (c << 1)) : o;
+	}
+	else if (C == null) // !r o? s?
+	{   c = (s = S == null ? _s : s) - r;
+	    o = O == null ? (c == 8 ? 8 : (c << 1)) : o;
+	}
+	else // !r !c o? s?
+	{   s = S == null ? (r + c) : s;
+	    o = O == null ? (c == 8 ? 8 : (c << 1)) : o;
+	}
+	
+	
+	if (r > s)
+	{   System.err.println("The bitrate must not be higher than the state size.");
+	    System.exit(6);
+	}
+	if (c > s)
+	{   System.err.println("The capacity must not be higher than the state size.");
+	    System.exit(6);
+	}
+	if (r + c != s)
+	{   System.err.println("The sum of the bitrate and the capacity must equal the state size.");
+	    System.exit(6);
+	}
+	
+	System.err.println("Bitrate: " + r);
+	System.err.println("Capacity: " + c);
+	System.err.println("Word size: " + w);
+	System.err.println("State size: " + s);
+	System.err.println("Output size: " + o);
+	System.err.println("Iterations: " + i);
+	
 	
 	if (fptr == 0)
 	    files[fptr++] = null;
@@ -227,28 +330,59 @@ public class sha3sum
 		    SHA3.update(chunk, read);
 		}
 		byte[] bs = SHA3.digest();
-		for (int _ = 1; _ < i; _++)
+		if (multi == false)
 		{
-		    SHA3.initialise(r, c, o);
-		    bs = SHA3.digest(bs);
+		    for (int _ = 1; _ < i; _++)
+		    {
+			SHA3.initialise(r, c, o);
+			bs = SHA3.digest(bs);
+		    }
+		    if (binary)
+		    {   if (filename == null)
+			    stdin = bs;
+			System.out.write(bs);
+		    }
+		    else
+		    {   for (int b = 0, bn = bs.length; b < bn; b++)
+			{   rc += "0123456789ABCDEF".charAt((bs[b] >> 4) & 15);
+			    rc += "0123456789ABCDEF".charAt(bs[b] & 15);
+			}
+			rc += " " + (filename == null ? "-" : filename) + "\n";
+			if (filename == null)
+			    stdin = rc.getBytes("UTF-8");
+			System.out.print(rc);
+		    }
 		}
-		if (binary)
-		{   if (filename == null)
-			stdin = bs;
+		else if (binary)
+		{
 		    System.out.write(bs);
-		    System.out.flush();
+		    for (int _ = 1; _ < i; _++)
+		    {
+			SHA3.initialise(r, c, o);
+			System.out.write(bs = SHA3.digest(bs));
+		    }
 		}
 		else
-		{   for (int b = 0, bn = bs.length; b < bn; b++)
-		    {	rc += "0123456789ABCDEF".charAt((bs[b] >> 4) & 15);
-			rc += "0123456789ABCDEF".charAt(bs[b] & 15);
+		{
+		    byte[] out = new byte[(bs.length << 1) + 1];
+		    for (int b = 0, bn = bs.length; b < bn; b++)
+		    {   out[ b << 1     ] = (byte)("0123456789ABCDEF".charAt((bs[b] >> 4) & 15));
+			out[(b << 1) | 1] = (byte)("0123456789ABCDEF".charAt(bs[b] & 15));
 		    }
-		    rc += " " + (filename == null ? "-" : filename) + "\n";
-		    if (filename == null)
-			stdin = rc.getBytes("UTF-8");
-		    System.out.print(rc);
-		    System.out.flush();
+		    out[out.length - 1] = '\n';
+		    System.out.write(out);
+		    for (int _ = 1; _ < i; _++)
+		    {
+			SHA3.initialise(r, c, o);
+			bs = SHA3.digest(bs);
+			for (int b = 0, bn = bs.length; b < bn; b++)
+			{   out[ b << 1     ] = (byte)("0123456789ABCDEF".charAt((bs[b] >> 4) & 15));
+			    out[(b << 1) | 1] = (byte)("0123456789ABCDEF".charAt(bs[b] & 15));
+			}
+			System.out.write(out);
+		    }
 		}
+		System.out.flush();
 	    }
 	    catch (final IOException err)
 	    {   System.err.println(cmd + ": cannot read file: " + filename + ": " + err);
