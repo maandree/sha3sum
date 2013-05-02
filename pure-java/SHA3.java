@@ -508,7 +508,7 @@ public class SHA3
         int ptr = 0;
         
         int rr = SHA3.r >> 3;
-        int nn = SHA3.n >> 3;
+        int nn = (SHA3.n + 7) >> 3;
         int ww = SHA3.w >> 3;
         
         /* Absorbing phase */
