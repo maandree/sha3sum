@@ -1,5 +1,7 @@
 COMPLETE STATUS:
 
+>> Investigating problems with patterns, and reflective hashes  >>
+
     Pure Java 1.2+ :: optimised
     Python 3       :: optimised
     C ISO C90      :: optimised
