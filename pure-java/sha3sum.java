@@ -408,7 +408,7 @@ public class sha3sum
 			System.out.println(now);
 		    }
 		    if (loop != null)
-			System.out.println("\033[31;31mLoop found\033[00m");
+			System.out.println("\033[01;31mLoop found\033[00m");
 		}
 		System.out.flush();
 	    }
