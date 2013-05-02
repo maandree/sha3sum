@@ -68,7 +68,7 @@ public class sha3sum
 	else if (cmd == "sha3-384sum")  o = _o = 384;
 	else if (cmd == "sha3-512sum")  o = _o = 512;
 	boolean binary = false;
-	boolean multi = false;
+	int multi = 0;
 	
 	String[] files = new String[argv.length + 1];
 	int fptr = 0;
@@ -181,7 +181,7 @@ public class sha3sum
 		    if (arg == "--binary")
 	                binary = true;
 		    else if (arg == "--multi")
-	                multi = true;
+	                multi++;
 		    else
 			linger = new String[] { arg, null };
 	    else if (arg.startsWith("-"))
@@ -194,7 +194,7 @@ public class sha3sum
 		}
                 else if (arg.charAt(0) == 'm')
 		{
-                    multi = true;
+                    multi++;
 		    arg = arg.substring(1);
 		}
                 else if (arg.length() == 1)
@@ -330,7 +330,7 @@ public class sha3sum
 		    SHA3.update(chunk, read);
 		}
 		byte[] bs = SHA3.digest();
-		if (multi == false)
+		if (multi == 0)
 		{
 		    for (int _ = 1; _ < i; _++)
 		    {
@@ -362,7 +362,7 @@ public class sha3sum
 			System.out.write(bs = SHA3.digest(bs));
 		    }
 		}
-		else
+		else if (multi == 1)
 		{
 		    byte[] out = new byte[(bs.length << 1) + 1];
 		    for (int b = 0, bn = bs.length; b < bn; b++)
@@ -380,6 +380,32 @@ public class sha3sum
 			    out[(b << 1) | 1] = (byte)("0123456789ABCDEF".charAt(bs[b] & 15));
 			}
 			System.out.write(out);
+		    }
+		}
+		else
+		{
+		    HashSet<String> got = new HashSet<String>();
+		    String loop = null;
+		    byte[] out = new byte[(bs.length << 1)];
+		    for (int _ = 0; _ < i; _++)
+		    {
+			if (_ > 0)
+			{   SHA3.initialise(r, c, o);
+			    bs = SHA3.digest(bs);
+			}
+			for (int b = 0, bn = bs.length; b < bn; b++)
+			{   out[ b << 1     ] = (byte)("0123456789ABCDEF".charAt((bs[b] >> 4) & 15));
+			    out[(b << 1) | 1] = (byte)("0123456789ABCDEF".charAt(bs[b] & 15));
+			}
+			String now = new String(out, "UTF-8");
+			if (loop == null)
+			    if (got.contains(now))
+				loop = now;
+			    else
+				got.add(now);
+			if ((loop != null) && (loop.equals(now)))
+			    now = "\033[31m" + now + "\033[00m";
+			System.out.println(now);
 		    }
 		}
 		System.out.flush();
