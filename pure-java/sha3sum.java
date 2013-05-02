@@ -253,7 +253,7 @@ public class sha3sum
 	
 	
 	if ((R == null) && (C == null) && (O == null)) // s?
-	{   r = ((c = (o = ((((s = S == null ? _s : s) << 5) / 100 + 7) >> 3) << 3) << 1) - s);
+	{   r = -((c = (o = ((((s = S == null ? _s : s) << 5) / 100 + 7) >> 3) << 3) << 1) - s);
 	    o = o < 8 ? 8 : o;
 	}
 	else if ((R == null) && (C == null)) // !o s?
@@ -287,6 +287,7 @@ public class sha3sum
 	{   System.err.println("The sum of the bitrate and the capacity must equal the state size.");
 	    System.exit(6);
 	}
+	
 	
 	System.err.println("Bitrate: " + r);
 	System.err.println("Capacity: " + c);
