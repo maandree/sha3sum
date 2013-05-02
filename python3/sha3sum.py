@@ -545,7 +545,7 @@ class SHA3:
                 i += 1
             olen -= SHA3.r
             if olen > 0:
-                SHA3.keccakF(S)
+                SHA3.keccakF(SHA3.S)
         
         return bytes(rc)
 
