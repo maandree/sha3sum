@@ -511,7 +511,7 @@ class SHA3 : Object
         int ptr = 0;
         
         int rr = this.r >> 3;
-        int nn = this.n >> 3;
+        int nn = (this.n + 7) >> 3;
         int ww = this.w >> 3;
         
         /* Absorbing phase */
