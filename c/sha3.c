@@ -691,6 +691,9 @@ extern byte* digest(byte* msg, long msglen)
       if (olen > 0)
 	keccakF(S);
     }
+  if ((n & 7))
+    rc[n >> 3] &= (1 << (n & 7)) - 1;
+  
   return rc;
 }
 

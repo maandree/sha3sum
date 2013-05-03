@@ -465,7 +465,7 @@ class SHA3:
         ptr = 0
         
         rr = SHA3.r >> 3
-        nn = (SHA3.n + 3) >> 3
+        nn = (SHA3.n + 7) >> 3
         ww = SHA3.w >> 3
         
         # Absorbing phase
@@ -546,6 +546,8 @@ class SHA3:
             olen -= SHA3.r
             if olen > 0:
                 SHA3.keccakF(SHA3.S)
+        if (SHA3.n & 7) != 0:
+            rc[len(rc) - 1] &= (1 << (SHA3.n & 7)) - 1
         
         return bytes(rc)
 

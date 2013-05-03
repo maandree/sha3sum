@@ -602,6 +602,9 @@ class SHA3 : Object
 			if (olen > 0)
 				this.keccakF(S);
 		}
+        if ((n & 7) != 0)
+            rc[n >> 3] &= (1 << (n & 7)) - 1;
+        
         return rc;
     }
     
