@@ -492,6 +492,12 @@ public class SHA3
      */
     public static byte[] digest(byte[] msg, int msglen)
     {
+	/*{   String _;
+	    System.out.print("\033[32m");
+	    for (int j = 0; j < msglen; j++)
+		System.out.print((_ = "00" + Long.toString(msg[j] & 255, 16)).substring(_.length() - 2));
+	    System.out.println("\033[00m");
+	}*/
 	byte[] message;
         if ((msg == null) || (msglen == 0))
             message = SHA3.pad10star1(SHA3.M, SHA3.mptr, SHA3.r);
@@ -502,6 +508,12 @@ public class SHA3
 	    System.arraycopy(msg, 0, SHA3.M, SHA3.mptr, msglen);
 	    message = SHA3.pad10star1(SHA3.M, SHA3.mptr + msglen, SHA3.r);
 	}
+	/*{   String _;
+	    System.out.print("\033[33m");
+	    for (int j = 0; j < message.length; j++)
+		System.out.print((_ = "00" + Long.toString(message[j] & 255, 16)).substring(_.length() - 2));
+	    System.out.println("\033[00m");
+	}*/
         SHA3.M = null;
         int len = message.length;
         byte[] rc = new byte[(SHA3.n + 7) >> 3];
@@ -515,6 +527,13 @@ public class SHA3
         if (ww == 8)
             for (int i = 0; i < len; i += rr)
 	    {
+		/*if (i == 0)
+		{   String _;
+		    System.out.print("\033[34m");
+		    for (int j = 0; j < 25; j++)
+			System.out.print((_ = "0000000000000000" + Long.toString(SHA3.S[j], 16)).substring(_.length() - 16));
+		    System.out.println("\033[00m");
+		}*/
 		SHA3.S[ 0] ^= SHA3.toLane64(message, rr, i + 0);
 		SHA3.S[ 5] ^= SHA3.toLane64(message, rr, i + 8);
 		SHA3.S[10] ^= SHA3.toLane64(message, rr, i + 16);
@@ -540,6 +559,13 @@ public class SHA3
                 SHA3.S[14] ^= SHA3.toLane64(message, rr, i + 176);
                 SHA3.S[19] ^= SHA3.toLane64(message, rr, i + 184);
                 SHA3.S[24] ^= SHA3.toLane64(message, rr, i + 192);
+		/*if (i == 0)
+		{   String _;
+		    System.out.print("\033[35m");
+		    for (int j = 0; j < 25; j++)
+			System.out.print((_ = "0000000000000000" + Long.toString(SHA3.S[j], 16)).substring(_.length() - 16));
+		    System.out.println("\033[00m");
+		}*/
                 SHA3.keccakF(SHA3.S);
 	    }
         else

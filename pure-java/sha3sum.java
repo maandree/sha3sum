@@ -67,7 +67,7 @@ public class sha3sum
 	else if (cmd == "sha3-256sum")  o = _o = 256;
 	else if (cmd == "sha3-384sum")  o = _o = 384;
 	else if (cmd == "sha3-512sum")  o = _o = 512;
-	boolean binary = false;
+	boolean binary = false, hex = false;
 	int multi = 0;
 	
 	String[] files = new String[argv.length + 1];
@@ -110,6 +110,9 @@ public class sha3sum
 		    System.out.println("        ");
 		    System.out.println("        -i ITERATIONS");
 		    System.out.println("        --iterations    The number of hash iterations to run.   (default: " + _i + ")");
+		    System.out.println("        ");
+		    System.out.println("        -h");
+		    System.out.println("        --hex           Read the input in hexadecimal, rather than binary.");
 		    System.out.println("        ");
 		    System.out.println("        -b");
 		    System.out.println("        --binary        Print the checksum in binary, rather than hexadecimal.");
@@ -182,6 +185,8 @@ public class sha3sum
 	                binary = true;
 		    else if (arg == "--multi")
 	                multi++;
+		    else if (arg == "--hex")
+	                hex = true;
 		    else
 			linger = new String[] { arg, null };
 	    else if (arg.startsWith("-"))
@@ -195,6 +200,11 @@ public class sha3sum
                 else if (arg.charAt(0) == 'm')
 		{
                     multi++;
+		    arg = arg.substring(1);
+		}
+                else if (arg.charAt(0) == 'h')
+		{
+                    hex = true;
 		    arg = arg.substring(1);
 		}
                 else if (arg.length() == 1)
@@ -328,7 +338,18 @@ public class sha3sum
 		    int read = file.read(chunk, 0, blksize);
 		    if (read <= 0)
 			break;
-		    SHA3.update(chunk, read);
+		    if (hex == false)
+			SHA3.update(chunk, read);
+		    else
+		    {
+		        int n = read << 1;
+			for (int _ = 0; _ < n; _++)
+			{
+			    byte a = chunk[_ << 1], b = chunk[(_ << 1) | 1];
+			    chunk[_] = (byte)((((a & 15) + (a <= '9' ? 0 : 9)) << 4) | ((b & 15) + (b <= '9' ? 0 : 9)));
+			}
+			SHA3.update(chunk, n);
+		    }
 		}
 		byte[] bs = SHA3.digest();
 		if (multi == 0)
