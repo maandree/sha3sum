@@ -608,7 +608,7 @@ byte* digest(byte* msg, jint msglen)
   byte* message;
   byte* rc;
   long rr = r >> 3, len;
-  long nn = n >> 3, olen;
+  long nn = (n + 7) >> 3, olen;
   long ww = w >> 3, ni;
   long i, j = 0, ptr = 0, _;
   

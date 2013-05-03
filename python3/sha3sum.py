@@ -465,7 +465,7 @@ class SHA3:
         ptr = 0
         
         rr = SHA3.r >> 3
-        nn = SHA3.n >> 3
+        nn = (SHA3.n + 3) >> 3
         ww = SHA3.w >> 3
         
         # Absorbing phase
