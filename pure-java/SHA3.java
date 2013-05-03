@@ -600,7 +600,7 @@ public class SHA3
 		SHA3.keccakF(S);
 	}
 	if ((SHA3.n & 7) != 0)
-	    rc[rc.length - 1] &= (1 << (SHA3.n & 7)) - 1
+	    rc[rc.length - 1] &= (1 << (SHA3.n & 7)) - 1;
 	
         return rc;
     }
