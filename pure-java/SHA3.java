@@ -466,38 +466,75 @@ public class SHA3
     
     /**
      * Squeeze the Keccak sponge
+     * 
+     * @return  The hash sum
      */
     public static byte[] digest()
     {
-	return digest(null);
+	return digest(null, 0, true);
+    }
+    
+    
+    /**
+     * Squeeze the Keccak sponge
+     * 
+     * @paran   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
+     * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
+     */
+    public static byte[] digest(boolean withReturn)
+    {
+	return digest(null, 0, withReturn);
     }
     
     
     /**
      * Absorb the last part of the message and squeeze the Keccak sponge
      * 
-     * @param  msg  The rest of the message
+     * @param   msg  The rest of the message
+     * @return       The hash sum
      */
     public static byte[] digest(byte[] msg)
     {
-	return digest(msg, msg == null ? 0 : msg.length);
+	return digest(msg, msg == null ? 0 : msg.length, true);
     }
     
     
     /**
      * Absorb the last part of the message and squeeze the Keccak sponge
      * 
-     * @param  msg     The rest of the message
-     * @param  msglen  The length of the partial message
+     * @param   msg         The rest of the message
+     * @paran   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
+     * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
+     */
+    public static byte[] digest(byte[] msg, boolean withReturn)
+    {
+	return digest(msg, msg == null ? 0 : msg.length, withReturn);
+    }
+    
+    
+    /**
+     * Absorb the last part of the message and squeeze the Keccak sponge
+     * 
+     * @param   msg     The rest of the message
+     * @param   msglen  The length of the partial message
+     * @return          The hash sum
      */
     public static byte[] digest(byte[] msg, int msglen)
     {
-	/*{   String _;
-	    System.out.print("\033[32m");
-	    for (int j = 0; j < msglen; j++)
-		System.out.print((_ = "00" + Long.toString(msg[j] & 255, 16)).substring(_.length() - 2));
-	    System.out.println("\033[00m");
-	}*/
+	return digest(msg, msg == null ? 0 : msg.length, true);
+    }
+    
+    
+    /**
+     * Absorb the last part of the message and squeeze the Keccak sponge
+     * 
+     * @param   msg         The rest of the message
+     * @param   msglen      The length of the partial message
+     * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
+     * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
+     */
+    public static byte[] digest(byte[] msg, int msglen, boolean withReturn)
+    {
 	byte[] message;
         if ((msg == null) || (msglen == 0))
             message = SHA3.pad10star1(SHA3.M, SHA3.mptr, SHA3.r);
@@ -508,16 +545,8 @@ public class SHA3
 	    System.arraycopy(msg, 0, SHA3.M, SHA3.mptr, msglen);
 	    message = SHA3.pad10star1(SHA3.M, SHA3.mptr + msglen, SHA3.r);
 	}
-	/*{   String _;
-	    System.out.print("\033[33m");
-	    for (int j = 0; j < message.length; j++)
-		System.out.print((_ = "00" + Long.toString(message[j] & 255, 16)).substring(_.length() - 2));
-	    System.out.println("\033[00m");
-	}*/
         SHA3.M = null;
         int len = message.length;
-        byte[] rc = new byte[(SHA3.n + 7) >> 3];
-        int ptr = 0;
         
         int rr = SHA3.r >> 3;
         int nn = (SHA3.n + 7) >> 3;
@@ -527,13 +556,6 @@ public class SHA3
         if (ww == 8)
             for (int i = 0; i < len; i += rr)
 	    {
-		/*if (i == 0)
-		{   String _;
-		    System.out.print("\033[34m");
-		    for (int j = 0; j < 25; j++)
-			System.out.print((_ = "0000000000000000" + Long.toString(SHA3.S[j], 16)).substring(_.length() - 16));
-		    System.out.println("\033[00m");
-		}*/
 		SHA3.S[ 0] ^= SHA3.toLane64(message, rr, i + 0);
 		SHA3.S[ 5] ^= SHA3.toLane64(message, rr, i + 8);
 		SHA3.S[10] ^= SHA3.toLane64(message, rr, i + 16);
@@ -559,13 +581,6 @@ public class SHA3
                 SHA3.S[14] ^= SHA3.toLane64(message, rr, i + 176);
                 SHA3.S[19] ^= SHA3.toLane64(message, rr, i + 184);
                 SHA3.S[24] ^= SHA3.toLane64(message, rr, i + 192);
-		/*if (i == 0)
-		{   String _;
-		    System.out.print("\033[35m");
-		    for (int j = 0; j < 25; j++)
-			System.out.print((_ = "0000000000000000" + Long.toString(SHA3.S[j], 16)).substring(_.length() - 16));
-		    System.out.println("\033[00m");
-		}*/
                 SHA3.keccakF(SHA3.S);
 	    }
         else
@@ -600,9 +615,113 @@ public class SHA3
 	    }
         
         /* Squeezing phase */
+	if (withReturn)
+	{
+	    byte[] rc = new byte[(SHA3.n + 7) >> 3];
+	    int ptr = 0;
+	    
+	    int olen = SHA3.n;
+	    int j = 0;
+	    int ni = Math.min(25, rr);
+	    while (olen > 0)
+	    {
+		int i = 0;
+		while ((i < ni) && (j < nn))
+		{
+		    long v = SHA3.S[(i % 5) * 5 + i / 5];
+		    for (int _ = 0; _ < ww; _++)
+		    {
+			if (j < nn)
+			{
+			    rc[ptr] = (byte)v;
+			    ptr += 1;
+			}
+			v >>= 8;
+			j += 1;
+		    }
+		    i += 1;
+		}
+		olen -= SHA3.r;
+		if (olen > 0)
+		    SHA3.keccakF(SHA3.S);
+	    }
+	    if ((SHA3.n & 7) != 0)
+		rc[rc.length - 1] &= (1 << (SHA3.n & 7)) - 1;
+	    
+	    return rc;
+	}
         int olen = SHA3.n;
-        int j = 0;
-        int ni = Math.min(25, rr);
+        while ((olen -= SHA3.r) > 0)
+	    SHA3.keccakF(SHA3.S);
+	return null;
+    }
+    
+    
+    /**
+     * Force a round of Keccak-f
+     */
+    public static void simpleSqueeze()
+    {
+	SHA3.keccakF(SHA3.S);
+    }
+    
+    
+    /**
+     * Force some rounds of Keccak-f
+     * 
+     * @param  times  The number of rounds
+     */
+    public static void simpleSqueeze(int times)
+    {
+	for (int i = 0; i < times; i++)
+	    SHA3.keccakF(SHA3.S);
+    }
+    
+    
+    /**
+     * Squeeze as much as is needed to get a digest
+     */
+    public static void fastSqueeze()
+    {
+	SHA3.keccakF(SHA3.S); /* Last squeeze did not do a ending squeeze */
+        int olen = SHA3.n;
+        while ((olen -= SHA3.r) > 0)
+	    SHA3.keccakF(SHA3.S);
+    }
+    
+    
+    /**
+     * Squeeze as much as is needed to get a digest a number of times
+     * 
+     * @param  times  The number of digests
+     */
+    public static void fastSqueeze(int times)
+    {
+	for (int i = 0; i < times; i++)
+	{
+	    SHA3.keccakF(SHA3.S); /* Last squeeze did not do a ending squeeze */
+	    int olen = SHA3.n;
+	    while ((olen -= SHA3.r) > 0)
+		SHA3.keccakF(SHA3.S);
+	}
+    }
+    
+    
+    /**
+     * Squeeze out another digest
+     * 
+     * @return  The hash sum
+     */
+    public static byte[] squeeze()
+    {
+	SHA3.keccakF(SHA3.S); /* Last squeeze did not do a ending squeeze */
+	
+        int nn, ww = SHA3.w >> 3;
+        byte[] rc = new byte[nn = (SHA3.n + 7) >> 3];
+	
+        int olen = SHA3.n;
+        int j = 0, ptr = 0;
+        int ni = Math.min(25, SHA3.r >> 3);
         while (olen > 0)
 	{
             int i = 0;
@@ -623,7 +742,7 @@ public class SHA3
 	    }
             olen -= SHA3.r;
 	    if (olen > 0)
-		SHA3.keccakF(S);
+		SHA3.keccakF(SHA3.S);
 	}
 	if ((SHA3.n & 7) != 0)
 	    rc[rc.length - 1] &= (1 << (SHA3.n & 7)) - 1;
