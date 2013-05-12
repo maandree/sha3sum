@@ -61,7 +61,8 @@ public class sha3sum
 	Integer C = null; int _c = _s - _r;         /* --capacity   */
 	Integer W = null; int _w = _s / 25;         /* --wordsize   */
 	Integer I = null; int _i = 1;               /* --iterations */
-	int o = 0, s = 0, r = 0, c = 0, w = 0, i = 0;
+	Integer J = null; int _j = 1;               /* --squeezes   */
+	int o = 0, s = 0, r = 0, c = 0, w = 0, i = 0, j = 0;
 	
 	if      (cmd == "sha3-224sum")  o = _o = 224;
 	else if (cmd == "sha3-256sum")  o = _o = 256;
@@ -111,6 +112,9 @@ public class sha3sum
 		    System.out.println("        -i ITERATIONS");
 		    System.out.println("        --iterations    The number of hash iterations to run.   (default: " + _i + ")");
 		    System.out.println("        ");
+		    System.out.println("        -j SQUEEZES");
+		    System.out.println("        --squeezes      The number of hash squeezes to run.     (default: " + _j + ")");
+		    System.out.println("        ");
 		    System.out.println("        -h");
 		    System.out.println("        --hex           Read the input in hexadecimal, rather than binary.");
 		    System.out.println("        ");
@@ -159,6 +163,8 @@ public class sha3sum
 			S = Integer.valueOf(linger[1]);
 		    else if ((linger[0] == "-i") || (linger[0] == "--iterations"))
 			I = Integer.valueOf(linger[1]);
+		    else if ((linger[0] == "-j") || (linger[0] == "--squeezes"))
+			J = Integer.valueOf(linger[1]);
 		    else
 		    {
 			System.err.println(cmd + ": unrecognised option: " + linger[0]);
@@ -218,22 +224,23 @@ public class sha3sum
 	
 	
 	i = I == null ? _i : I.intValue();
+	j = J == null ? _j : J.intValue();
 	
 	if (S != null)
 	{   s = S.intValue();
 	    if ((s <= 0) || (s > 1600) || (s % 25 != 0))
-	    {	System.err.println("The state size must be a positive multiple of 25 and is limited to 1600.");
+	    {	System.err.println(cmd + ": the state size must be a positive multiple of 25 and is limited to 1600.");
 		System.exit(6);
 	}   }
 	
 	if (W != null)
 	{   w = W.intValue();
 	    if ((w <= 0) || (w > 64))
-	    {	System.err.println("The word size must be positive and is limited to 64.");
+	    {	System.err.println(cmd + ": the word size must be positive and is limited to 64.");
 		System.exit(6);
 	    }
 	    if ((S != null) && (s != w * 25))
-	    {	System.err.println("The state size must be 25 times of the word size.");
+	    {	System.err.println(cmd + ": the state size must be 25 times of the word size.");
 		System.exit(6);
 	    }
 	    else if (S == null)
@@ -243,21 +250,21 @@ public class sha3sum
 	if (C != null)
 	{   c = C.intValue();
 	    if ((c <= 0) || ((c & 7) != 0))
-	    {	System.err.println("The capacity must be a positive multiple of 8.");
+	    {	System.err.println(cmd + ": the capacity must be a positive multiple of 8.");
 		System.exit(6);
 	}   }
 	
 	if (R != null)
 	{   r = R.intValue();
 	    if ((r <= 0) || ((r & 7) != 0))
-	    {	System.err.println("The bitrate must be a positive multiple of 8.");
+	    {	System.err.println(cmd + ": the bitrate must be a positive multiple of 8.");
 		System.exit(6);
 	}   }
 	
 	if (O != null)
 	{   o = O.intValue();
 	    if (o <= 0)
-	    {	System.err.println("The output size must be positive.");
+	    {	System.err.println(cmd + ": the output size must be positive.");
 		System.exit(6);
 	}   }
 	
@@ -286,15 +293,15 @@ public class sha3sum
 	
 	
 	if (r > s)
-	{   System.err.println("The bitrate must not be higher than the state size.");
+	{   System.err.println(cmd + ": the bitrate must not be higher than the state size.");
 	    System.exit(6);
 	}
 	if (c > s)
-	{   System.err.println("The capacity must not be higher than the state size.");
+	{   System.err.println(cmd + ": the capacity must not be higher than the state size.");
 	    System.exit(6);
 	}
 	if (r + c != s)
-	{   System.err.println("The sum of the bitrate and the capacity must equal the state size.");
+	{   System.err.println(cmd + ": the sum of the bitrate and the capacity must equal the state size.");
 	    System.exit(6);
 	}
 	
@@ -311,7 +318,12 @@ public class sha3sum
 	    files[fptr++] = null;
 	if (i < 1)
 	{
-	    System.err.println(cmd + ": sorry, I will only do at least one iteration!");
+	    System.err.println(cmd + ": sorry, I will only do at least one hash iteration!");
+	    System.exit(3);
+	}
+	if (j < 1)
+	{
+	    System.err.println(cmd + ": sorry, I will only do at least one squeeze iteration!");
 	    System.exit(3);
 	}
 	
@@ -351,13 +363,21 @@ public class sha3sum
 			SHA3.update(chunk, n);
 		    }
 		}
-		byte[] bs = SHA3.digest();
+		byte[] bs = SHA3.digest(j > 1);
+		if (j > 2)
+		    SHA3.fastSqueeze(j - 2);
+		if (j > 1)
+		    bs = SHA3.squeeze();
 		if (multi == 0)
 		{
 		    for (int _ = 1; _ < i; _++)
 		    {
 			SHA3.initialise(r, c, o);
-			bs = SHA3.digest(bs);
+			bs = SHA3.digest(bs, j > 1);
+			if (j > 2)
+			    SHA3.fastSqueeze(j - 2);
+			if (j > 1)
+			    bs = SHA3.squeeze();
 		    }
 		    if (binary)
 		    {   if (filename == null)
@@ -381,7 +401,12 @@ public class sha3sum
 		    for (int _ = 1; _ < i; _++)
 		    {
 			SHA3.initialise(r, c, o);
-			System.out.write(bs = SHA3.digest(bs));
+			bs = SHA3.digest(bs, j > 1);
+			if (j > 2)
+			    SHA3.fastSqueeze(j - 2);
+			if (j > 1)
+			    bs = SHA3.squeeze();
+			System.out.write(bs);
 		    }
 		}
 		else if (multi == 1)
@@ -396,7 +421,11 @@ public class sha3sum
 		    for (int _ = 1; _ < i; _++)
 		    {
 			SHA3.initialise(r, c, o);
-			bs = SHA3.digest(bs);
+			bs = SHA3.digest(bs, j > 1);
+			if (j > 2)
+			    SHA3.fastSqueeze(j - 2);
+			if (j > 1)
+			    bs = SHA3.squeeze();
 			for (int b = 0, bn = bs.length; b < bn; b++)
 			{   out[ b << 1     ] = (byte)("0123456789ABCDEF".charAt((bs[b] >> 4) & 15));
 			    out[(b << 1) | 1] = (byte)("0123456789ABCDEF".charAt(bs[b] & 15));
@@ -413,7 +442,11 @@ public class sha3sum
 		    {
 			if (_ > 0)
 			{   SHA3.initialise(r, c, o);
-			    bs = SHA3.digest(bs);
+			    bs = SHA3.digest(bs, j > 1);
+			    if (j > 2)
+				SHA3.fastSqueeze(j - 2);
+			    if (j > 1)
+				bs = SHA3.squeeze();
 			}
 			for (int b = 0, bn = bs.length; b < bn; b++)
 			{   out[ b << 1     ] = (byte)("0123456789ABCDEF".charAt((bs[b] >> 4) & 15));
