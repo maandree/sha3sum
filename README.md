@@ -42,8 +42,17 @@ COMPLETE STATUS:
     -i ITERATIONS
     --iterations   The number of hash iterations to run.  (default: 1)
     
+    -j SQUEEZES
+    --squeezes      The number of hash squeezes to run.   (default: 1)
+    
+    -h
+    --hex          Read the input in hexadecimal, rather than binary.
+    
     -b
     --binary       Print the checksum in binary, rather than hexadecimal.
+    
+    -m
+    --multi         Print the chechsum at all iterations.
 
 
 If you want to contribute with an implementation in another
