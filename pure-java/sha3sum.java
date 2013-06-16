@@ -61,8 +61,8 @@ public class sha3sum
 	else if (cmd == "sha3-384sum")  _o = 384;
 	else if (cmd == "sha3-512sum")  _o = 512;
 	Integer S = null; int _s = 1600;            /* --statesize  */
-	Integer R = null; int _r = _s - (_o << 1);  /* --bitrate    */
-	Integer C = null; int _c = _s - _r;         /* --capacity   */
+	Integer C = null; int _c = _s - (_o << 1);  /* --capacity   */
+	Integer R = null; int _r = _s - _c;         /* --bitrate    */
 	Integer W = null; int _w = _s / 25;         /* --wordsize   */
 	Integer I = null; int _i = 1;               /* --iterations */
 	Integer J = null; int _j = 1;               /* --squeezes   */
@@ -270,7 +270,7 @@ public class sha3sum
 	
 	
 	if ((R == null) && (C == null) && (O == null)) // s?
-	{   r = -((c = (o = ((((s = S == null ? _s : s) << 5) / 100 + 7) >> 3) << 3) << 1) - s);
+	{   c = -((r = (o = ((((s = S == null ? _s : s) << 5) / 100 + 7) >> 3) << 3) << 1) - s);
 	    o = o < 8 ? 8 : o;
 	}
 	else if ((R == null) && (C == null)) // !o s?

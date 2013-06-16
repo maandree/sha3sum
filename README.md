@@ -25,10 +25,10 @@ COMPLETE STATUS:
 *OPTIONS:*
 
     -r BITRATE
-    --bitrate      The bitrate to use for SHA-3.          (default: 576)
+    --bitrate      The bitrate to use for SHA-3.          (default: 1024)
     
     -c CAPACITY
-    --capacity     The capacity to use for SHA-3.         (default: 1024)
+    --capacity     The capacity to use for SHA-3.         (default: 576)
     
     -w WORDSIZE
     --wordsize     The word size to use for SHA-3.        (default: 64)
@@ -53,6 +53,11 @@ COMPLETE STATUS:
     
     -m
     --multi         Print the chechsum at all iterations.
+
+
+Pending the standardisation of SHA-3, there is no specification of particular SHA-3 functions yet.
+Our defaults are based on Keccak[] being Keccak[r = 1024, c = 576] rather than the functions in
+Wikipedias entires that uses [r = 576, c = 1024].
 
 
 If you want to contribute with an implementation in another

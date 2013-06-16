@@ -635,8 +635,8 @@ static int main(string[] cmdargs)
 	else if (cmd == "sha3-384sum")  o = _o = 384;
 	else if (cmd == "sha3-512sum")  o = _o = 512;
 	int _s, s = _s = 1600;          /* --statesize  */
-	int _r, r = _r = s - (o << 1);  /* --bitrate    */
-	int _c, c = _c = s - r;         /* --capacity   */
+	int _c, c = _c = s - (o << 1);  /* --capacity   */
+	int _r, r = _r = s - c;         /* --bitrate    */
 	int _w, w = _w = s / 25;        /* --wordsize   */
 	int _i, i = _i = 1;             /* --iterations */
 	bool binary = false;

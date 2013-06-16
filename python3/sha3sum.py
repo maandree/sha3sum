@@ -655,8 +655,8 @@ if __name__ == '__main__':
     elif cmd == 'sha3-384sum':  _o = 384
     elif cmd == 'sha3-512sum':  _o = 512
     _s = 1600            # --statesize
-    _r = _s - (_o << 1)  # --bitrate
-    _c = _s - _r         # --capacity
+    _c = _s - (_o << 1)  # --capacity
+    _r = _s - _c         # --bitrate
     _w = _s / 25         # --wordsize
     _i = 1               # --iterations
     _j = 1               # --squeezes
@@ -834,8 +834,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     if (R is None) and (C is None) and (O is None): ## s?
         s = _s if S is None else s
         o = (((s << 5) // 100 + 7) >> 3) << 3
-        c = o << 1
-        r = s - c
+        r = o << 1
+        c = s - r
         o = 8 if o < 8 else o
     elif (R is None) and (C is None): ## !o s?
         r = _r

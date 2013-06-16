@@ -218,8 +218,8 @@ int main(int argc, char** argv)
 	    _o = 512;
 	}
   _s = 1600;            /* --statesize  */
-  _r = _s - (_o << 1);  /* --bitrate    */
-  _c = _s - _r;         /* --capacity   */
+  _c = _s - (_o << 1);  /* --capacity   */
+  _r = _s - _c;         /* --bitrate    */
   _w = _s / 25;         /* --wordsize   */
   _i = 1;               /* --iterations */
   _j = 1;               /* --squeezes   */
@@ -479,7 +479,7 @@ int main(int argc, char** argv)
   if ((_R & _C & _O) == null) /* s? */
     {
       s = _S ? s : _s;
-      r = -((c = (o = (((s << 5) / 100 + 7) >> 3) << 3) << 1) - s);
+      c = -((r = (o = (((s << 5) / 100 + 7) >> 3) << 3) << 1) - s);
       o = o < 8 ? 8 : o;
     }
   else if ((_R & _C) == null) /* !o s? */
