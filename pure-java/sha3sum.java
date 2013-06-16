@@ -142,7 +142,7 @@ public class sha3sum
 		    System.out.println("You should have received a copy of the GNU General Public License");
 		    System.out.println("along with this program.  If not, see <http://www.gnu.org/licenses/>.");
 		    System.out.println("");
-		    System.exit(2);
+		    System.exit(0);
 		}
 		else
 		{
@@ -292,6 +292,15 @@ public class sha3sum
 	}
 	
 	
+	System.err.println("Bitrate: " + r);
+	System.err.println("Capacity: " + c);
+	System.err.println("Word size: " + w);
+	System.err.println("State size: " + s);
+	System.err.println("Output size: " + o);
+	System.err.println("Iterations: " + i);
+	System.err.println("Squeezes: " + j);
+	
+	
 	if (r > s)
 	{   System.err.println(cmd + ": the bitrate must not be higher than the state size.");
 	    System.exit(6);
@@ -304,15 +313,6 @@ public class sha3sum
 	{   System.err.println(cmd + ": the sum of the bitrate and the capacity must equal the state size.");
 	    System.exit(6);
 	}
-	
-	
-	System.err.println("Bitrate: " + r);
-	System.err.println("Capacity: " + c);
-	System.err.println("Word size: " + w);
-	System.err.println("State size: " + s);
-	System.err.println("Output size: " + o);
-	System.err.println("Iterations: " + i);
-	System.err.println("Squeezes: " + j);
 	
 	
 	if (fptr == 0)

@@ -467,7 +467,9 @@ class SHA3:
         @param   withReturn:bool  Whether to return the hash instead of just do a quick squeeze phrase and return `None`
         @return  :bytes?          The hash sum, or `None` if `withReturn` is `False`
         '''
-        if (msglen is not None) and isinstance(msglen, bool):
+        if (msg is not None) and isinstance(msg, bool):
+            (msg, withReturn) = (withReturn, msg)
+        elif (msglen is not None) and isinstance(msglen, bool):
             (msglen, withReturn) = (withReturn, msglen)
         if msg is None:
             msg = bytes([])
@@ -593,7 +595,7 @@ class SHA3:
         '''
         for i in range(times):
             SHA3.keccakF(SHA3.S) # Last squeeze did not do a ending squeeze
-            int olen = SHA3.n
+            olen = SHA3.n
             while olen > SHA3.r:
                 olen -= SHA3.r
                 SHA3.keccakF(SHA3.S)
@@ -725,7 +727,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ''' % (_r, _c, _w, _o, _s, _i, _j)).encode('utf-8'))
                 sys.stderr.buffer.flush()
-                exit(2)
+                exit(0)
             else:
                 if linger[1] is None:
                     linger[1] = arg
@@ -813,24 +815,27 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     if C is not None:
         c = C
         if (c <= 0) or ((c & 7) != 0):
-        printerr(cmd + ': the capacity must be a positive multiple of 8.')
-        sys.exit(6);
+            printerr(cmd + ': the capacity must be a positive multiple of 8.')
+            sys.exit(6)
     
     if R is not None:
         r = R
         if (r <= 0) or ((r & 7) != 0):
             printerr(cmd + ': the bitrate must be a positive multiple of 8.')
-            sys.exit(6);
+            sys.exit(6)
     
     if O is not None:
         o = O
         if o <= 0:
             printerr(cmd + ': the output size must be positive.')
-            sys.exit(6);
+            sys.exit(6)
     
     
     if (R is None) and (C is None) and (O is None): ## s?
-        r = -((c = (o = ((((s = S is None ? _s : s) << 5) / 100 + 7) >> 3) << 3) << 1) - s);
+        s = _s if S is None else s
+        o = (((s << 5) // 100 + 7) >> 3) << 3
+        c = o << 1
+        r = s - c
         o = 8 if o < 8 else o
     elif (R is None) and (C is None): ## !o s?
         r = _r
@@ -838,35 +843,35 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         s = (r + c) if S is None else s
     elif R is None: ## !c o? s?
         s = _s if S is None else s
-        r = s - c;
-        o = (8 if c == 8 else (c << 1)) if O is None else o;
+        r = s - c
+        o = (8 if c == 8 else (c << 1)) if O is None else o
     elif C is None: ## !r o? s?
         s = _s if S is None else s
-        c = s - r;
-        o = (8 if c == 8 else (c << 1)) if O is None else o;
+        c = s - r
+        o = (8 if c == 8 else (c << 1)) if O is None else o
     else: ## !r !c o? s?
         s = (r + c) if S is None else s
         o = (8 if c == 8 else (c << 1)) if O is None else o
     
     
+    printerr('Bitrate: %d' % r)
+    printerr('Capacity: %d' % c)
+    printerr('Word size: %d' % w)
+    printerr('State size: %d' % s)
+    printerr('Output size: %d' % o)
+    printerr('Iterations: %d' % i)
+    printerr('Squeezes: %d' % j)
+    
+    
     if r > s:
-        printerr(cmd + ': the bitrate must not be higher than the state size.');
-        sys.exit(6);
+        printerr(cmd + ': the bitrate must not be higher than the state size.')
+        sys.exit(6)
     if c > s:
-        printerr(cmd + ': the capacity must not be higher than the state size.');
-        sys.exit(6);
+        printerr(cmd + ': the capacity must not be higher than the state size.')
+        sys.exit(6)
     if r + c != s:
-        printerr(cmd + ': the sum of the bitrate and the capacity must equal the state size.');
-        sys.exit(6);
-    
-    
-    printerr('Bitrate: ' % r)
-    printerr('Capacity: ' % c)
-    printerr('Word size: ' % w)
-    printerr('State size: ' % s)
-    printerr('Output size: ' % o)
-    printerr('Iterations: ' % i)
-    printerr('Squeezes: ' % j)
+        printerr(cmd + ': the sum of the bitrate and the capacity must equal the state size.')
+        sys.exit(6)
     
     
     if len(files) == 0:
@@ -908,7 +913,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                                 a = ((a & 15) + (0 if a <= '9' else 9)) << 4
                                 b =  (b & 15) + (0 if b <= '9' else 0)
                                 chunk[_] = a | b
-                            SHA3.update(chunk, n)
+                            SHA3.update(bytes(chunk), n)
                     bs = SHA3.digest(j == 1)
                     if j > 2:
                         SHA3.fastSqueeze(j - 2)
@@ -919,7 +924,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 else:
                     bs = stdin
                 if multi == 0:
-                    for _ in range(n - 1):
+                    for _ in range(i - 1):
                         SHA3.initialise(r, c, o)
                         bs = SHA3.digest(bs, j == 1)
                         if j > 2:

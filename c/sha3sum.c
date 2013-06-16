@@ -294,7 +294,7 @@ int main(int argc, char** argv)
 		free(*linger);
 	      free(linger);
 	      free(files);
-	      return 2;
+	      return 0;
 	    }
 	  else
 	    {
@@ -505,6 +505,15 @@ int main(int argc, char** argv)
     }
   
   
+  fprintf(stderr, "Bitrate: %li\n", r);
+  fprintf(stderr, "Capacity: %li\n", c);
+  fprintf(stderr, "Word size: %li\n", w);
+  fprintf(stderr, "State size: %li\n", s);
+  fprintf(stderr, "Output Size: %li\n", o);
+  fprintf(stderr, "Iterations: %li\n", i);
+  fprintf(stderr, "Squeezes: %li\n", j);
+  
+  
   if (r > s)
     {
       ERR("the bitrate must not be higher than the state size.");
@@ -520,15 +529,6 @@ int main(int argc, char** argv)
       ERR("the sum of the bitrate and the capacity must equal the state size.");
       return 6;
     }
-  
-  
-  fprintf(stderr, "Bitrate: %li", r);
-  fprintf(stderr, "Capacity: %li", c);
-  fprintf(stderr, "Word size: %li", w);
-  fprintf(stderr, "State size: %li", s);
-  fprintf(stderr, "Output Size: %li", o);
-  fprintf(stderr, "Iterations: %li", i);
-  fprintf(stderr, "Squeezes: %li", j);
   
   
   if (fptr == 0)
