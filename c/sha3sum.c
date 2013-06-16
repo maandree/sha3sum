@@ -26,7 +26,113 @@
 #define true  1
 #define null  0
 
+#define SET void**
+
 #define HEXADECA "0123456789ABCDEF"
+
+
+/**
+ * Prints a number of bytes to stdout
+ * 
+ * @param  bytes  The bytes to print
+ * @param  n      The number of bytes
+ */
+inline void putchars(char* bytes, long n)
+{
+  fwrite(bytes, 1, n, stdout);
+}
+
+
+/**
+ * Creates a new set
+ * 
+ * @return  The set
+ */
+SET set_new()
+{
+  return (void**)malloc(sizeof(void*) << 4);
+}
+
+
+/**
+ * Frees a set
+ * 
+ * @param  set  The set
+ */
+void set_free(SET set)
+{
+  if (*(set +  0))  set_free((void**)*(set +  0));
+  if (*(set +  1))  set_free((void**)*(set +  1));
+  if (*(set +  2))  set_free((void**)*(set +  2));
+  if (*(set +  3))  set_free((void**)*(set +  3));
+  if (*(set +  4))  set_free((void**)*(set +  4));
+  if (*(set +  5))  set_free((void**)*(set +  5));
+  if (*(set +  6))  set_free((void**)*(set +  6));
+  if (*(set +  7))  set_free((void**)*(set +  7));
+  if (*(set +  8))  set_free((void**)*(set +  8));
+  if (*(set +  9))  set_free((void**)*(set +  9));
+  if (*(set + 10))  set_free((void**)*(set + 10));
+  if (*(set + 11))  set_free((void**)*(set + 11));
+  if (*(set + 12))  set_free((void**)*(set + 12));
+  if (*(set + 13))  set_free((void**)*(set + 13));
+  if (*(set + 14))  set_free((void**)*(set + 14));
+  if (*(set + 15))  set_free((void**)*(set + 15));
+  free(set);
+}
+
+
+/**
+ * Adds an item to a set
+ * 
+ * @param  set   The set
+ * @param  item  The item
+ * @param  n     The length of the item
+ */
+void set_add(SET set, char* item, long n)
+{
+  long i;
+  void** at = set;
+  for (i = 0; i < n; i++)
+    {
+      long a = (long)((*(item + i)) & 15), b = (long)((*(item + i) >> 4) & 15);
+      if (*(at + a))
+	at = (void**)*(at + a);
+      else
+	at = (void**)(*(at + a) = (void*)malloc(sizeof(void*) << 4));
+      if (*(at + b))
+	at = (void**)*(at + b);
+      else
+	at = (void**)(*(at + b) = (void*)malloc(sizeof(void*) << 4));
+    }
+}
+
+
+/**
+ * Checks if a set contains an item
+ * 
+ * @param   set   The set
+ * @param   item  The item
+ * @param   n     The length of the item
+ * @return        Whether the set contains the item
+ */
+long set_contains(SET set, char* item, long n)
+{
+  long i;
+  void** at = set;
+  for (i = 0; i < n; i++)
+    {
+      long a = (long)((*(item + i)) & 15), b = (long)((*(item + i) >> 4) & 15);
+      if (*(at + a))
+	at = (void**)*(at + a);
+      else
+	return false;
+      if (*(at + b))
+	at = (void**)*(at + b);
+      else
+	return false;
+    }
+  return true;
+}
 
 
 /**
@@ -70,14 +176,22 @@ long parseInt(char* str)
 int main(int argc, char** argv)
 {
   char* cmd = *argv;
-  long _o, o, _s, s, _r, r, _c, c, _w, w, _i, i;
-  long binary = false, dashed = false, fptr = 0, freelinger = true;
+  
+  long _o, o, _s, s, _r, r, _c, c, _w, w, _i, i, _j, j;
+  long _O, O, _S, S, _R, R, _C, C, _W, W, _I, I, _J, J;
+  long binary = false, hex = false, dashed = false, freelinger = true;
+  long multi = 0, fptr = 0, bn;
   
   char** files = (char**)malloc(argc * sizeof(char*));
   char** linger = (char**)malloc(sizeof(char*) << 1);
   
   long a = 0, an = argc - 1;
   char** args = argv + 1;
+  
+  
+  _O = _S = _R = _C = _W = _I = false;
+  O = S = R = C = W = I = J = 0;
+  o = s = r = c = w = i = j = 0;
   
   *linger = 0;
   
@@ -89,25 +203,26 @@ int main(int argc, char** argv)
   if (s >= 0)
     cmd += s + 1;
   
-  o = _o = 512;           /* --outputsize */
+  _o = 512;           /* --outputsize */
   if ((cmd[0] == 's') && (cmd[1] == 'h') && (cmd[2] == 'a') && (cmd[3] == '3') && (cmd[4] == '-'))
     if ((cmd[5] != 0) && (cmd[6] != 0) && (cmd[7] != 0))
       if ((cmd[8] == 's') && (cmd[9] == 'u') && (cmd[10] == 'm') && (cmd[11] == 0))
 	{
 	  if ((cmd[5] == '2') && (cmd[6] == '2') && (cmd[7] == '4'))
-	    o = _o = 224;
+	    _o = 224;
 	  else if ((cmd[5] == '2') && (cmd[6] == '5') && (cmd[7] == '6'))
-	    o = _o = 256;
+	    _o = 256;
 	  else if ((cmd[5] == '3') && (cmd[6] == '8') && (cmd[7] == '4'))
-	    o = _o = 384;
+	    _o = 384;
 	  else if ((cmd[5] == '5') && (cmd[6] == '1') && (cmd[7] == '2'))
-	    o = _o = 512;
+	    _o = 512;
 	}
-  s = _s = 1600;          /* --statesize  */
-  r = _r = s - (o << 1);  /* --bitrate    */
-  c = _c = s - r;         /* --capacity   */
-  w = _w = s / 25;        /* --wordsize   */
-  i = _i = 1;             /* --iterations */
+  _s = 1600;            /* --statesize  */
+  _r = _s - (_o << 1);  /* --bitrate    */
+  _c = _s - _r;         /* --capacity   */
+  _w = _s / 25;         /* --wordsize   */
+  _i = 1;               /* --iterations */
+  _j = 1;               /* --squeezes   */
   
   
   for (; a <= an; a++)
@@ -143,8 +258,17 @@ int main(int argc, char** argv)
 	      printf("        -i ITERATIONS\n");
 	      printf("        --iterations    The number of hash iterations to run.   (default: %li)\n", _i);
 	      printf("        \n");
+	      printf("        -j SQUEEZES\n");
+	      printf("        --squeezes      The number of hash squeezes to run.     (default: %li)\n", _j);
+	      printf("        \n");
+	      printf("        -h\n");
+	      printf("        --hex           Read the input in hexadecimal, rather than binary.\n");
+	      printf("        \n");
 	      printf("        -b\n");
 	      printf("        --binary        Print the checksum in binary, rather than hexadecimal.\n");
+	      printf("        \n");
+	      printf("        -m\n");
+	      printf("        --multi         Print the chechsum at all iterations.\n");
 	      printf("\n");
 	      printf("\n");
 	      printf("COPYRIGHT:\n");
@@ -180,17 +304,19 @@ int main(int argc, char** argv)
 		  arg = null;
 		}
 	      if (eq(*linger, "-r") || eq(*linger, "--bitrate"))
-		o = (s - (r = parseInt(linger[1]))) >> 1;
+		_R = 1 | (R = parseInt(linger[1]));
 	      else if (eq(*linger, "-c") || eq(*linger, "--capacity"))
-		r = s - (c = parseInt(linger[1]));
+		_C = 1 | (C = parseInt(linger[1]));
 	      else if (eq(*linger, "-w") || eq(*linger, "--wordsize"))
-		s = (w = parseInt(linger[1])) * 25;
+		_W = 1 | (W = parseInt(linger[1]));
 	      else if (eq(*linger, "-o") || eq(*linger, "--outputsize"))
-		r = s - ((o = parseInt(linger[1])) << 1);
+		_O = 1 | (O = parseInt(linger[1]));
 	      else if (eq(*linger, "-s") || eq(*linger, "--statesize"))
-		r = (s = parseInt(linger[1])) - (o << 1);
+		_S = 1 | (S = parseInt(linger[1]));
 	      else if (eq(*linger, "-i") || eq(*linger, "--iterations"))
-		i = parseInt(linger[1]);
+		_I = 1 | (I = parseInt(linger[1]));
+	      else if (eq(*linger, "-j") || eq(*linger, "--squeezes"))
+		_J = 1 | (J = parseInt(linger[1]));
 	      else
 		{
 		  fprintf(stderr, "%s: unrecognised option: %s\n", cmd, *linger);
@@ -237,6 +363,10 @@ int main(int argc, char** argv)
 	  else
 	    if (eq(arg, "--binary"))
 	      binary = true;
+	    else if (eq(arg, "--multi"))
+	      multi++;
+	    else if (eq(arg, "--hex"))
+	      hex = true;
 	    else
 	      {
 		linger[0] = arg;
@@ -250,6 +380,16 @@ int main(int argc, char** argv)
 	  if (*arg == 'b')
 	    {
 	      binary = true;
+	      arg++;
+	    }
+	  else if (*arg == 'm')
+	    {
+	      multi++;
+	      arg++;
+	    }
+	  else if (*arg == 'h')
+	    {
+	      hex = true;
 	      arg++;
 	    }
 	  else
@@ -274,22 +414,151 @@ int main(int argc, char** argv)
   free(linger);
   
   
+  i = _I ? I : _i;
+  j = _J ? J : _j;
+  
+  #define ERR(text)  fprintf(stderr, "%s: " text "\n", cmd);  fflush(stdout);  fflush(stderr)
+  
+  if (_S)
+    {
+      s = S;
+      if ((s <= 0) || (s > 1600) || (s % 25))
+	{
+	  ERR("the state size must be a positive multiple of 25 and is limited to 1600.");
+	  return 6;
+	}
+    }
+  
+  if (_W)
+    {
+      w = W;
+      if ((w <= 0) || (w > 64))
+	{
+	  ERR("the word size must be positive and is limited to 64.");
+	  return 6;
+	}
+      if (_S && (s != w * 25))
+	{
+	  ERR("the state size must be 25 times of the word size.");
+	  return 6;
+	}
+      else if (_S == null)
+	_S = 1 | (S = w * 25);
+    }
+  
+  if (_C)
+    {
+      c = C;
+      if ((c <= 0) || (c & 7))
+	{
+	  ERR("the capacity must be a positive multiple of 8.");
+	  return 6;
+	}
+    }
+  
+  if (_R)
+    {
+      r = R;
+      if ((r <= 0) || (r & 7))
+	{
+	  ERR("the bitrate must be a positive multiple of 8.");
+	  return 6;
+	}
+    }
+  
+  if (_O)
+    {
+      o = o;
+      if (o <= 0)
+	{
+	  ERR("the output size must be positive.");
+	  return 6;
+	}
+    }
+  
+  if ((_R & _C & _O) == null) /* s? */
+    {
+      s = _S ? s : _s;
+      r = -((c = (o = (((s << 5) / 100 + 7) >> 3) << 3) << 1) - s);
+      o = o < 8 ? 8 : o;
+    }
+  else if ((_R & _C) == null) /* !o s? */
+    {
+      r = _r;
+      c = _c;
+      s = _S ? s : (r + c);
+    }
+  else if (_R == null) /* !c o? s? */
+    {
+      r = (s = _S ? s : _s) - c;
+      o = _O ? o : (c == 8 ? 8 : (c << 1));
+    }
+  else if (_C == null) /* !r o? s? */
+    {
+      c = (s = _S ? s : _s) - r;
+      o = _O ? o : (c == 8 ? 8 : (c << 1));
+    }
+  else /* !r !c o? s? */
+    {
+      s = _S ? s : (r + c);
+      o = _O ? o : (c == 8 ? 8 : (c << 1));
+    }
+  
+  
+  if (r > s)
+    {
+      ERR("the bitrate must not be higher than the state size.");
+      return 6;
+    }
+  if (c > s)
+    {
+      ERR("the capacity must not be higher than the state size.");
+      return 6;
+    }
+  if (r + c != s)
+    {
+      ERR("the sum of the bitrate and the capacity must equal the state size.");
+      return 6;
+    }
+  
+  
+  fprintf(stderr, "Bitrate: %li", r);
+  fprintf(stderr, "Capacity: %li", c);
+  fprintf(stderr, "Word size: %li", w);
+  fprintf(stderr, "State size: %li", s);
+  fprintf(stderr, "Output Size: %li", o);
+  fprintf(stderr, "Iterations: %li", i);
+  fprintf(stderr, "Squeezes: %li", j);
+  
+  
   if (fptr == 0)
     files[fptr++] = null;
   if (i < 1)
     {
-      fprintf(stderr, "%s: sorry, I will only do at least one iteration!\n", cmd);
-      fflush(stdout);
-      fflush(stderr);
+      ERR("sorry, I will only do at least one hash iteration!");
+      free(files);
+      return 3;
+    }
+  if (j < 1)
+    {
+      ERR("sorry, I will only do at least one squeeze iteration!");
       free(files);
       return 3;
     }
   
+  #undef ERR
+  
+  bn = (o + 7) >> 3;
   {
-    char* stdin = null;
+    char* stdin;
     char* filename;
     char* fn;
-    long f, fail = false, _, bn;
+    long f, fail, _;
+    
+    char* out = binary ? null : (char*)malloc(bn * 2);
+    
+    fail = false;
+    stdin = null;
     
     for (f = 0; f < fptr; f++)
       {
@@ -311,80 +580,176 @@ int main(int argc, char** argv)
 	    fail = true;
 	    continue;
 	  }
-	initialise(r, c, o);
 	
-	blksize = 4096; /** XXX os.stat(os.path.realpath(fn)).st_size; **/
-	chunk = (char*)malloc(blksize);
-	for (;;)
+	if ((filename != null) || (stdin == null))
 	  {
-	    long read = fread(chunk, 1, blksize, file);
-	    if (read <= 0)
-	      break;
-	    update(chunk, read);
-	  }
-	free(chunk);
-	bs = digest(null, 0);
-	dispose();
-	bn = (o + 7) >> 3;
-	for (_ = 1; _ < i; _++)
-	  {
-	    char* _ = bs;
 	    initialise(r, c, o);
-	    bs = digest(bs, bn);
-	    free(_);
+	    blksize = 4096; /** XXX os.stat(os.path.realpath(fn)).st_size; **/
+	    chunk = (char*)malloc(blksize);
+	    for (;;)
+	      {
+		long read = fread(chunk, 1, blksize, file);
+		if (read <= 0)
+		  break;
+		if (hex == false)
+		  update(chunk, read);
+		else
+		  {
+		    int n = read >> 1;
+		    for (_ = 0; _ < n; _++)
+		      {
+			char a = *(chunk + (_ << 1)), b = *(chunk + ((_ << 1) | 1));
+			a = (a & 15) + (a <= '9' ? 0 : 9);
+			b = (b & 15) + (b <= '9' ? 0 : 9);
+			*(chunk + _) = (a << 4) | b;
+		      }
+		    update(chunk, n);
+		  }
+	      }
+	    free(chunk);
+	    bs = digest(null, 0, j == 1);
+	    if (j > 2)
+	      fastSqueeze(j - 2);
+	    if (j > 1)
+	      bs = squeeze(1);
 	    dispose();
-	  }
-	
-	if (binary)
-	  {
-	    long j;
-	    for (j = 0; j < bn; j++)
-	      putchar(*(bs + j));
+	    
 	    if (filename == null)
 	      {
-		stdin = bs;
-		bs = null;
+		stdin = (char*)malloc(bn * sizeof(char));
+		for (_ = 0; _ < bn; _++)
+		  *(stdin + _) = *(bs + _);
 	      }
-	    fflush(stdout);
+          }
+	else
+	  bs = stdin;
+	
+	if (multi == 0)
+	  {
+	    for (_ = 1; _ < i; _++)
+	      {
+		char* _bs = bs;
+		initialise(r, c, o);
+		bs = digest(bs, bn, j == 1);
+		if (j > 2)
+		  fastSqueeze(j - 2);
+		if (j > 1)
+		  bs = squeeze();
+		free(_bs);
+		dispose();
+	      }
+	    if (binary)
+	      putchars(bs, bn);
+	    else
+	      {
+		long b, outptr = 0;
+		for (b = 0; b < bn; b++)
+		  {
+		    char v = bs[b];
+		    *(out + outptr++) = HEXADECA[(v >> 4) & 15];
+		    *(out + outptr++) = HEXADECA[v & 15];
+		  }
+		printf("%s %s\n", out, filename ? filename : "-");
+	      }
+	  }
+	else if (multi == 1)
+	  {
+	    long b;
+	    if (binary)
+	      putchars(bs, bn);
+	    else
+	      {
+		for (b = 0; b < bn; b++)
+		  {
+		    char v = bs[b];
+		    out[b * 2    ] = HEXADECA[(v >> 4) & 15];
+		    out[b * 2 + 1] = HEXADECA[v & 15];
+		  }
+		printf("%s %s\n", out, filename ? filename : "-");
+	      }
+	    for (_ = 1; _ < i; _++)
+	      {
+		char* _bs = bs;
+		initialise(r, c, o);
+		bs = digest(bs, bn, j == 1);
+		if (j > 2)
+		  fastSqueeze(j - 2);
+		if (j > 1)
+		  bs = squeeze();
+		free(_bs);
+		dispose();
+		if (binary)
+		  putchars(bs, bn);
+		else
+		  {
+		    for (b = 0; b < bn; b++)
+		      {
+			char v = bs[b];
+			out[b * 2    ] = HEXADECA[(v >> 4) & 15];
+			out[b * 2 + 1] = HEXADECA[v & 15];
+		      }
+		    printf("%s\n", out);
+		  }
+	      }
 	  }
 	else
 	  {
-	    long flen = 0, rcptr = 0, b = 0;
-	    char* rc;
-	    if (filename != null)
-	      while (*(filename + flen))
-		flen++;
-	    rc = malloc((bn << 1) + 3 + (filename == null ? 1 : 0) + flen);
-	    for (b = 0; b < bn; b++)
+	    long b, loophere;
+	    char* loop = null;
+	    SET got = set_new();
+	    for (_ = 0; _ < i; _++)
 	      {
-		char v = bs[b];
-		*(rc + rcptr++) = HEXADECA[(v >> 4) & 15];
-		*(rc + rcptr++) = HEXADECA[v & 15];
+		if (_ > 0)
+		  {
+		    char* _bs = bs;
+		    initialise(r, c, o);
+		    bs = digest(bs, bn, j == 1);
+		    if (j > 2)
+		      fastSqueeze(j - 2);
+		    if (j > 1)
+		      bs = squeeze();
+		    free(_bs);
+		    dispose();
+		  }
+		for (b = 0; b < bn; b++)
+		  {
+		    char v = bs[b];
+		    out[b * 2    ] = HEXADECA[(v >> 4) & 15];
+		    out[b * 2 + 1] = HEXADECA[v & 15];
+		  }
+		if (loop == null)
+		  {
+		    if (set_contains(got, bs, bn))
+		      {
+			loop = (char*)malloc(bn * 2);
+			for (b = 0; b < bn * 2; b++)
+			  *(loop + b) = *(out + b);
+		      }
+		    else
+		      set_add(got, out, bn);
+		  }
+		loophere = loop && eq(loop, out);
+		if (loophere)
+		  printf("\033[31m");
+		putchars(out, bn * 2);
+		if (loophere)
+		  printf("\033[00m");
+		fflush(stdout);
 	      }
-	    *(rc + rcptr++) = ' ';
-	    if (filename == null)
-	      *(rc + rcptr++) = '-';
-	    else
+	    if (loop)
 	      {
-		flen = 0;
-		while (*(filename + flen))
-		  *(rc + rcptr++) = *(filename + flen++);
+		fprintf(stderr, "\033[01;31mLoop found\033[00m\n");
+		free(loop);
 	      }
-	    *(rc + rcptr++) = '\n';
-	    *(rc + rcptr++) = 0;
-	    printf("%s", rc);
-	    fflush(stdout);
-	    if (filename == null)
-	      stdin = rc;
-	    else
-	      free(rc);
+	    set_free(got);
 	  }
-	
 	if (bs != null)
 	  free(bs);
 	fclose(file);
       }
     
+    if (out != null)
+      free(out);
     if (stdin != null)
       free(stdin);
     

@@ -56,6 +56,10 @@ public class sha3sum
 	cmd = cmd.intern();
 	
 	Integer O = null; int _o = 512;             /* --outputsize */
+	if      (cmd == "sha3-224sum")  _o = 224;
+	else if (cmd == "sha3-256sum")  _o = 256;
+	else if (cmd == "sha3-384sum")  _o = 384;
+	else if (cmd == "sha3-512sum")  _o = 512;
 	Integer S = null; int _s = 1600;            /* --statesize  */
 	Integer R = null; int _r = _s - (_o << 1);  /* --bitrate    */
 	Integer C = null; int _c = _s - _r;         /* --capacity   */
@@ -64,10 +68,6 @@ public class sha3sum
 	Integer J = null; int _j = 1;               /* --squeezes   */
 	int o = 0, s = 0, r = 0, c = 0, w = 0, i = 0, j = 0;
 	
-	if      (cmd == "sha3-224sum")  o = _o = 224;
-	else if (cmd == "sha3-256sum")  o = _o = 256;
-	else if (cmd == "sha3-384sum")  o = _o = 384;
-	else if (cmd == "sha3-512sum")  o = _o = 512;
 	boolean binary = false, hex = false;
 	int multi = 0;
 	
@@ -244,7 +244,7 @@ public class sha3sum
 		System.exit(6);
 	    }
 	    else if (S == null)
-		s = new Integer(w * 25);
+		S = new Integer(w * 25);
 	}
 	
 	if (C != null)
@@ -312,6 +312,7 @@ public class sha3sum
 	System.err.println("State size: " + s);
 	System.err.println("Output size: " + o);
 	System.err.println("Iterations: " + i);
+	System.err.println("Squeezes: " + j);
 	
 	
 	if (fptr == 0)
@@ -341,96 +342,95 @@ public class sha3sum
 	    InputStream file = null;
 	    try
 	    {
-		file = new FileInputStream(fn);
-		SHA3.initialise(r, c, o);
-		int blksize = 4096; /** XXX os.stat(os.path.realpath(fn)).st_size; **/
-		byte[] chunk = new byte[blksize];
-		for (;;)
+		byte[] bs;
+		if ((filename != null) || (stdin == null))
 		{
-		    int read = file.read(chunk, 0, blksize);
-		    if (read <= 0)
-			break;
-		    if (hex == false)
-			SHA3.update(chunk, read);
-		    else
+		    file = new FileInputStream(fn);
+		    SHA3.initialise(r, c, o);
+		    int blksize = 4096; /** XXX os.stat(os.path.realpath(fn)).st_size; **/
+		    byte[] chunk = new byte[blksize];
+		    for (;;)
 		    {
-		        int n = read << 1;
-			for (int _ = 0; _ < n; _++)
+			int read = file.read(chunk, 0, blksize);
+			if (read <= 0)
+			    break;
+			if (hex == false)
+			    SHA3.update(chunk, read);
+			else
 			{
-			    byte a = chunk[_ << 1], b = chunk[(_ << 1) | 1];
-			    chunk[_] = (byte)((((a & 15) + (a <= '9' ? 0 : 9)) << 4) | ((b & 15) + (b <= '9' ? 0 : 9)));
+			    int n = read >> 1;
+			    for (int _ = 0; _ < n; _++)
+			    {	byte a = chunk[_ << 1], b = chunk[(_ << 1) | 1];
+				chunk[_] = (byte)((((a & 15) + (a <= '9' ? 0 : 9)) << 4) | ((b & 15) + (b <= '9' ? 0 : 9)));
+			    }
+			    SHA3.update(chunk, n);
 			}
-			SHA3.update(chunk, n);
 		    }
+		    bs = SHA3.digest(j == 1);
+		    if (j > 2)
+			SHA3.fastSqueeze(j - 2);
+		    if (j > 1)
+			bs = SHA3.squeeze();
+		    if (filename == null)
+			stdin = bs;
 		}
-		byte[] bs = SHA3.digest(j > 1);
-		if (j > 2)
-		    SHA3.fastSqueeze(j - 2);
-		if (j > 1)
-		    bs = SHA3.squeeze();
+		else
+		    bs = stdin;
 		if (multi == 0)
 		{
 		    for (int _ = 1; _ < i; _++)
 		    {
 			SHA3.initialise(r, c, o);
-			bs = SHA3.digest(bs, j > 1);
+			bs = SHA3.digest(bs, j == 1);
 			if (j > 2)
 			    SHA3.fastSqueeze(j - 2);
 			if (j > 1)
 			    bs = SHA3.squeeze();
 		    }
 		    if (binary)
-		    {   if (filename == null)
-			    stdin = bs;
 			System.out.write(bs);
-		    }
 		    else
 		    {   for (int b = 0, bn = bs.length; b < bn; b++)
 			{   rc += "0123456789ABCDEF".charAt((bs[b] >> 4) & 15);
 			    rc += "0123456789ABCDEF".charAt(bs[b] & 15);
 			}
 			rc += " " + (filename == null ? "-" : filename) + "\n";
-			if (filename == null)
-			    stdin = rc.getBytes("UTF-8");
 			System.out.print(rc);
-		    }
-		}
-		else if (binary)
-		{
-		    System.out.write(bs);
-		    for (int _ = 1; _ < i; _++)
-		    {
-			SHA3.initialise(r, c, o);
-			bs = SHA3.digest(bs, j > 1);
-			if (j > 2)
-			    SHA3.fastSqueeze(j - 2);
-			if (j > 1)
-			    bs = SHA3.squeeze();
-			System.out.write(bs);
 		    }
 		}
 		else if (multi == 1)
 		{
-		    byte[] out = new byte[(bs.length << 1) + 1];
-		    for (int b = 0, bn = bs.length; b < bn; b++)
-		    {   out[ b << 1     ] = (byte)("0123456789ABCDEF".charAt((bs[b] >> 4) & 15));
-			out[(b << 1) | 1] = (byte)("0123456789ABCDEF".charAt(bs[b] & 15));
-		    }
-		    out[out.length - 1] = '\n';
-		    System.out.write(out);
-		    for (int _ = 1; _ < i; _++)
+		    byte[] out = null;
+		    if (binary)
+			System.out.write(bs);
+		    else
 		    {
-			SHA3.initialise(r, c, o);
-			bs = SHA3.digest(bs, j > 1);
-			if (j > 2)
-			    SHA3.fastSqueeze(j - 2);
-			if (j > 1)
-			    bs = SHA3.squeeze();
+			out = new byte[(bs.length << 1) + 1];
 			for (int b = 0, bn = bs.length; b < bn; b++)
 			{   out[ b << 1     ] = (byte)("0123456789ABCDEF".charAt((bs[b] >> 4) & 15));
 			    out[(b << 1) | 1] = (byte)("0123456789ABCDEF".charAt(bs[b] & 15));
 			}
+			out[out.length - 1] = '\n';
 			System.out.write(out);
+		    }
+		    for (int _ = 1; _ < i; _++)
+		    {
+			SHA3.initialise(r, c, o);
+			bs = SHA3.digest(bs, j == 1);
+			if (j > 2)
+			    SHA3.fastSqueeze(j - 2);
+			if (j > 1)
+			    bs = SHA3.squeeze();
+			if (binary)
+			    System.out.write(bs);
+			else
+			{
+			    for (int b = 0, bn = bs.length; b < bn; b++)
+			    {   out[ b << 1     ] = (byte)("0123456789ABCDEF".charAt((bs[b] >> 4) & 15));
+				out[(b << 1) | 1] = (byte)("0123456789ABCDEF".charAt(bs[b] & 15));
+			    }
+			    System.out.write(out);
+			}
 		    }
 		}
 		else
@@ -442,7 +442,7 @@ public class sha3sum
 		    {
 			if (_ > 0)
 			{   SHA3.initialise(r, c, o);
-			    bs = SHA3.digest(bs, j > 1);
+			    bs = SHA3.digest(bs, j == 1);
 			    if (j > 2)
 				SHA3.fastSqueeze(j - 2);
 			    if (j > 1)
@@ -463,7 +463,7 @@ public class sha3sum
 			System.out.println(now);
 		    }
 		    if (loop != null)
-			System.out.println("\033[01;31mLoop found\033[00m");
+			System.err.println("\033[01;31mLoop found\033[00m");
 		}
 		System.out.flush();
 	    }

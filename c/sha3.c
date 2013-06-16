@@ -611,10 +611,12 @@ extern void update(byte* msg, long msglen)
 /**
  * Absorb the last part of the message and squeeze the Keccak sponge
  * 
- * @param  msg     The rest of the message, may be {@code null}
- * @param  msglen  The length of the partial message
+ * @param   msg         The rest of the message, may be {@code null}
+ * @param   msglen      The length of the partial message
+ * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
+ * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
  */
-extern byte* digest(byte* msg, long msglen)
+extern byte* digest(byte* msg, long msglen, boolean withReturn)
 {
   byte* message;
   byte* rc;
@@ -671,17 +673,98 @@ extern byte* digest(byte* msg, long msglen)
   
   /* Squeezing phase */
   olen = n;
-  ni = min(25, rr);
+  if (withReturn)
+    {
+      ni = min(25, rr);
+      while (olen > 0)
+	{
+	  i = 0;
+	  while ((i < ni) && (j < nn))
+	    {
+	      llong v = S[(i % 5) * 5 + i / 5];
+	      for (_ = 0; _ < ww; _++)
+		{
+		  if (j < nn)
+		    rc[ptr++] = (byte)v;
+		  v >>= 8;
+		  j += 1;
+		}
+	      i += 1;
+	    }
+	  olen -= r;
+	  if (olen > 0)
+	    keccakF(S);
+	}
+      if ((n & 7))
+	rc[n >> 3] &= (1 << (n & 7)) - 1;
+      
+      return rc;
+    }
+  while ((olen -= r) > 0)
+    keccakF(S);
+  return null;
+}
+
+
+/**
+ * Force some rounds of Keccak-f
+ * 
+ * @param  times  The number of rounds
+ */
+extern void simpleSqueeze(long times)
+{
+  long i;
+  for (i = 0; i < times; i++)
+    keccakF(S);
+}
+
+
+/**
+ * Squeeze as much as is needed to get a digest a number of times
+ * 
+ * @param  times  The number of digests
+ */
+extern void fastSqueeze(long times)
+{
+  long i, olen;
+  for (i = 0; i < times; i++)
+    {
+      keccakF(S); /* Last squeeze did not do a ending squeeze */
+      olen = n;
+      while ((olen -= r) > 0)
+	keccakF(S);
+    }
+}
+
+
+/**
+ * Squeeze out another digest
+ * 
+ * @return  The hash sum
+ */
+extern byte* squeeze()
+{
+  long nn, ww, olen, i, j, ptr, ni;
+  byte* rc;
+  
+  keccakF(S); /* Last squeeze did not do a ending squeeze */
+  
+  ww = w >> 3;
+  rc = (byte*)malloc(nn = (n + 7) >> 3);
+  olen = n;
+  j = ptr = 0;
+  ni = (25 < r >> 3) ? 25 : (r >> 3);
+  
   while (olen > 0)
     {
       i = 0;
       while ((i < ni) && (j < nn))
 	{
-	  llong v = S[(i % 5) * 5 + i / 5];
+	  long _, v = S[(i % 5) * 5 + i / 5];
 	  for (_ = 0; _ < ww; _++)
 	    {
 	      if (j < nn)
-		rc[ptr++] = (byte)v;
+		*(rc + ptr++) = (byte)v;
 	      v >>= 8;
 	      j += 1;
 	    }
@@ -691,8 +774,8 @@ extern byte* digest(byte* msg, long msglen)
       if (olen > 0)
 	keccakF(S);
     }
-  if ((n & 7))
-    rc[n >> 3] &= (1 << (n & 7)) - 1;
+  if (n & 7)
+    rc[nn - 1] &= (1 << (n & 7)) - 1;
   
   return rc;
 }

@@ -86,31 +86,116 @@ public class SHA3
     
     /**
      * Squeeze the Keccak sponge
+     * 
+     * @return  The hash sum
      */
     public static byte[] digest()
     {
-	return digest(null);
+	return digest(null, 0, true);
+    }
+    
+    
+    /**
+     * Squeeze the Keccak sponge
+     * 
+     * @paran   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
+     * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
+     */
+    public static byte[] digest(boolean withReturn)
+    {
+	return digest(null, 0, withReturn);
     }
     
     
     /**
      * Absorb the last part of the message and squeeze the Keccak sponge
      * 
-     * @param  msg  The rest of the message
+     * @param   msg  The rest of the message
+     * @return       The hash sum
      */
     public static byte[] digest(byte[] msg)
     {
-	return digest(msg, msg == null ? 0 : msg.length);
+	return digest(msg, msg == null ? 0 : msg.length, true);
     }
     
     
     /**
      * Absorb the last part of the message and squeeze the Keccak sponge
      * 
-     * @param  msg     The rest of the message
-     * @param  msglen  The length of the partial message
+     * @param   msg         The rest of the message
+     * @paran   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
+     * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
      */
-    public static native byte[] digest(byte[] msg, int msglen);
+    public static byte[] digest(byte[] msg, boolean withReturn)
+    {
+	return digest(msg, msg == null ? 0 : msg.length, withReturn);
+    }
+    
+    
+    /**
+     * Absorb the last part of the message and squeeze the Keccak sponge
+     * 
+     * @param   msg     The rest of the message
+     * @param   msglen  The length of the partial message
+     * @return          The hash sum
+     */
+    public static byte[] digest(byte[] msg, int msglen)
+    {
+	return digest(msg, msg == null ? 0 : msg.length, true);
+    }
+    
+    
+    /**
+     * Absorb the last part of the message and squeeze the Keccak sponge
+     * 
+     * @param   msg         The rest of the message
+     * @param   msglen      The length of the partial message
+     * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
+     * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
+     */
+    public static native byte[] digest(byte[] msg, int msglen, boolean withReturn);
+    
+    
+    /**
+     * Force a round of Keccak-f
+     */
+    public static void simpleSqueeze()
+    {
+	simpleSqueeze(1);
+    }
+    
+    
+    /**
+     * Force some rounds of Keccak-f
+     * 
+     * @param  times  The number of rounds
+     */
+    public static native void simpleSqueeze(int times);
+    
+    
+    /**
+     * Squeeze as much as is needed to get a digest
+     */
+    public static void fastSqueeze()
+    {
+	fastSqueeze(1);
+    }
+    
+    
+    /**
+     * Squeeze as much as is needed to get a digest a number of times
+     * 
+     * @param  times  The number of digests
+     */
+    public static native void fastSqueeze(int times);
+    
+    
+    /**
+     * Squeeze out another digest
+     * 
+     * @return  The hash sum
+     */
+    public static native byte[] squeeze();
     
 }
 

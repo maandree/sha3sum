@@ -478,7 +478,7 @@ public class SHA3
     /**
      * Squeeze the Keccak sponge
      * 
-     * @paran   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
+     * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
      * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
      */
     public static byte[] digest(boolean withReturn)
@@ -503,7 +503,7 @@ public class SHA3
      * Absorb the last part of the message and squeeze the Keccak sponge
      * 
      * @param   msg         The rest of the message
-     * @paran   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
+     * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
      * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
      */
     public static byte[] digest(byte[] msg, boolean withReturn)
