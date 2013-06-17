@@ -883,13 +883,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         printerr(cmd + ': sorry, I will only do at least one squeeze iteration!\n')
         sys.exit(3)
     stdin = None
+    fail = False
     for filename in files:
-        if (filename is None) and (stdin is not None):
-            print(stdin)
-            continue
         rc = ''
         fn = '/dev/stdin' if filename is None else filename
-        fail = False
         with open(fn, 'rb') as file:
             try:
                 if (filename is not None) or (stdin is None):

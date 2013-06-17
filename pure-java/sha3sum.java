@@ -333,12 +333,8 @@ public class sha3sum
 	String filename;
 
 	for (int f = 0; f < fptr; f++)
-	{   if (((filename = files[f]) == null) && (stdin != null))
-	    {	System.out.write(stdin);
-		continue;
-	    }
-	    String rc = "";
-	    String fn = filename == null ? "/dev/stdin" : filename;
+	{   String rc = "";
+	    String fn = (filename = files[f]) == null ? "/dev/stdin" : filename;
 	    InputStream file = null;
 	    try
 	    {

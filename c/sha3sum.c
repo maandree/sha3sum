@@ -567,11 +567,7 @@ int main(int argc, char** argv)
 	char* chunk;
 	char* bs;
 	
-	if (((filename = *(files + f)) == null) && stdin)
-	  {
-	    printf("%s", stdin);
-	    continue;
-	  }
+	filename = *(files + f)
 	fn = filename ? filename : "/dev/stdin";
 	file = fopen(fn, "r");
 	if (file == null)
