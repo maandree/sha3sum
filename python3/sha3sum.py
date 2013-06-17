@@ -987,7 +987,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         printerr('\033[01;31mLoop found\033[00m')
                 sys.stdout.buffer.flush()
             except Exception as err:
-                printerr(cmd + ': connot read file: ' + filename + ': ' + str(err))
+                printerr(cmd + ': connot read file: ' + fn + ': ' + str(err))
                 fail = True
         sys.stdout.buffer.flush()
     if fail:
