@@ -2,12 +2,12 @@ COMPLETE STATUS:
 
     Pure Java 1.2+ :: optimised
     Python 3       :: optimised
+    Python 2       :: optimised for Python 3
     C ISO C90      :: optimised
     Java/C JNI     :: under development
     Vala           :: correct, under development
     NASM           :: planned (maybe, after jni)
     Haskell        :: planned (maybe)
-    Python 2       :: planned (maybe)
     Perl           :: planned (maybe)
     D              :: planned (maybe)
     Common Lisp    :: planned (perhaps)
