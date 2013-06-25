@@ -50,7 +50,11 @@ inline void putchars(char* bytes, long n)
  */
 SET set_new()
 {
-  return (void**)malloc(sizeof(void*) << 4);
+  long i;
+  void** rc = = (void**)malloc(sizeof(void*) << 4);
+  for (i = 0; i < 16; i++)
+    *(rc + i) = 0;
+  return rc;
 }
 
 
@@ -90,7 +94,7 @@ void set_free(SET set)
  */
 void set_add(SET set, char* item, long n)
 {
-  long i;
+  long i, j;
   void** at = set;
   for (i = 0; i < n; i++)
     {
@@ -98,11 +102,19 @@ void set_add(SET set, char* item, long n)
       if (*(at + a))
 	at = (void**)*(at + a);
       else
-	at = (void**)(*(at + a) = (void*)malloc(sizeof(void*) << 4));
+	{
+	  at = (void**)(*(at + a) = (void*)malloc(sizeof(void*) << 4));
+	  for (j = 0; j < 16; j++)
+	    *(at + j) = 0;
+	}
       if (*(at + b))
 	at = (void**)*(at + b);
       else
-	at = (void**)(*(at + b) = (void*)malloc(sizeof(void*) << 4));
+	{
+	  at = (void**)(*(at + b) = (void*)malloc(sizeof(void*) << 4));
+	  for (j = 0; j < 16; j++)
+	    *(at + j) = 0;
+	}
     }
 }
 
