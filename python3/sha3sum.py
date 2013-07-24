@@ -894,6 +894,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     blksize = 4096
                     try:
                         blksize = os.stat(os.path.realpath(fn)).st_blksize
+                        if blksize <= 0:
+                            blksize = 4096
                     except:
                         pass
                     while True:
