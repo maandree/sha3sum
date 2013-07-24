@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <stdio.h>
-#include <stdlib.h>
+#include <sys/stat.h>
 
 #include "sha3.h"
 
@@ -566,6 +566,7 @@ int main(int argc, char** argv)
     char* filename;
     char* fn;
     long f, fail, _;
+    struct stat attr;
     
     char* out = binary ? null : (char*)malloc(bn * 2);
     
@@ -592,7 +593,9 @@ int main(int argc, char** argv)
 	if ((filename != null) || (stdin == null))
 	  {
 	    initialise(r, c, o);
-	    blksize = 4096; /** XXX os.stat(os.path.realpath(fn)).st_size; **/
+	    blksize = stat(*(argv + f), &attr) ? 0 : attr.st_blksize;
+	    if (blksize <= 0)
+	      blksize = 4096;
 	    chunk = (char*)malloc(blksize);
 	    for (;;)
 	      {
