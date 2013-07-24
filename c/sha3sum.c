@@ -480,7 +480,7 @@ int main(int argc, char** argv)
   
   if (_O)
     {
-      o = o;
+      o = O;
       if (o <= 0)
 	{
 	  ERR("the output size must be positive.");

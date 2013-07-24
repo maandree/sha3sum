@@ -549,8 +549,9 @@ void update(byte* msg, jint msglen)
 {
   long rr = r >> 3;
   long ww = w >> 3;
-  long i, len;
+  long i, len, nnn;
   byte* message;
+  byte* _msg;
   
   if (mptr + msglen > mlen)
     {
@@ -565,13 +566,14 @@ void update(byte* msg, jint msglen)
   message = (byte*)malloc(len);
   arraycopy(M, 0, message, 0, len);
   mptr -= len;
-  revarraycopy(M, len, M, 0, mptr);
+  revarraycopy(M, nnn = len, M, 0, mptr);
+  _msg = message;
   
   /* Absorbing phase */
   if (ww == 8)
-    for (i = 0; i < len; i += rr)
+    for (i = 0; i < nnn; i += rr)
       {
-        #define __S(Si, OFF)  S[Si] ^= toLane64(message, len, rr, i + OFF)
+        #define __S(Si, OFF)  S[Si] ^= toLane64(message, len, rr, OFF)
 	__S( 0,   0);  __S( 5,   8);  __S(10,  16);  __S(15,  24);  __S(20,  32);
 	__S( 1,  40);  __S( 6,  48);  __S(11,  56);  __S(16,  64);  __S(21,  72);
 	__S( 2,  80);  __S( 7,  88);  __S(12,  96);  __S(17, 104);  __S(22, 112);
@@ -579,11 +581,13 @@ void update(byte* msg, jint msglen)
 	__S( 4, 160);  __S( 9, 168);  __S(14, 176);  __S(19, 184);  __S(24, 192);
         #undef __S
 	keccakF(S);
+	message += rr;
+	len -= rr;
       }
   else
-    for (i = 0; i < len; i += rr)
+    for (i = 0; i < nnn; i += rr)
       {
-        #define __S(Si, OFF)  S[Si] ^= toLane(message, len, rr, ww, i + OFF * w)
+        #define __S(Si, OFF)  S[Si] ^= toLane(message, len, rr, ww, OFF * w)
 	__S( 0,  0);  __S( 5,  1);  __S(10,  2);  __S(15,  3);  __S(20,  4);
 	__S( 1,  5);  __S( 6,  6);  __S(11,  7);  __S(16,  8);  __S(21,  9);
 	__S( 2, 10);  __S( 7, 11);  __S(12, 12);  __S(17, 13);  __S(22, 14);
@@ -591,9 +595,11 @@ void update(byte* msg, jint msglen)
 	__S( 4, 20);  __S( 9, 21);  __S(14, 22);  __S(19, 23);  __S(24, 24);
         #undef __S
 	keccakF(S);
+	message += rr;
+	len -= rr;
       }
   
-  free(message);
+  free(_msg);
 }
 
 
@@ -607,7 +613,8 @@ byte* digest(byte* msg, jint msglen)
 {
   byte* message;
   byte* rc;
-  long rr = r >> 3, len;
+  byte* _msg;
+  long rr = r >> 3, len, nnn;
   long nn = (n + 7) >> 3, olen;
   long ww = w >> 3, ni;
   long i, j = 0, ptr = 0, _;
@@ -629,12 +636,14 @@ byte* digest(byte* msg, jint msglen)
   free(M);
   M = null;
   rc = (byte*)malloc((n + 7) >> 3);
+  nnn = len;
+  _msg = message;
   
   /* Absorbing phase */
   if (ww == 8)
-    for (i = 0; i < len; i += rr)
+    for (i = 0; i < nnn; i += rr)
       {
-        #define __S(Si, OFF)  S[Si] ^= toLane64(message, len, rr, i + OFF)
+        #define __S(Si, OFF)  S[Si] ^= toLane64(message, len, rr, OFF)
 	__S( 0,   0);  __S( 5,   8);  __S(10,  16);  __S(15,  24);  __S(20,  32);
 	__S( 1,  40);  __S( 6,  48);  __S(11,  56);  __S(16,  64);  __S(21,  72);
 	__S( 2,  80);  __S( 7,  88);  __S(12,  96);  __S(17, 104);  __S(22, 112);
@@ -642,11 +651,13 @@ byte* digest(byte* msg, jint msglen)
 	__S( 4, 160);  __S( 9, 168);  __S(14, 176);  __S(19, 184);  __S(24, 192);
         #undef __S
 	keccakF(S);
+	message += rr;
+	len -= rr;
       }
   else
-    for (i = 0; i < len; i += rr)
+    for (i = 0; i < nnn; i += rr)
       {
-        #define __S(Si, OFF)  S[Si] ^= toLane(message, len, rr, ww, i + OFF * w)
+        #define __S(Si, OFF)  S[Si] ^= toLane(message, len, rr, ww, OFF * w)
 	__S( 0,  0);  __S( 5,  1);  __S(10,  2);  __S(15,  3);  __S(20,  4);
 	__S( 1,  5);  __S( 6,  6);  __S(11,  7);  __S(16,  8);  __S(21,  9);
 	__S( 2, 10);  __S( 7, 11);  __S(12, 12);  __S(17, 13);  __S(22, 14);
@@ -654,9 +665,11 @@ byte* digest(byte* msg, jint msglen)
 	__S( 4, 20);  __S( 9, 21);  __S(14, 22);  __S(19, 23);  __S(24, 24);
         #undef __S
 	keccakF(S);
+	message += rr;
+	len -= rr;
       }
   
-  free(message);
+  free(_msg);
   
   /* Squeezing phase */
   olen = n;

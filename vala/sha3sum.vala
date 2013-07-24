@@ -307,15 +307,16 @@ class SHA3 : Object
      * Convert a chunk of byte:s to a word
      * 
      * @param   message  The message
+	 * @param   msgoff   The number of times to loop has run times to bitrate
      * @param   rr       Bitrate in bytes
      * @param   ww       Word size in bytes
      * @param   off      The offset in the message
      * @return           Lane
      */
-    private int64 toLane(uint8[] message, int rr, int ww, int off)
+    private int64 toLane(uint8[] message, int msgoff, int rr, int ww, int off)
     {
 		int64 rc = 0;
-		int n = message.length < rr ? message.length : rr;
+		int n = (message.length < rr ? message.length : rr) + msgoff;
         for (int i = off + ww - 1; i >= off; i--)
             rc = (rc << 8) | ((i < n) ? (int64)(message[i] & 255) : 0L);
         return rc;
@@ -326,13 +327,14 @@ class SHA3 : Object
      * Convert a chunk of byte:s to a 64-bit word
      * 
      * @param   message  The message
+	 * @param   msgoff   The number of times to loop has run times to bitrate
      * @param   rr       Bitrate in bytes
      * @param   off      The offset in the message
      * @return           Lane
      */
-    private int64 toLane64(uint8[] message, int rr, int off)
+    private int64 toLane64(uint8[] message, int msgoff, int rr, int off)
     {
-		int n = message.length < rr ? message.length : rr;
+		int n = (message.length < rr ? message.length : rr) + msgoff;
         return ((off + 7 < n) ? ((int64)(message[off + 7] & 255) << 56) : 0L) |
 		       ((off + 6 < n) ? ((int64)(message[off + 6] & 255) << 48) : 0L) |
 			   ((off + 5 < n) ? ((int64)(message[off + 5] & 255) << 40) : 0L) |
@@ -427,61 +429,61 @@ class SHA3 : Object
         if (ww == 8)
             for (int i = 0; i < len; i += rr)
 			{
-				this.S[ 0] ^= this.toLane64(message, rr, i + 0);
-				this.S[ 5] ^= this.toLane64(message, rr, i + 8);
-				this.S[10] ^= this.toLane64(message, rr, i + 16);
-                this.S[15] ^= this.toLane64(message, rr, i + 24);
-                this.S[20] ^= this.toLane64(message, rr, i + 32);
-                this.S[ 1] ^= this.toLane64(message, rr, i + 40);
-                this.S[ 6] ^= this.toLane64(message, rr, i + 48);
-                this.S[11] ^= this.toLane64(message, rr, i + 56);
-                this.S[16] ^= this.toLane64(message, rr, i + 64);
-                this.S[21] ^= this.toLane64(message, rr, i + 72);
-                this.S[ 2] ^= this.toLane64(message, rr, i + 80);
-                this.S[ 7] ^= this.toLane64(message, rr, i + 88);
-				this.S[12] ^= this.toLane64(message, rr, i + 96);
-				this.S[17] ^= this.toLane64(message, rr, i + 104);
-				this.S[22] ^= this.toLane64(message, rr, i + 112);
-				this.S[ 3] ^= this.toLane64(message, rr, i + 120);
-				this.S[ 8] ^= this.toLane64(message, rr, i + 128);
-				this.S[13] ^= this.toLane64(message, rr, i + 136);
-				this.S[18] ^= this.toLane64(message, rr, i + 144);
-				this.S[23] ^= this.toLane64(message, rr, i + 152);
-                this.S[ 4] ^= this.toLane64(message, rr, i + 160);
-                this.S[ 9] ^= this.toLane64(message, rr, i + 168);
-                this.S[14] ^= this.toLane64(message, rr, i + 176);
-                this.S[19] ^= this.toLane64(message, rr, i + 184);
-                this.S[24] ^= this.toLane64(message, rr, i + 192);
+				this.S[ 0] ^= this.toLane64(message, i, rr, i + 0);
+				this.S[ 5] ^= this.toLane64(message, i, rr, i + 8);
+				this.S[10] ^= this.toLane64(message, i, rr, i + 16);
+                this.S[15] ^= this.toLane64(message, i, rr, i + 24);
+                this.S[20] ^= this.toLane64(message, i, rr, i + 32);
+                this.S[ 1] ^= this.toLane64(message, i, rr, i + 40);
+                this.S[ 6] ^= this.toLane64(message, i, rr, i + 48);
+                this.S[11] ^= this.toLane64(message, i, rr, i + 56);
+                this.S[16] ^= this.toLane64(message, i, rr, i + 64);
+                this.S[21] ^= this.toLane64(message, i, rr, i + 72);
+                this.S[ 2] ^= this.toLane64(message, i, rr, i + 80);
+                this.S[ 7] ^= this.toLane64(message, i, rr, i + 88);
+				this.S[12] ^= this.toLane64(message, i, rr, i + 96);
+				this.S[17] ^= this.toLane64(message, i, rr, i + 104);
+				this.S[22] ^= this.toLane64(message, i, rr, i + 112);
+				this.S[ 3] ^= this.toLane64(message, i, rr, i + 120);
+				this.S[ 8] ^= this.toLane64(message, i, rr, i + 128);
+				this.S[13] ^= this.toLane64(message, i, rr, i + 136);
+				this.S[18] ^= this.toLane64(message, i, rr, i + 144);
+				this.S[23] ^= this.toLane64(message, i, rr, i + 152);
+                this.S[ 4] ^= this.toLane64(message, i, rr, i + 160);
+                this.S[ 9] ^= this.toLane64(message, i, rr, i + 168);
+                this.S[14] ^= this.toLane64(message, i, rr, i + 176);
+                this.S[19] ^= this.toLane64(message, i, rr, i + 184);
+                this.S[24] ^= this.toLane64(message, i, rr, i + 192);
 				this.keccakF(this.S);
 			}
         else
 			for (int i = 0; i < len; i += rr)
 			{
-				this.S[ 0] ^= this.toLane(message, rr, ww, i +  0    );
-				this.S[ 5] ^= this.toLane(message, rr, ww, i +      w);
-				this.S[10] ^= this.toLane(message, rr, ww, i +  2 * w);
-                this.S[15] ^= this.toLane(message, rr, ww, i +  3 * w);
-                this.S[20] ^= this.toLane(message, rr, ww, i +  4 * w);
-                this.S[ 1] ^= this.toLane(message, rr, ww, i +  5 * w);
-                this.S[ 6] ^= this.toLane(message, rr, ww, i +  6 * w);
-                this.S[11] ^= this.toLane(message, rr, ww, i +  7 * w);
-                this.S[16] ^= this.toLane(message, rr, ww, i +  8 * w);
-                this.S[21] ^= this.toLane(message, rr, ww, i +  9 * w);
-                this.S[ 2] ^= this.toLane(message, rr, ww, i + 10 * w);
-                this.S[ 7] ^= this.toLane(message, rr, ww, i + 11 * w);
-				this.S[12] ^= this.toLane(message, rr, ww, i + 12 * w);
-				this.S[17] ^= this.toLane(message, rr, ww, i + 13 * w);
-				this.S[22] ^= this.toLane(message, rr, ww, i + 14 * w);
-				this.S[ 3] ^= this.toLane(message, rr, ww, i + 15 * w);
-				this.S[ 8] ^= this.toLane(message, rr, ww, i + 16 * w);
-				this.S[13] ^= this.toLane(message, rr, ww, i + 17 * w);
-				this.S[18] ^= this.toLane(message, rr, ww, i + 18 * w);
-				this.S[23] ^= this.toLane(message, rr, ww, i + 19 * w);
-                this.S[ 4] ^= this.toLane(message, rr, ww, i + 20 * w);
-                this.S[ 9] ^= this.toLane(message, rr, ww, i + 21 * w);
-                this.S[14] ^= this.toLane(message, rr, ww, i + 22 * w);
-                this.S[19] ^= this.toLane(message, rr, ww, i + 23 * w);
-                this.S[24] ^= this.toLane(message, rr, ww, i + 24 * w);
+				this.S[ 0] ^= this.toLane(message, i, rr, ww, i +  0    );
+				this.S[ 5] ^= this.toLane(message, i, rr, ww, i +      w);
+				this.S[10] ^= this.toLane(message, i, rr, ww, i +  2 * w);
+                this.S[15] ^= this.toLane(message, i, rr, ww, i +  3 * w);
+                this.S[20] ^= this.toLane(message, i, rr, ww, i +  4 * w);
+                this.S[ 1] ^= this.toLane(message, i, rr, ww, i +  5 * w);
+                this.S[ 6] ^= this.toLane(message, i, rr, ww, i +  6 * w);
+                this.S[11] ^= this.toLane(message, i, rr, ww, i +  7 * w);
+                this.S[16] ^= this.toLane(message, i, rr, ww, i +  8 * w);
+                this.S[21] ^= this.toLane(message, i, rr, ww, i +  9 * w);
+                this.S[ 2] ^= this.toLane(message, i, rr, ww, i + 10 * w);
+                this.S[ 7] ^= this.toLane(message, i, rr, ww, i + 11 * w);
+				this.S[12] ^= this.toLane(message, i, rr, ww, i + 12 * w);
+				this.S[17] ^= this.toLane(message, i, rr, ww, i + 13 * w);
+				this.S[22] ^= this.toLane(message, i, rr, ww, i + 14 * w);
+				this.S[ 3] ^= this.toLane(message, i, rr, ww, i + 15 * w);
+				this.S[ 8] ^= this.toLane(message, i, rr, ww, i + 16 * w);
+				this.S[13] ^= this.toLane(message, i, rr, ww, i + 17 * w);
+				this.S[18] ^= this.toLane(message, i, rr, ww, i + 18 * w);
+				this.S[23] ^= this.toLane(message, i, rr, ww, i + 19 * w);
+                this.S[ 4] ^= this.toLane(message, i, rr, ww, i + 20 * w);
+                this.S[ 9] ^= this.toLane(message, i, rr, ww, i + 21 * w);
+                this.S[14] ^= this.toLane(message, i, rr, ww, i + 22 * w);
+                this.S[19] ^= this.toLane(message, i, rr, ww, i + 23 * w);
+                this.S[24] ^= this.toLane(message, i, rr, ww, i + 24 * w);
 				this.keccakF(this.S);
 			}
     }
@@ -518,61 +520,61 @@ class SHA3 : Object
         if (ww == 8)
             for (int i = 0; i < len; i += rr)
 			{
-				this.S[ 0] ^= this.toLane64(message, rr, i + 0);
-				this.S[ 5] ^= this.toLane64(message, rr, i + 8);
-				this.S[10] ^= this.toLane64(message, rr, i + 16);
-                this.S[15] ^= this.toLane64(message, rr, i + 24);
-                this.S[20] ^= this.toLane64(message, rr, i + 32);
-                this.S[ 1] ^= this.toLane64(message, rr, i + 40);
-                this.S[ 6] ^= this.toLane64(message, rr, i + 48);
-                this.S[11] ^= this.toLane64(message, rr, i + 56);
-                this.S[16] ^= this.toLane64(message, rr, i + 64);
-                this.S[21] ^= this.toLane64(message, rr, i + 72);
-                this.S[ 2] ^= this.toLane64(message, rr, i + 80);
-                this.S[ 7] ^= this.toLane64(message, rr, i + 88);
-				this.S[12] ^= this.toLane64(message, rr, i + 96);
-				this.S[17] ^= this.toLane64(message, rr, i + 104);
-				this.S[22] ^= this.toLane64(message, rr, i + 112);
-				this.S[ 3] ^= this.toLane64(message, rr, i + 120);
-				this.S[ 8] ^= this.toLane64(message, rr, i + 128);
-				this.S[13] ^= this.toLane64(message, rr, i + 136);
-				this.S[18] ^= this.toLane64(message, rr, i + 144);
-				this.S[23] ^= this.toLane64(message, rr, i + 152);
-                this.S[ 4] ^= this.toLane64(message, rr, i + 160);
-                this.S[ 9] ^= this.toLane64(message, rr, i + 168);
-                this.S[14] ^= this.toLane64(message, rr, i + 176);
-                this.S[19] ^= this.toLane64(message, rr, i + 184);
-                this.S[24] ^= this.toLane64(message, rr, i + 192);
+				this.S[ 0] ^= this.toLane64(message, i, rr, i + 0);
+				this.S[ 5] ^= this.toLane64(message, i, rr, i + 8);
+				this.S[10] ^= this.toLane64(message, i, rr, i + 16);
+                this.S[15] ^= this.toLane64(message, i, rr, i + 24);
+                this.S[20] ^= this.toLane64(message, i, rr, i + 32);
+                this.S[ 1] ^= this.toLane64(message, i, rr, i + 40);
+                this.S[ 6] ^= this.toLane64(message, i, rr, i + 48);
+                this.S[11] ^= this.toLane64(message, i, rr, i + 56);
+                this.S[16] ^= this.toLane64(message, i, rr, i + 64);
+                this.S[21] ^= this.toLane64(message, i, rr, i + 72);
+                this.S[ 2] ^= this.toLane64(message, i, rr, i + 80);
+                this.S[ 7] ^= this.toLane64(message, i, rr, i + 88);
+				this.S[12] ^= this.toLane64(message, i, rr, i + 96);
+				this.S[17] ^= this.toLane64(message, i, rr, i + 104);
+				this.S[22] ^= this.toLane64(message, i, rr, i + 112);
+				this.S[ 3] ^= this.toLane64(message, i, rr, i + 120);
+				this.S[ 8] ^= this.toLane64(message, i, rr, i + 128);
+				this.S[13] ^= this.toLane64(message, i, rr, i + 136);
+				this.S[18] ^= this.toLane64(message, i, rr, i + 144);
+				this.S[23] ^= this.toLane64(message, i, rr, i + 152);
+                this.S[ 4] ^= this.toLane64(message, i, rr, i + 160);
+                this.S[ 9] ^= this.toLane64(message, i, rr, i + 168);
+                this.S[14] ^= this.toLane64(message, i, rr, i + 176);
+                this.S[19] ^= this.toLane64(message, i, rr, i + 184);
+                this.S[24] ^= this.toLane64(message, i, rr, i + 192);
                 this.keccakF(this.S);
 			}
         else
 			for (int i = 0; i < len; i += rr)
 			{
-				this.S[ 0] ^= this.toLane(message, rr, ww, i +  0    );
-				this.S[ 5] ^= this.toLane(message, rr, ww, i +      w);
-				this.S[10] ^= this.toLane(message, rr, ww, i +  2 * w);
-                this.S[15] ^= this.toLane(message, rr, ww, i +  3 * w);
-                this.S[20] ^= this.toLane(message, rr, ww, i +  4 * w);
-                this.S[ 1] ^= this.toLane(message, rr, ww, i +  5 * w);
-                this.S[ 6] ^= this.toLane(message, rr, ww, i +  6 * w);
-                this.S[11] ^= this.toLane(message, rr, ww, i +  7 * w);
-                this.S[16] ^= this.toLane(message, rr, ww, i +  8 * w);
-                this.S[21] ^= this.toLane(message, rr, ww, i +  9 * w);
-                this.S[ 2] ^= this.toLane(message, rr, ww, i + 10 * w);
-                this.S[ 7] ^= this.toLane(message, rr, ww, i + 11 * w);
-				this.S[12] ^= this.toLane(message, rr, ww, i + 12 * w);
-				this.S[17] ^= this.toLane(message, rr, ww, i + 13 * w);
-				this.S[22] ^= this.toLane(message, rr, ww, i + 14 * w);
-				this.S[ 3] ^= this.toLane(message, rr, ww, i + 15 * w);
-				this.S[ 8] ^= this.toLane(message, rr, ww, i + 16 * w);
-				this.S[13] ^= this.toLane(message, rr, ww, i + 17 * w);
-				this.S[18] ^= this.toLane(message, rr, ww, i + 18 * w);
-				this.S[23] ^= this.toLane(message, rr, ww, i + 19 * w);
-                this.S[ 4] ^= this.toLane(message, rr, ww, i + 20 * w);
-                this.S[ 9] ^= this.toLane(message, rr, ww, i + 21 * w);
-                this.S[14] ^= this.toLane(message, rr, ww, i + 22 * w);
-                this.S[19] ^= this.toLane(message, rr, ww, i + 23 * w);
-                this.S[24] ^= this.toLane(message, rr, ww, i + 24 * w);
+				this.S[ 0] ^= this.toLane(message, i, rr, ww, i +  0    );
+				this.S[ 5] ^= this.toLane(message, i, rr, ww, i +      w);
+				this.S[10] ^= this.toLane(message, i, rr, ww, i +  2 * w);
+                this.S[15] ^= this.toLane(message, i, rr, ww, i +  3 * w);
+                this.S[20] ^= this.toLane(message, i, rr, ww, i +  4 * w);
+                this.S[ 1] ^= this.toLane(message, i, rr, ww, i +  5 * w);
+                this.S[ 6] ^= this.toLane(message, i, rr, ww, i +  6 * w);
+                this.S[11] ^= this.toLane(message, i, rr, ww, i +  7 * w);
+                this.S[16] ^= this.toLane(message, i, rr, ww, i +  8 * w);
+                this.S[21] ^= this.toLane(message, i, rr, ww, i +  9 * w);
+                this.S[ 2] ^= this.toLane(message, i, rr, ww, i + 10 * w);
+                this.S[ 7] ^= this.toLane(message, i, rr, ww, i + 11 * w);
+				this.S[12] ^= this.toLane(message, i, rr, ww, i + 12 * w);
+				this.S[17] ^= this.toLane(message, i, rr, ww, i + 13 * w);
+				this.S[22] ^= this.toLane(message, i, rr, ww, i + 14 * w);
+				this.S[ 3] ^= this.toLane(message, i, rr, ww, i + 15 * w);
+				this.S[ 8] ^= this.toLane(message, i, rr, ww, i + 16 * w);
+				this.S[13] ^= this.toLane(message, i, rr, ww, i + 17 * w);
+				this.S[18] ^= this.toLane(message, i, rr, ww, i + 18 * w);
+				this.S[23] ^= this.toLane(message, i, rr, ww, i + 19 * w);
+                this.S[ 4] ^= this.toLane(message, i, rr, ww, i + 20 * w);
+                this.S[ 9] ^= this.toLane(message, i, rr, ww, i + 21 * w);
+                this.S[14] ^= this.toLane(message, i, rr, ww, i + 22 * w);
+                this.S[19] ^= this.toLane(message, i, rr, ww, i + 23 * w);
+                this.S[24] ^= this.toLane(message, i, rr, ww, i + 24 * w);
 				this.keccakF(this.S);
 			}
         
