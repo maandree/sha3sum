@@ -51,7 +51,7 @@ inline void putchars(char* bytes, long n)
 SET set_new()
 {
   long i;
-  void** rc = = (void**)malloc(sizeof(void*) << 4);
+  void** rc = (void**)malloc(sizeof(void*) << 4);
   for (i = 0; i < 16; i++)
     *(rc + i) = 0;
   return rc;
@@ -201,7 +201,7 @@ int main(int argc, char** argv)
   char** args = argv + 1;
   
   
-  _O = _S = _R = _C = _W = _I = false;
+  _O = _S = _R = _C = _W = _I = _J = false;
   O = S = R = C = W = I = J = 0;
   o = s = r = c = w = i = j = 0;
   
@@ -579,7 +579,7 @@ int main(int argc, char** argv)
 	char* chunk;
 	char* bs;
 	
-	filename = *(files + f)
+	filename = *(files + f);
 	fn = filename ? filename : "/dev/stdin";
 	file = fopen(fn, "r");
 	if (file == null)
