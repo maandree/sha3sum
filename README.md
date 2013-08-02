@@ -6,7 +6,8 @@ COMPLETE STATUS:
     C ISO C90      :: optimised
     Java/C JNI     :: under development
     Vala           :: correct, under development
-    NASM           :: planned (maybe, after jni)
+    NASM           :: planned (maybe)
+    Python 3 + C   :: planned (maybe)
     Haskell        :: planned (maybe)
     Perl           :: planned (maybe)
     D              :: planned (maybe)
