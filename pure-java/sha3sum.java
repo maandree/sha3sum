@@ -4,16 +4,16 @@
  * Copyright © 2013  Mattias Andrée (maandree@member.fsf.org)
  * 
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -130,16 +130,16 @@ public class sha3sum
 		    System.out.println("Copyright © 2013  Mattias Andrée (maandree@member.fsf.org)");
 		    System.out.println("");
 		    System.out.println("This program is free software: you can redistribute it and/or modify");
-		    System.out.println("it under the terms of the GNU General Public License as published by");
+		    System.out.println("it under the terms of the GNU Affero General Public License as published by");
 		    System.out.println("the Free Software Foundation, either version 3 of the License, or");
 		    System.out.println("(at your option) any later version.");
 		    System.out.println("");
 		    System.out.println("This program is distributed in the hope that it will be useful,");
 		    System.out.println("but WITHOUT ANY WARRANTY; without even the implied warranty of");
 		    System.out.println("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the");
-		    System.out.println("GNU General Public License for more details.");
+		    System.out.println("GNU Affero General Public License for more details.");
 		    System.out.println("");
-		    System.out.println("You should have received a copy of the GNU General Public License");
+		    System.out.println("You should have received a copy of the GNU Affero General Public License");
 		    System.out.println("along with this program.  If not, see <http://www.gnu.org/licenses/>.");
 		    System.out.println("");
 		    System.exit(0);

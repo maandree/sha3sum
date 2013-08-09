@@ -4,16 +4,16 @@
  * Copyright © 2013  Mattias Andrée (maandree@member.fsf.org)
  * 
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
     
@@ -691,16 +691,16 @@ static int main(string[] cmdargs)
 				stdout.printf("Copyright © 2013  Mattias Andrée (maandree@member.fsf.org)\n");
 				stdout.printf("\n");
 				stdout.printf("This program is free software: you can redistribute it and/or modify\n");
-				stdout.printf("it under the terms of the GNU General Public License as published by\n");
+				stdout.printf("it under the terms of the GNU Affero General Public License as published by\n");
 				stdout.printf("the Free Software Foundation, either version 3 of the License, or\n");
 				stdout.printf("(at your option) any later version.\n");
 				stdout.printf("\n");
 				stdout.printf("This program is distributed in the hope that it will be useful,\n");
 				stdout.printf("but WITHOUT ANY WARRANTY; without even the implied warranty of\n");
 				stdout.printf("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n");
-				stdout.printf("GNU General Public License for more details.\n");
+				stdout.printf("GNU Affero General Public License for more details.\n");
 				stdout.printf("\n");
-				stdout.printf("You should have received a copy of the GNU General Public License\n");
+				stdout.printf("You should have received a copy of the GNU Affero General Public License\n");
 				stdout.printf("along with this program.  If not, see <http://www.gnu.org/licenses/>.\n");
 				stdout.printf("\n");
 				return 2;
