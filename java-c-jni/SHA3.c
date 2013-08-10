@@ -21,9 +21,9 @@
 
 
 #if __x86_64__ || __ppc64__
-#define llong long int
+  #define llong long int
 #else
-#define llong long long int
+  #define llong long long int
 #endif
 
 
@@ -180,7 +180,7 @@ inline void arraycopy(byte* src, long soff, byte* dest, long doff, long length)
       if ((length &  16))  {  __0;  __1;  __2;  __3;  __4;   src += 16;  dest += 16;  }
       if ((length &  32))  {  __0;  __1;  __2;  __3;  __4;  __5;   src += 32;  dest += 32;  }
       if ((length &  64))  {  __0;  __1;  __2;  __3;  __4;  __5;  __6;   src += 64;  dest += 64;  }
-      if ((length & 128))  {  __0;  __1;  __2;  __3;  __4;  __5;  __6;  __7;   src += 128;  dest += 256;  }
+      if ((length & 128))  {  __0;  __1;  __2;  __3;  __4;  __5;  __6;  __7;   src += 128;  dest += 128;  }
     }
   length &= ~255;
   for (i = 0; i < length; i += 256)
@@ -199,6 +199,7 @@ inline void arraycopy(byte* src, long soff, byte* dest, long doff, long length)
   #undef __0
   #undef __
 }
+
 
 /**
  * Copy an array segment into an array in end to start order
@@ -220,21 +221,21 @@ inline void revarraycopy(byte* src, long soff, byte* dest, long doff, long lengt
 /**
  * Rotate a word
  * 
- * @param   X:long  The value to rotate
- * @param   N:long  Rotation steps, may not be 0
- * @return   :long  The value rotated
+ * @param   X:llong  The value to rotate
+ * @param   N:long   Rotation steps, may not be 0
+ * @return   :llong  The value rotated
  */
-#define rotate(X, N)  (((X >> (w - (N % w))) + (X << (N % w))) & wmod)
+#define rotate(X, N)  ((((X) >> (w - ((N) % w))) + ((X) << ((N) % w))) & wmod)
 
 
 /**
  * Rotate a 64-bit word
  * 
- * @param   X:long  The value to rotate
- * @param   N:long  Rotation steps, may not be 0
- * @return   :long  The value rotated
+ * @param   X:llong  The value to rotate
+ * @param   N:long   Rotation steps, may not be 0
+ * @return   :llong  The value rotated
  */
-#define rotate64(X, N)  ((llong)((unsigned llong)X >> (64 - N)) + (X << N))
+#define rotate64(X, N)  ((llong)((unsigned llong)(X) >> (64 - (N))) + ((X) << (N)))
 
 
 /**
@@ -303,12 +304,12 @@ static void keccakFRound(llong* A, llong rc)
     }
   
   /* ξ step */
-  #define __A(X, X5, X10) A[X] = B[X] ^ ((~(B[X5])) & B[X10])
-  __A( 0,  5,  0);  __A( 1,  6,  1);  __A( 2,  7,  2);  __A( 3,  8,  3);  __A( 4,  9,  4);
-  __A( 5, 10,  5);  __A( 6, 11,  6);  __A( 7, 12,  7);  __A( 8, 13,  8);  __A( 9, 14,  9);
-  __A(10, 15, 10);  __A(11, 16, 11);  __A(12, 17, 12);  __A(13, 18, 13);  __A(14, 19, 14);
-  __A(15, 20, 15);  __A(16, 21, 16);  __A(17, 22, 17);  __A(18, 23, 18);  __A(19, 24, 19);
-  __A(20,  0, 20);  __A(21,  1, 21);  __A(22,  2, 22);  __A(23,  3, 23);  __A(24,  4, 24);
+  #define __A(X, X5, X10)  A[X] = B[X] ^ ((~(B[X5])) & B[X10])
+  __A( 0,  5, 10);  __A( 1,  6, 11);  __A( 2,  7, 12);  __A( 3,  8, 13);  __A( 4,  9, 14);
+  __A( 5, 10, 15);  __A( 6, 11, 16);  __A( 7, 12, 17);  __A( 8, 13, 18);  __A( 9, 14, 19);
+  __A(10, 15, 20);  __A(11, 16, 21);  __A(12, 17, 22);  __A(13, 18, 23);  __A(14, 19, 24);
+  __A(15, 20,  0);  __A(16, 21,  1);  __A(17, 22,  2);  __A(18, 23,  3);  __A(19, 24,  4);
+  __A(20,  0,  5);  __A(21,  1,  6);  __A(22,  2,  7);  __A(23,  3,  8);  __A(24,  4,  9);
   #undef __A
   
   /* ι step */
@@ -555,7 +556,7 @@ extern void dispose()
  * @param  msg     The partial message
  * @param  msglen  The length of the partial message
  */
-void update(byte* msg, jint msglen)
+void update(byte* msg, long msglen)
 {
   long rr = r >> 3;
   long ww = w >> 3;
@@ -584,7 +585,7 @@ void update(byte* msg, jint msglen)
   if (ww == 8)
     for (i = 0; i < nnn; i += rr)
       {
-        #define __S(Si, OFF)  S[Si] ^= toLane64(message, len, rr, OFF)
+	#define __S(Si, OFF)  S[Si] ^= toLane64(message + i, len - i, rr, OFF)
 	__S( 0,   0);  __S( 5,   8);  __S(10,  16);  __S(15,  24);  __S(20,  32);
 	__S( 1,  40);  __S( 6,  48);  __S(11,  56);  __S(16,  64);  __S(21,  72);
 	__S( 2,  80);  __S( 7,  88);  __S(12,  96);  __S(17, 104);  __S(22, 112);
@@ -598,7 +599,7 @@ void update(byte* msg, jint msglen)
   else
     for (i = 0; i < nnn; i += rr)
       {
-        #define __S(Si, OFF)  S[Si] ^= toLane(message, len, rr, ww, OFF * w)
+	#define __S(Si, OFF)  S[Si] ^= toLane(message + i, len - i, rr, ww, OFF * w)
 	__S( 0,  0);  __S( 5,  1);  __S(10,  2);  __S(15,  3);  __S(20,  4);
 	__S( 1,  5);  __S( 6,  6);  __S(11,  7);  __S(16,  8);  __S(21,  9);
 	__S( 2, 10);  __S( 7, 11);  __S(12, 12);  __S(17, 13);  __S(22, 14);
@@ -622,11 +623,11 @@ void update(byte* msg, jint msglen)
  * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
  * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
  */
-byte* digest(byte* msg, jint msglen, boolean withReturn)
+byte* digest(byte* msg, long msglen, boolean withReturn)
 {
   byte* message;
-  byte* rc;
   byte* _msg;
+  byte* rc;
   long rr = r >> 3, len;
   long nn = (n + 7) >> 3, olen;
   long ww = w >> 3, ni;
@@ -657,7 +658,7 @@ byte* digest(byte* msg, jint msglen, boolean withReturn)
   if (ww == 8)
     for (i = 0; i < nnn; i += rr)
       {
-        #define __S(Si, OFF)  S[Si] ^= toLane64(message, len, rr, OFF)
+	#define __S(Si, OFF)  S[Si] ^= toLane64(message, len, rr, OFF)
 	__S( 0,   0);  __S( 5,   8);  __S(10,  16);  __S(15,  24);  __S(20,  32);
 	__S( 1,  40);  __S( 6,  48);  __S(11,  56);  __S(16,  64);  __S(21,  72);
 	__S( 2,  80);  __S( 7,  88);  __S(12,  96);  __S(17, 104);  __S(22, 112);
@@ -671,7 +672,7 @@ byte* digest(byte* msg, jint msglen, boolean withReturn)
   else
     for (i = 0; i < nnn; i += rr)
       {
-        #define __S(Si, OFF)  S[Si] ^= toLane(message, len, rr, ww, OFF * w)
+	#define __S(Si, OFF)  S[Si] ^= toLane(message, len, rr, ww, OFF * w)
 	__S( 0,  0);  __S( 5,  1);  __S(10,  2);  __S(15,  3);  __S(20,  4);
 	__S( 1,  5);  __S( 6,  6);  __S(11,  7);  __S(16,  8);  __S(21,  9);
 	__S( 2, 10);  __S( 7, 11);  __S(12, 12);  __S(17, 13);  __S(22, 14);
@@ -813,7 +814,7 @@ JNIEXPORT void JNICALL Java_SHA3_update(JNIEnv* env, jclass class, jbyteArray ms
 }
 
 
- JNIEXPORT jbyteArray JNICALL Java_SHA3_digest(JNIEnv* env, jclass class, jbyteArray msg, jint msglen, jboolean withReturn)
+JNIEXPORT jbyteArray JNICALL Java_SHA3_digest(JNIEnv* env, jclass class, jbyteArray msg, jint msglen, jboolean withReturn)
 {
   jbyte* rcn;
   jbyteArray rcj = null;

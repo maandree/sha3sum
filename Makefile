@@ -71,7 +71,7 @@ bin/java-c-jni/%.so: java-c-jni/%.h java-c-jni/%.c
 .PHONY: clean
 clean:
 	-rm {*/,}*.{t2d,aux,cp,cps,fn,ky,log,pg,pgs,toc,tp,vr,vrs,op,ops} 2>/dev/null
-	-rm {*/,}*.{bak,info,pdf,ps,dvi,gz,class,jar,pyc,pyo,o,so,out} 2>/dev/null
+	-rm {*/,}*.{bak,info,pdf,ps,dvi,gz,class,jar,pyc,pyo,o,so,out,gch} 2>/dev/null
 	-rm java-c-jni/*.h 2>/dev/null
 	-rm -r bin 2>/dev/null
 

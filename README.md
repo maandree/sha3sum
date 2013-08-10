@@ -4,8 +4,8 @@ COMPLETE STATUS:
     Python 3       :: optimised
     Python 2       :: optimised for Python 3
     C ISO C90      :: optimised
-    Java/C JNI     :: under development
-    Vala           :: correct, under development
+    Java/C JNI     :: optimised
+    Vala           :: under development
     NASM           :: planned (maybe)
     Python 3 + C   :: planned (maybe)
     Haskell        :: planned (maybe)

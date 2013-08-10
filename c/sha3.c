@@ -20,9 +20,9 @@
 
 
 #if __x86_64__ || __ppc64__
-    #define llong long int
+  #define llong long int
 #else
-    #define llong long long int
+  #define llong long long int
 #endif
 
 
@@ -38,12 +38,12 @@
  * Round contants
  */
 static const llong RC[] = {
-	    0x0000000000000001L, 0x0000000000008082L, 0x800000000000808AL, 0x8000000080008000L,
-	    0x000000000000808BL, 0x0000000080000001L, 0x8000000080008081L, 0x8000000000008009L,
-	    0x000000000000008AL, 0x0000000000000088L, 0x0000000080008009L, 0x000000008000000AL,
-	    0x000000008000808BL, 0x800000000000008BL, 0x8000000000008089L, 0x8000000000008003L,
-	    0x8000000000008002L, 0x8000000000000080L, 0x000000000000800AL, 0x800000008000000AL,
-	    0x8000000080008081L, 0x8000000000008080L, 0x0000000080000001L, 0x8000000080008008L};
+  0x0000000000000001L, 0x0000000000008082L, 0x800000000000808AL, 0x8000000080008000L,
+  0x000000000000808BL, 0x0000000080000001L, 0x8000000080008081L, 0x8000000000008009L,
+  0x000000000000008AL, 0x0000000000000088L, 0x0000000080008009L, 0x000000008000000AL,
+  0x000000008000808BL, 0x800000000000008BL, 0x8000000000008089L, 0x8000000000008003L,
+  0x8000000000008002L, 0x8000000000000080L, 0x000000000000800AL, 0x800000008000000AL,
+  0x8000000080008081L, 0x8000000000008080L, 0x0000000080000001L, 0x8000000080008008L};
 
 /**
  * Keccak-f round temporary
@@ -95,7 +95,7 @@ static long l = 0;
  * 12 + 2ℓ, the number of rounds
  */
 static long nr = 0;
-    
+
 
 /**
  * The current state
@@ -106,7 +106,7 @@ static llong* S = null;
  * Left over water to fill the sponge with at next update
  */
 static byte* M = null;
-    
+
 /**
  * Pointer for {@link #M}
  */
@@ -215,7 +215,6 @@ inline void revarraycopy(byte* src, long soff, byte* dest, long doff, long lengt
   for (copyi = length - 1; copyi >= 0; copyi--)
     dest[copyi + doff] = src[copyi + soff];
 }
-
 
 
 /**
@@ -428,7 +427,7 @@ inline byte* pad10star1(byte* msg, long len, long r, long* outlen)
     }
   else
     {
-      char* M;
+      byte* M;
       long N;
       len = (nrf + 1) << 3;
       len = ((len - (len % r) + (r - 8)) >> 3) + 1;
@@ -613,7 +612,7 @@ extern void update(byte* msg, long msglen)
   
   free(_msg);
 }
-    
+
 
 /**
  * Absorb the last part of the message and squeeze the Keccak sponge
