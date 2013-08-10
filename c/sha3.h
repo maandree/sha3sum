@@ -33,7 +33,7 @@ extern void initialise(long bitrate, long capacity, long output);
 /**
  * Dispose of the Keccak sponge
  */
-extern void dispose();
+extern void dispose(void);
 
 
 /**
@@ -77,5 +77,5 @@ extern void fastSqueeze(long times);
  * 
  * @return  The hash sum
  */
-extern char* squeeze();
+extern char* squeeze(void);
 
