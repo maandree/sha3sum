@@ -19,8 +19,8 @@ COMPLETE STATUS:
 PERFORMANCE COMPARISON:
 
     C ISO C90    ::  0,082s ~   1
-    Java/C JNI   ::  0,175s ~   2.13
-    Java 1.2+    ::  0,258s ~   3.15
+    Java/C JNI   ::  0,175s ~   2,13
+    Java 1.2+    ::  0,258s ~   3,15
     Python 3     :: 25,057s ~ 306
     Python 2     :: 37,488s ~ 457
     
