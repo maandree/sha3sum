@@ -104,6 +104,11 @@ public class ConcurrentSHA3
     
     
     /**
+     * Message chunk that is being processed
+     */
+    private byte[] message;
+    
+    /**
      * The current state
      */
     private long[] S = null;
@@ -277,19 +282,18 @@ public class ConcurrentSHA3
     /**
      * Convert a chunk of byte:s to a word
      * 
-     * @param   message  The message
-     * @param   msgoff   The number of times to loop has run times the bitrate
-     * @param   rr       Bitrate in bytes
-     * @param   ww       Word size in bytes
-     * @param   off      The offset in the message
-     * @return           Lane
+     * @param   msgoff  The number of times to loop has run times the bitrate
+     * @param   rr      Bitrate in bytes
+     * @param   ww      Word size in bytes
+     * @param   off     The offset in the message
+     * @return          Lane
      */
-    private static long toLane(byte[] message, int msgoff, int rr, int ww, int off)
+    private long toLane(int msgoff, int rr, int ww, int off)
     {
 	long rc = 0;
-        int n = Math.min(message.length, rr) + msgoff;
+        int n = Math.min(this.message.length, rr) + msgoff;
         for (int i = off + ww - 1; i >= off; i--)
-            rc = (rc << 8) | ((i < n) ? (long)(message[i] & 255) : 0L);
+            rc = (rc << 8) | ((i < n) ? (long)(this.message[i] & 255) : 0L);
         return rc;
     }
     
@@ -297,35 +301,33 @@ public class ConcurrentSHA3
     /**
      * Convert a chunk of byte:s to a 64-bit word
      * 
-     * @param   message  The message
-     * @param   msgoff   The number of times to loop has run times the bitrate
-     * @param   rr       Bitrate in bytes
-     * @param   off      The offset in the message
-     * @return           Lane
+     * @param   msgoff  The number of times to loop has run times the bitrate
+     * @param   rr      Bitrate in bytes
+     * @param   off     The offset in the message
+     * @return          Lane
      */
-    private static long toLane64(byte[] message, int msgoff, int rr, int off)
+    private long toLane64(int msgoff, int rr, int off)
     {
-        int n = Math.min(message.length, rr) + msgoff;
-        return ((off + 7 < n) ? ((long)(message[off + 7] & 255) << 56) : 0L) |
-	       ((off + 6 < n) ? ((long)(message[off + 6] & 255) << 48) : 0L) |
-	       ((off + 5 < n) ? ((long)(message[off + 5] & 255) << 40) : 0L) |
-	       ((off + 4 < n) ? ((long)(message[off + 4] & 255) << 32) : 0L) |
-	       ((off + 3 < n) ? ((long)(message[off + 3] & 255) << 24) : 0L) |
-	       ((off + 2 < n) ? ((long)(message[off + 2] & 255) << 16) : 0L) |
-	       ((off + 1 < n) ? ((long)(message[off + 1] & 255) <<  8) : 0L) |
-	       ((off < n) ? ((long)(message[off] & 255)) : 0L);
+        int n = Math.min(this.message.length, rr) + msgoff;
+        return ((off + 7 < n) ? ((long)(this.message[off + 7] & 255) << 56) : 0L) |
+	       ((off + 6 < n) ? ((long)(this.message[off + 6] & 255) << 48) : 0L) |
+	       ((off + 5 < n) ? ((long)(this.message[off + 5] & 255) << 40) : 0L) |
+	       ((off + 4 < n) ? ((long)(this.message[off + 4] & 255) << 32) : 0L) |
+	       ((off + 3 < n) ? ((long)(this.message[off + 3] & 255) << 24) : 0L) |
+	       ((off + 2 < n) ? ((long)(this.message[off + 2] & 255) << 16) : 0L) |
+	       ((off + 1 < n) ? ((long)(this.message[off + 1] & 255) <<  8) : 0L) |
+	       ((off < n) ? ((long)(this.message[off] & 255)) : 0L);
     }
     
     
     /**
      * pad 10*1
      * 
-     * @param   msg  The message to pad
-     * @param   len  The length of the message
-     * @param   r    The bitrate
-     * @return       The message padded
+     * @param  msg  The message to pad
+     * @param  len  The length of the message
+     * @param  r    The bitrate
      */
-    private static byte[] pad10star1(byte[] msg, int len, int r)
+    private static void pad10star1(byte[] msg, int len, int r)
     {
         int nrf = (len <<= 3) >> 3;
         int nbrf = len & 7;
@@ -333,23 +335,20 @@ public class ConcurrentSHA3
         
         byte b = (byte)(nbrf == 0 ? 1 : ((msg[nrf] >> (8 - nbrf)) | (1 << nbrf)));
         
-        byte[] message;
         if ((r - 8 <= ll) && (ll <= r - 2))
 	{
-	    message = new byte[len = nrf + 1];
-            message[nrf] = (byte)(b ^ 128);
+	    this.message = new byte[len = nrf + 1];
+            this.message[nrf] = (byte)(b ^ 128);
 	}
         else
 	{
 	    len = (nrf + 1) << 3;
 	    len = ((len - (len % r) + (r - 8)) >> 3) + 1;
-	    message = new byte[len];
-	    message[nrf] = b;
-	    message[len - 1] = -128;
+	    this.message = new byte[len];
+	    this.message[nrf] = b;
+	    this.message[len - 1] = -128;
 	}
-	System.arraycopy(msg, 0, message, 0, nrf);
-        
-        return message;
+	System.arraycopy(msg, 0, this.message, 0, nrf);
     }
     
     
@@ -403,69 +402,68 @@ public class ConcurrentSHA3
 	System.arraycopy(msg, 0, this.M, this.mptr, msglen);
         int len = this.mptr += msglen;
         len -= len % ((this.r * this.b) >> 3);
-        byte[] message;
-	System.arraycopy(this.M, 0, message = new byte[len], 0, len);
+	System.arraycopy(this.M, 0, this.message = new byte[len], 0, len);
 	System.arraycopy(this.M, len, this.M, 0, this.mptr -= len);
 	
         /* Absorbing phase */
         if (ww == 8)
             for (int i = 0; i < len; i += rr)
 	    {
-		this.S[ 0] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 0);
-		this.S[ 5] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 8);
-		this.S[10] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 16);
-                this.S[15] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 24);
-                this.S[20] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 32);
-                this.S[ 1] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 40);
-                this.S[ 6] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 48);
-                this.S[11] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 56);
-                this.S[16] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 64);
-                this.S[21] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 72);
-                this.S[ 2] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 80);
-                this.S[ 7] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 88);
-		this.S[12] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 96);
-		this.S[17] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 104);
-		this.S[22] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 112);
-		this.S[ 3] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 120);
-		this.S[ 8] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 128);
-		this.S[13] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 136);
-		this.S[18] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 144);
-		this.S[23] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 152);
-                this.S[ 4] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 160);
-                this.S[ 9] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 168);
-                this.S[14] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 176);
-                this.S[19] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 184);
-                this.S[24] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 192);
+		this.S[ 0] ^= this.toLane64(i, rr, i + 0);
+		this.S[ 5] ^= this.toLane64(i, rr, i + 8);
+		this.S[10] ^= this.toLane64(i, rr, i + 16);
+                this.S[15] ^= this.toLane64(i, rr, i + 24);
+                this.S[20] ^= this.toLane64(i, rr, i + 32);
+                this.S[ 1] ^= this.toLane64(i, rr, i + 40);
+                this.S[ 6] ^= this.toLane64(i, rr, i + 48);
+                this.S[11] ^= this.toLane64(i, rr, i + 56);
+                this.S[16] ^= this.toLane64(i, rr, i + 64);
+                this.S[21] ^= this.toLane64(i, rr, i + 72);
+                this.S[ 2] ^= this.toLane64(i, rr, i + 80);
+                this.S[ 7] ^= this.toLane64(i, rr, i + 88);
+		this.S[12] ^= this.toLane64(i, rr, i + 96);
+		this.S[17] ^= this.toLane64(i, rr, i + 104);
+		this.S[22] ^= this.toLane64(i, rr, i + 112);
+		this.S[ 3] ^= this.toLane64(i, rr, i + 120);
+		this.S[ 8] ^= this.toLane64(i, rr, i + 128);
+		this.S[13] ^= this.toLane64(i, rr, i + 136);
+		this.S[18] ^= this.toLane64(i, rr, i + 144);
+		this.S[23] ^= this.toLane64(i, rr, i + 152);
+                this.S[ 4] ^= this.toLane64(i, rr, i + 160);
+                this.S[ 9] ^= this.toLane64(i, rr, i + 168);
+                this.S[14] ^= this.toLane64(i, rr, i + 176);
+                this.S[19] ^= this.toLane64(i, rr, i + 184);
+                this.S[24] ^= this.toLane64(i, rr, i + 192);
 		this.keccakF(this.S);
 	    }
         else
 	    for (int i = 0; i < len; i += rr)
 	    {
-		this.S[ 0] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i +  0    );
-		this.S[ 5] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i +      w);
-		this.S[10] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i +  2 * w);
-                this.S[15] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i +  3 * w);
-                this.S[20] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i +  4 * w);
-                this.S[ 1] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i +  5 * w);
-                this.S[ 6] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i +  6 * w);
-                this.S[11] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i +  7 * w);
-                this.S[16] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i +  8 * w);
-                this.S[21] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i +  9 * w);
-                this.S[ 2] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 10 * w);
-                this.S[ 7] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 11 * w);
-		this.S[12] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 12 * w);
-		this.S[17] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 13 * w);
-		this.S[22] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 14 * w);
-		this.S[ 3] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 15 * w);
-		this.S[ 8] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 16 * w);
-		this.S[13] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 17 * w);
-		this.S[18] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 18 * w);
-		this.S[23] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 19 * w);
-                this.S[ 4] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 20 * w);
-                this.S[ 9] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 21 * w);
-                this.S[14] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 22 * w);
-                this.S[19] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 23 * w);
-                this.S[24] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 24 * w);
+		this.S[ 0] ^= this.toLane(i, rr, ww, i +  0    );
+		this.S[ 5] ^= this.toLane(i, rr, ww, i +      w);
+		this.S[10] ^= this.toLane(i, rr, ww, i +  2 * w);
+                this.S[15] ^= this.toLane(i, rr, ww, i +  3 * w);
+                this.S[20] ^= this.toLane(i, rr, ww, i +  4 * w);
+                this.S[ 1] ^= this.toLane(i, rr, ww, i +  5 * w);
+                this.S[ 6] ^= this.toLane(i, rr, ww, i +  6 * w);
+                this.S[11] ^= this.toLane(i, rr, ww, i +  7 * w);
+                this.S[16] ^= this.toLane(i, rr, ww, i +  8 * w);
+                this.S[21] ^= this.toLane(i, rr, ww, i +  9 * w);
+                this.S[ 2] ^= this.toLane(i, rr, ww, i + 10 * w);
+                this.S[ 7] ^= this.toLane(i, rr, ww, i + 11 * w);
+		this.S[12] ^= this.toLane(i, rr, ww, i + 12 * w);
+		this.S[17] ^= this.toLane(i, rr, ww, i + 13 * w);
+		this.S[22] ^= this.toLane(i, rr, ww, i + 14 * w);
+		this.S[ 3] ^= this.toLane(i, rr, ww, i + 15 * w);
+		this.S[ 8] ^= this.toLane(i, rr, ww, i + 16 * w);
+		this.S[13] ^= this.toLane(i, rr, ww, i + 17 * w);
+		this.S[18] ^= this.toLane(i, rr, ww, i + 18 * w);
+		this.S[23] ^= this.toLane(i, rr, ww, i + 19 * w);
+                this.S[ 4] ^= this.toLane(i, rr, ww, i + 20 * w);
+                this.S[ 9] ^= this.toLane(i, rr, ww, i + 21 * w);
+                this.S[14] ^= this.toLane(i, rr, ww, i + 22 * w);
+                this.S[19] ^= this.toLane(i, rr, ww, i + 23 * w);
+                this.S[24] ^= this.toLane(i, rr, ww, i + 24 * w);
 		this.keccakF(this.S);
 	    }
     }
@@ -542,18 +540,17 @@ public class ConcurrentSHA3
      */
     public byte[] digest(byte[] msg, int msglen, boolean withReturn)
     {
-	byte[] message;
         if ((msg == null) || (msglen == 0))
-            message = ConcurrentSHA3.pad10star1(this.M, this.mptr, this.r);
+            ConcurrentSHA3.pad10star1(this.M, this.mptr, this.r);
 	else
 	{
 	    if (this.mptr + msglen > this.M.length)
 		System.arraycopy(this.M, 0, this.M = new byte[this.M.length + msglen], 0, this.mptr);
 	    System.arraycopy(msg, 0, this.M, this.mptr, msglen);
-	    message = ConcurrentSHA3.pad10star1(this.M, this.mptr + msglen, this.r);
+	    ConcurrentSHA3.pad10star1(this.M, this.mptr + msglen, this.r);
 	}
         this.M = null;
-        int len = message.length;
+        int len = this.message.length;
         
         int rr = this.r >> 3;
         int nn = (this.n + 7) >> 3;
@@ -563,61 +560,61 @@ public class ConcurrentSHA3
         if (ww == 8)
             for (int i = 0; i < len; i += rr)
 	    {
-		this.S[ 0] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 0);
-		this.S[ 5] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 8);
-		this.S[10] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 16);
-                this.S[15] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 24);
-                this.S[20] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 32);
-                this.S[ 1] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 40);
-                this.S[ 6] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 48);
-                this.S[11] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 56);
-                this.S[16] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 64);
-                this.S[21] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 72);
-                this.S[ 2] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 80);
-                this.S[ 7] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 88);
-		this.S[12] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 96);
-		this.S[17] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 104);
-		this.S[22] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 112);
-		this.S[ 3] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 120);
-		this.S[ 8] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 128);
-		this.S[13] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 136);
-		this.S[18] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 144);
-		this.S[23] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 152);
-                this.S[ 4] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 160);
-                this.S[ 9] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 168);
-                this.S[14] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 176);
-                this.S[19] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 184);
-                this.S[24] ^= ConcurrentSHA3.toLane64(message, i, rr, i + 192);
+		this.S[ 0] ^= this.toLane64(i, rr, i + 0);
+		this.S[ 5] ^= this.toLane64(i, rr, i + 8);
+		this.S[10] ^= this.toLane64(i, rr, i + 16);
+                this.S[15] ^= this.toLane64(i, rr, i + 24);
+                this.S[20] ^= this.toLane64(i, rr, i + 32);
+                this.S[ 1] ^= this.toLane64(i, rr, i + 40);
+                this.S[ 6] ^= this.toLane64(i, rr, i + 48);
+                this.S[11] ^= this.toLane64(i, rr, i + 56);
+                this.S[16] ^= this.toLane64(i, rr, i + 64);
+                this.S[21] ^= this.toLane64(i, rr, i + 72);
+                this.S[ 2] ^= this.toLane64(i, rr, i + 80);
+                this.S[ 7] ^= this.toLane64(i, rr, i + 88);
+		this.S[12] ^= this.toLane64(i, rr, i + 96);
+		this.S[17] ^= this.toLane64(i, rr, i + 104);
+		this.S[22] ^= this.toLane64(i, rr, i + 112);
+		this.S[ 3] ^= this.toLane64(i, rr, i + 120);
+		this.S[ 8] ^= this.toLane64(i, rr, i + 128);
+		this.S[13] ^= this.toLane64(i, rr, i + 136);
+		this.S[18] ^= this.toLane64(i, rr, i + 144);
+		this.S[23] ^= this.toLane64(i, rr, i + 152);
+                this.S[ 4] ^= this.toLane64(i, rr, i + 160);
+                this.S[ 9] ^= this.toLane64(i, rr, i + 168);
+                this.S[14] ^= this.toLane64(i, rr, i + 176);
+                this.S[19] ^= this.toLane64(i, rr, i + 184);
+                this.S[24] ^= this.toLane64(i, rr, i + 192);
                 this.keccakF(this.S);
 	    }
         else
 	    for (int i = 0; i < len; i += rr)
 	    {
-		this.S[ 0] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i +  0    );
-		this.S[ 5] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i +      w);
-		this.S[10] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i +  2 * w);
-                this.S[15] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i +  3 * w);
-                this.S[20] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i +  4 * w);
-                this.S[ 1] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i +  5 * w);
-                this.S[ 6] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i +  6 * w);
-                this.S[11] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i +  7 * w);
-                this.S[16] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i +  8 * w);
-                this.S[21] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i +  9 * w);
-                this.S[ 2] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 10 * w);
-                this.S[ 7] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 11 * w);
-		this.S[12] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 12 * w);
-		this.S[17] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 13 * w);
-		this.S[22] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 14 * w);
-		this.S[ 3] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 15 * w);
-		this.S[ 8] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 16 * w);
-		this.S[13] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 17 * w);
-		this.S[18] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 18 * w);
-		this.S[23] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 19 * w);
-                this.S[ 4] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 20 * w);
-                this.S[ 9] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 21 * w);
-                this.S[14] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 22 * w);
-                this.S[19] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 23 * w);
-                this.S[24] ^= ConcurrentSHA3.toLane(message, i, rr, ww, i + 24 * w);
+		this.S[ 0] ^= this.toLane(i, rr, ww, i +  0    );
+		this.S[ 5] ^= this.toLane(i, rr, ww, i +      w);
+		this.S[10] ^= this.toLane(i, rr, ww, i +  2 * w);
+                this.S[15] ^= this.toLane(i, rr, ww, i +  3 * w);
+                this.S[20] ^= this.toLane(i, rr, ww, i +  4 * w);
+                this.S[ 1] ^= this.toLane(i, rr, ww, i +  5 * w);
+                this.S[ 6] ^= this.toLane(i, rr, ww, i +  6 * w);
+                this.S[11] ^= this.toLane(i, rr, ww, i +  7 * w);
+                this.S[16] ^= this.toLane(i, rr, ww, i +  8 * w);
+                this.S[21] ^= this.toLane(i, rr, ww, i +  9 * w);
+                this.S[ 2] ^= this.toLane(i, rr, ww, i + 10 * w);
+                this.S[ 7] ^= this.toLane(i, rr, ww, i + 11 * w);
+		this.S[12] ^= this.toLane(i, rr, ww, i + 12 * w);
+		this.S[17] ^= this.toLane(i, rr, ww, i + 13 * w);
+		this.S[22] ^= this.toLane(i, rr, ww, i + 14 * w);
+		this.S[ 3] ^= this.toLane(i, rr, ww, i + 15 * w);
+		this.S[ 8] ^= this.toLane(i, rr, ww, i + 16 * w);
+		this.S[13] ^= this.toLane(i, rr, ww, i + 17 * w);
+		this.S[18] ^= this.toLane(i, rr, ww, i + 18 * w);
+		this.S[23] ^= this.toLane(i, rr, ww, i + 19 * w);
+                this.S[ 4] ^= this.toLane(i, rr, ww, i + 20 * w);
+                this.S[ 9] ^= this.toLane(i, rr, ww, i + 21 * w);
+                this.S[14] ^= this.toLane(i, rr, ww, i + 22 * w);
+                this.S[19] ^= this.toLane(i, rr, ww, i + 23 * w);
+                this.S[24] ^= this.toLane(i, rr, ww, i + 24 * w);
 		this.keccakF(this.S);
 	    }
         
