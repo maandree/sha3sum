@@ -318,11 +318,12 @@ public class SHA3
     /**
      * pad 10*1
      * 
-     * @param  msg  The message to pad
-     * @param  len  The length of the message
-     * @param  r    The bitrate
+     * @param   msg  The message to pad
+     * @param   len  The length of the message
+     * @param   r    The bitrate
+     * @return       The actual length of {@link #message}
      */
-    private static void pad10star1(byte[] msg, int len, int r)
+    private static int pad10star1(byte[] msg, int len, int r)
     {
         int nrf = (len <<= 3) >> 3;
         int nbrf = len & 7;
@@ -343,7 +344,9 @@ public class SHA3
 	    SHA3.message[nrf] = b;
 	    SHA3.message[len - 1] = -128;
 	}
+	
 	System.arraycopy(msg, 0, SHA3.message, 0, nrf);
+	return len;
     }
     
     
@@ -399,7 +402,7 @@ public class SHA3
         len -= len % ((SHA3.r * SHA3.b) >> 3);
 	System.arraycopy(SHA3.M, 0, SHA3.message = new byte[len], 0, len);
 	System.arraycopy(SHA3.M, len, SHA3.M, 0, SHA3.mptr -= len);
-	int n = Math.min(SHA3.message.length, rr);
+	int n = Math.min(len, rr);
 	
         /* Absorbing phase */
         if (ww == 8)
@@ -538,23 +541,23 @@ public class SHA3
      */
     public static byte[] digest(byte[] msg, int msglen, boolean withReturn)
     {
+	int len;
         if ((msg == null) || (msglen == 0))
-            SHA3.pad10star1(SHA3.M, SHA3.mptr, SHA3.r);
+            len = SHA3.pad10star1(SHA3.M, SHA3.mptr, SHA3.r);
 	else
 	{
 	    if (SHA3.mptr + msglen > SHA3.M.length)
 		System.arraycopy(SHA3.M, 0, SHA3.M = new byte[SHA3.M.length + msglen], 0, SHA3.mptr);
 	    System.arraycopy(msg, 0, SHA3.M, SHA3.mptr, msglen);
-	    SHA3.pad10star1(SHA3.M, SHA3.mptr + msglen, SHA3.r);
+	    len = SHA3.pad10star1(SHA3.M, SHA3.mptr + msglen, SHA3.r);
 	}
         SHA3.M = null;
-        int len = SHA3.message.length;
         
         int rr = SHA3.r >> 3;
         int nn = (SHA3.n + 7) >> 3;
         int ww = SHA3.w >> 3;
 	
-	int n = Math.min(SHA3.message.length, rr);
+	int n = Math.min(len, rr);
         
         /* Absorbing phase */
         if (ww == 8)

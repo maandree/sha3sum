@@ -323,11 +323,12 @@ public class ConcurrentSHA3
     /**
      * pad 10*1
      * 
-     * @param  msg  The message to pad
-     * @param  len  The length of the message
-     * @param  r    The bitrate
+     * @param   msg  The message to pad
+     * @param   len  The length of the message
+     * @param   r    The bitrate
+     * @return       The actual length of {@link #message}
      */
-    private void pad10star1(byte[] msg, int len, int r)
+    private int pad10star1(byte[] msg, int len, int r)
     {
         int nrf = (len <<= 3) >> 3;
         int nbrf = len & 7;
@@ -348,7 +349,9 @@ public class ConcurrentSHA3
 	    this.message[nrf] = b;
 	    this.message[len - 1] = -128;
 	}
+	
 	System.arraycopy(msg, 0, this.message, 0, nrf);
+	return len;
     }
     
     
@@ -404,7 +407,7 @@ public class ConcurrentSHA3
         len -= len % ((this.r * this.b) >> 3);
 	System.arraycopy(this.M, 0, this.message = new byte[len], 0, len);
 	System.arraycopy(this.M, len, this.M, 0, this.mptr -= len);
-	int n = Math.min(this.message.length, rr);
+	int n = Math.min(len, rr);
 	
         /* Absorbing phase */
         if (ww == 8)
@@ -543,23 +546,23 @@ public class ConcurrentSHA3
      */
     public byte[] digest(byte[] msg, int msglen, boolean withReturn)
     {
+	int len;
         if ((msg == null) || (msglen == 0))
-            this.pad10star1(this.M, this.mptr, this.r);
+            len = this.pad10star1(this.M, this.mptr, this.r);
 	else
 	{
 	    if (this.mptr + msglen > this.M.length)
 		System.arraycopy(this.M, 0, this.M = new byte[this.M.length + msglen], 0, this.mptr);
 	    System.arraycopy(msg, 0, this.M, this.mptr, msglen);
-	    this.pad10star1(this.M, this.mptr + msglen, this.r);
+	    len = this.pad10star1(this.M, this.mptr + msglen, this.r);
 	}
         this.M = null;
-        int len = this.message.length;
         
         int rr = this.r >> 3;
         int nn = (this.n + 7) >> 3;
         int ww = this.w >> 3;
 	
-	int n = Math.min(this.message.length, rr);
+	int n = Math.min(len, rr);
         
         /* Absorbing phase */
         if (ww == 8)
