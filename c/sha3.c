@@ -584,7 +584,7 @@ extern void update(byte* msg, long msglen)
   if (ww == 8)
     for (i = 0; i < nnn; i += rr)
       {
-	#define __S(Si, OFF)  S[Si] ^= toLane64(message + i, len - i, rr, OFF)
+	#define __S(Si, OFF)  S[Si] ^= toLane64(message, len, rr, OFF)
 	__S( 0,   0);  __S( 5,   8);  __S(10,  16);  __S(15,  24);  __S(20,  32);
 	__S( 1,  40);  __S( 6,  48);  __S(11,  56);  __S(16,  64);  __S(21,  72);
 	__S( 2,  80);  __S( 7,  88);  __S(12,  96);  __S(17, 104);  __S(22, 112);
@@ -598,7 +598,7 @@ extern void update(byte* msg, long msglen)
   else
     for (i = 0; i < nnn; i += rr)
       {
-	#define __S(Si, OFF)  S[Si] ^= toLane(message + i, len - i, rr, ww, OFF * w)
+	#define __S(Si, OFF)  S[Si] ^= toLane(message, len, rr, ww, OFF * w)
 	__S( 0,  0);  __S( 5,  1);  __S(10,  2);  __S(15,  3);  __S(20,  4);
 	__S( 1,  5);  __S( 6,  6);  __S(11,  7);  __S(16,  8);  __S(21,  9);
 	__S( 2, 10);  __S( 7, 11);  __S(12, 12);  __S(17, 13);  __S(22, 14);
