@@ -10,7 +10,7 @@
 LIB_EXT=so
 
 JAVAC=javac
-JAVADIRS=-s "pure-java" -d "bin/pure-java" -cp "pure-java"
+JAVADIRS=-s "java" -d "bin/java" -cp "java"
 JAVAFLAGS=-Xlint -O
 JAVA_FLAGS=$(JAVADIRS) $(JAVAFLAGS)
 
@@ -27,19 +27,19 @@ JNI_JAVAFLAGS=-Xlint -O
 JNI_JAVA_FLAGS=$(JNI_JAVADIRS) $(JNI_JAVAFLAGS)
 
 
-JAVA_CLASSES = $(shell find "pure-java" | grep '\.java$$' | sed -e 's_^_bin/_g' -e 's_java$$_class_g')
+JAVA_CLASSES = $(shell find "java" | grep '\.java$$' | sed -e 's_^_bin/_g' -e 's_java$$_class_g')
 C_OBJS = $(shell find "c" | grep '\.h$$' | sed -e 's_^_bin/_g' -e 's_h$$_o_g')
 C_BINS = bin/c/sha3sum
 JNI_CLASSES = $(shell find "java-c-jni" | grep '\.java$$' | sed -e 's_^_bin/_g' -e 's_java$$_class_g')
 
-all: pure-java c java-c-jni
+all: java c java-c-jni
 
 
 
-pure-java: $(JAVA_CLASSES)
-bin/pure-java/%.class: pure-java/%.java
-	mkdir -p "bin/pure-java"
-	$(JAVAC) $(JAVA_FLAGS) "pure-java/$*.java"
+java: $(JAVA_CLASSES)
+bin/java/%.class: java/%.java
+	mkdir -p "bin/java"
+	$(JAVAC) $(JAVA_FLAGS) "java/$*.java"
 
 
 c: $(C_OBJS) $(C_BINS)
@@ -63,7 +63,7 @@ bin/java-c-jni/%.class: java-c-jni/%.java
 
 .PHONY: clean
 clean:
-	rm {*/,}*.{t2d,aux,cp,cps,fn,ky,log,pg,pgs,toc,tp,vr,vrs,op,ops} 2>/dev/null || exit 0
-	rm {*/,}*.{bak,info,pdf,ps,dvi,gz,class,jar,pyc,o,so,out} 2>/dev/null || exit 0
-	rm -r bin 2>/dev/null || exit 0
+	-rm {*/,}*.{t2d,aux,cp,cps,fn,ky,log,pg,pgs,toc,tp,vr,vrs,op,ops} 2>/dev/null
+	-rm {*/,}*.{bak,info,pdf,ps,dvi,gz,class,jar,pyc,o,so,out} 2>/dev/null
+	-rm -r bin 2>/dev/null
 
