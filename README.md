@@ -1,6 +1,6 @@
 COMPLETE STATUS:
 
-    Pure Java 1.2+ :: optimised
+    Java 1.2+      :: optimised
     Python 3       :: optimised
     Python 2       :: optimised for Python 3
     C ISO C90      :: optimised
