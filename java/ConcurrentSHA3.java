@@ -321,7 +321,7 @@ public class ConcurrentSHA3
      * pad 10*1
      * 
      * @param   msg  The message to pad
-     * @parm    len  The length of the message
+     * @param   len  The length of the message
      * @param   r    The bitrate
      * @return       The message padded
      */
