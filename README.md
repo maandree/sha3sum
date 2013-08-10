@@ -62,7 +62,7 @@ Wikipedias entires that uses [r = 576, c = 1024].
 
 
 If you want to contribute with an implementation in another
-language, please try do some in the earliest version of the
+language, please try do so in the earliest version of the
 language officially supported on GNU/Linux, unless there are
 backwards incompatibilities (as is the case with Python.)
 This helps for embedded devices.
