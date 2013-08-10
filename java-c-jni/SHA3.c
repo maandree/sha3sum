@@ -34,8 +34,6 @@
 #define false   0
 
 
-#define min(X, Y)  ((X) < (Y) ? (X) : (Y))
-
 
 /**
  * Round contants
@@ -119,6 +117,18 @@ static long mptr = 0;
  * Size of {@link #M}
  */
 static long mlen = 0;
+
+
+
+/**
+ * Gets the smallest, in value, of the arguments
+ * 
+ * @param   X  The first candidate
+ * @param   Y  The second candidate
+ * @return     The lowest candidate
+ */
+#define min(X, Y)  ((X) < (Y) ? (X) : (Y))
+
 
 
 /**
@@ -549,9 +559,10 @@ void update(byte* msg, jint msglen)
 {
   long rr = r >> 3;
   long ww = w >> 3;
-  long i, len, nnn;
+  long i, len;
   byte* message;
   byte* _msg;
+  long nnn;
   
   if (mptr + msglen > mlen)
     {
@@ -606,18 +617,21 @@ void update(byte* msg, jint msglen)
 /**
  * Absorb the last part of the message and squeeze the Keccak sponge
  * 
- * @param  msg     The rest of the message, may be {@code null}
- * @param  msglen  The length of the partial message
+ * @param   msg         The rest of the message, may be {@code null}
+ * @param   msglen      The length of the partial message
+ * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
+ * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
  */
-byte* digest(byte* msg, jint msglen)
+byte* digest(byte* msg, jint msglen, boolean withReturn)
 {
   byte* message;
   byte* rc;
   byte* _msg;
-  long rr = r >> 3, len, nnn;
+  long rr = r >> 3, len;
   long nn = (n + 7) >> 3, olen;
   long ww = w >> 3, ni;
   long i, j = 0, ptr = 0, _;
+  long nnn;
   
   if ((msg == null) || (msglen == 0))
     message = pad10star1(M, mptr, r, &len);
@@ -636,8 +650,8 @@ byte* digest(byte* msg, jint msglen)
   free(M);
   M = null;
   rc = (byte*)malloc((n + 7) >> 3);
-  nnn = len;
   _msg = message;
+  nnn = len;
   
   /* Absorbing phase */
   if (ww == 8)
@@ -673,17 +687,98 @@ byte* digest(byte* msg, jint msglen)
   
   /* Squeezing phase */
   olen = n;
-  ni = min(25, rr);
+  if (withReturn)
+    {
+      ni = min(25, rr);
+      while (olen > 0)
+	{
+	  i = 0;
+	  while ((i < ni) && (j < nn))
+	    {
+	      llong v = S[(i % 5) * 5 + i / 5];
+	      for (_ = 0; _ < ww; _++)
+		{
+		  if (j < nn)
+		    rc[ptr++] = (byte)v;
+		  v >>= 8;
+		  j += 1;
+		}
+	      i += 1;
+	    }
+	  olen -= r;
+	  if (olen > 0)
+	    keccakF(S);
+	}
+      if ((n & 7))
+	rc[n >> 3] &= (1 << (n & 7)) - 1;
+      
+      return rc;
+    }
+  while ((olen -= r) > 0)
+    keccakF(S);
+  return null;
+}
+
+
+/**
+ * Force some rounds of Keccak-f
+ * 
+ * @param  times  The number of rounds
+ */
+void simpleSqueeze(long times)
+{
+  long i;
+  for (i = 0; i < times; i++)
+    keccakF(S);
+}
+
+
+/**
+ * Squeeze as much as is needed to get a digest a number of times
+ * 
+ * @param  times  The number of digests
+ */
+void fastSqueeze(long times)
+{
+  long i, olen;
+  for (i = 0; i < times; i++)
+    {
+      keccakF(S); /* Last squeeze did not do a ending squeeze */
+      olen = n;
+      while ((olen -= r) > 0)
+	keccakF(S);
+    }
+}
+
+
+/**
+ * Squeeze out another digest
+ * 
+ * @return  The hash sum
+ */
+byte* squeeze()
+{
+  long nn, ww, olen, i, j, ptr, ni;
+  byte* rc;
+  
+  keccakF(S); /* Last squeeze did not do a ending squeeze */
+  
+  ww = w >> 3;
+  rc = (byte*)malloc(nn = (n + 7) >> 3);
+  olen = n;
+  j = ptr = 0;
+  ni = (25 < r >> 3) ? 25 : (r >> 3);
+  
   while (olen > 0)
     {
       i = 0;
       while ((i < ni) && (j < nn))
 	{
-	  llong v = S[(i % 5) * 5 + i / 5];
+	  long _, v = S[(i % 5) * 5 + i / 5];
 	  for (_ = 0; _ < ww; _++)
 	    {
 	      if (j < nn)
-		rc[ptr++] = (byte)v;
+		*(rc + ptr++) = (byte)v;
 	      v >>= 8;
 	      j += 1;
 	    }
@@ -693,8 +788,8 @@ byte* digest(byte* msg, jint msglen)
       if (olen > 0)
 	keccakF(S);
     }
-  if ((n & 7))
-    rc[n >> 3] &= (1 << (n & 7)) - 1;
+  if (n & 7)
+    rc[nn - 1] &= (1 << (n & 7)) - 1;
   
   return rc;
 }
@@ -713,23 +808,26 @@ JNIEXPORT void JNICALL Java_SHA3_initialise(JNIEnv* env, jclass class, jint bitr
 JNIEXPORT void JNICALL Java_SHA3_update(JNIEnv* env, jclass class, jbyteArray msg, jint msglen)
 {
   (void) class;
-  if ((msg != 0) && (msglen != 0))
+  if ((msg != null) && (msglen != 0))
     update((byte*)((*env)->GetByteArrayElements(env, msg, 0)), msglen);
 }
 
 
-JNIEXPORT jbyteArray JNICALL Java_SHA3_digest(JNIEnv* env, jclass class, jbyteArray msg, jint msglen)
+ JNIEXPORT jbyteArray JNICALL Java_SHA3_digest(JNIEnv* env, jclass class, jbyteArray msg, jint msglen, jboolean withReturn)
 {
   jbyte* rcn;
-  jbyteArray rcj;
+  jbyteArray rcj = null;
   (void) class;
   
-  if ((msg != 0) && (msglen != 0))
-    rcn = (jbyte*)digest((byte*)((*env)->GetByteArrayElements(env, msg, 0)), msglen);
+  if ((msg != null) && (msglen != 0))
+    rcn = (jbyte*)digest((byte*)((*env)->GetByteArrayElements(env, msg, 0)), msglen, withReturn);
   else
-    rcn = (jbyte*)digest(0, 0);
-  rcj = (*env)->NewByteArray(env, (n + 7) >> 3);
-  (*env)->SetByteArrayRegion(env, rcj, 0, (n + 7) >> 3, rcn);
+    rcn = (jbyte*)digest(null, 0, withReturn);
+  if (withReturn)
+    {
+      rcj = (*env)->NewByteArray(env, (n + 7) >> 3);
+      (*env)->SetByteArrayRegion(env, rcj, 0, (n + 7) >> 3, rcn);
+    }
   return rcj;
 }
 

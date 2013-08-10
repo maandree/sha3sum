@@ -56,12 +56,15 @@ bin/c/%: c/%.c
 
 
 java-c-jni: bin/java-c-jni/SHA3.$(LIB_EXT) $(JNI_CLASSES)
-bin/java-c-jni/%.so: java-c-jni/%.c
+bin/java-c-jni/%.class: java-c-jni/%.java
+	mkdir -p "bin/java-c-jni"
+	$(JAVAC) $(JNI_JAVA_FLAGS) "java-c-jni/$*.java"
+java-c-jni/%.h: bin/java-c-jni/%.class
+	javah -classpath bin/java-c-jni -jni -d java-c-jni \
+	    $$(echo "$<" | sed -e 's:^bin/java-c-jni/::' -e 's:.class$$::' | sed -e 's:/:.:g')
+bin/java-c-jni/%.so: java-c-jni/%.h java-c-jni/%.c
 	mkdir -p "bin/java-c-jni"
 	gcc $(C_FLAGS) $(JNI_C_FLAGS) "java-c-jni/$*.c" -o "bin/java-c-jni/$*.$(LIB_EXT)"
-bin/java-c-jni/%.class: java-c-jni/%.java
-	 mkdir -p "bin/java-c-jni"
-	$(JAVAC) $(JNI_JAVA_FLAGS) "java-c-jni/$*.java"
 
 
 
@@ -69,5 +72,6 @@ bin/java-c-jni/%.class: java-c-jni/%.java
 clean:
 	-rm {*/,}*.{t2d,aux,cp,cps,fn,ky,log,pg,pgs,toc,tp,vr,vrs,op,ops} 2>/dev/null
 	-rm {*/,}*.{bak,info,pdf,ps,dvi,gz,class,jar,pyc,o,so,out} 2>/dev/null
+	-rm java-c-jni/*.h 2>/dev/null
 	-rm -r bin 2>/dev/null
 

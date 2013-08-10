@@ -622,7 +622,7 @@ int main(int argc, char** argv)
 	    if (j > 2)
 	      fastSqueeze(j - 2);
 	    if (j > 1)
-	      bs = squeeze(1);
+	      bs = squeeze();
 	    dispose();
 	    
 	    if (filename == null)
