@@ -18,11 +18,11 @@ COMPLETE STATUS:
 
 PERFORMANCE COMPARISON:
 
-    C ISO C90    ::  0,082s ~   1
-    Java/C JNI   ::  0,175s ~   2,13
-    Java 1.2+    ::  0,258s ~   3,15
-    Python 3     :: 25,057s ~ 306
-    Python 2     :: 37,488s ~ 457
+    C ISO C90      ::  0,082s ~   1
+    Java/C JNI     ::  0,175s ~   2,13
+    Java 1.2+      ::  0,258s ~   3,15
+    Python 3       :: 25,057s ~ 306
+    Python 2       :: 37,488s ~ 457
     
     Based on test against a 2,3 MB file.
 
@@ -55,7 +55,7 @@ PERFORMANCE COMPARISON:
     --iterations   The number of hash iterations to run.  (default: 1)
     
     -j SQUEEZES
-    --squeezes      The number of hash squeezes to run.   (default: 1)
+    --squeezes     The number of hash squeezes to run.    (default: 1)
     
     -h
     --hex          Read the input in hexadecimal, rather than binary.
@@ -64,7 +64,7 @@ PERFORMANCE COMPARISON:
     --binary       Print the checksum in binary, rather than hexadecimal.
     
     -m
-    --multi         Print the chechsum at all iterations.
+    --multi        Print the chechsum at all iterations.
 
 
 **Pending the standardisation of SHA-3**, there is no specification of particular
