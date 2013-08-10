@@ -319,7 +319,7 @@ class SHA3:
         
         @param   msg:bytes  The message to pad
         @param     r:int    The bitrate
-        @return     :str    The message padded
+        @return     :bytes  The message padded
         '''
         nnn = len(msg) << 3
         
