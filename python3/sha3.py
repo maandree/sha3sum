@@ -85,7 +85,6 @@ class SHA3:
         return ((x >> (self.w - m)) + (x << m)) & self.wmod
     
     
-    @staticmethod
     def rotate64(self, x, n):
         '''
         Rotate a 64-bit word
@@ -97,8 +96,7 @@ class SHA3:
         return ((x >> (64 - n)) + (x << n)) & 0xFFFFFFFFFFFFFFFF
     
     
-    @staticmethod
-    def lb(x):
+    def lb(self, x):
         '''
         Binary logarithm
         
@@ -124,45 +122,45 @@ class SHA3:
             # θ step (step 1 and 2 of 3)
             self.C[0] = (A[0]  ^ A[1])  ^ (A[2]  ^ A[3])  ^ A[4]
             self.C[2] = (A[10] ^ A[11]) ^ (A[12] ^ A[13]) ^ A[14]
-            db = self.C[0] ^ SHA3.rotate64(self.C[2], 1)
+            db = self.C[0] ^ self.rotate64(self.C[2], 1)
             self.C[4] = (A[20] ^ A[21]) ^ (A[22] ^ A[23]) ^ A[24]
-            dd = self.C[2] ^ SHA3.rotate64(self.C[4], 1)
+            dd = self.C[2] ^ self.rotate64(self.C[4], 1)
             self.C[1] = (A[5]  ^ A[6])  ^ (A[7]  ^ A[8])  ^ A[9]
-            da = self.C[4] ^ SHA3.rotate64(self.C[1], 1)
+            da = self.C[4] ^ self.rotate64(self.C[1], 1)
             self.C[3] = (A[15] ^ A[16]) ^ (A[17] ^ A[18]) ^ A[19]
-            dc = self.C[1] ^ SHA3.rotate64(self.C[3], 1)
-            de = self.C[3] ^ SHA3.rotate64(self.C[0], 1)
+            dc = self.C[1] ^ self.rotate64(self.C[3], 1)
+            de = self.C[3] ^ self.rotate64(self.C[0], 1)
             
             # ρ and π steps, with last part of θ
-            self.B[0] = SHA3.rotate64(A[0] ^ da, 0)
-            self.B[1] = SHA3.rotate64(A[15] ^ dd, 28)
-            self.B[2] = SHA3.rotate64(A[5] ^ db, 1)
-            self.B[3] = SHA3.rotate64(A[20] ^ de, 27)
-            self.B[4] = SHA3.rotate64(A[10] ^ dc, 62)
+            self.B[0] = self.rotate64(A[0] ^ da, 0)
+            self.B[1] = self.rotate64(A[15] ^ dd, 28)
+            self.B[2] = self.rotate64(A[5] ^ db, 1)
+            self.B[3] = self.rotate64(A[20] ^ de, 27)
+            self.B[4] = self.rotate64(A[10] ^ dc, 62)
             
-            self.B[5] = SHA3.rotate64(A[6] ^ db, 44)
-            self.B[6] = SHA3.rotate64(A[21] ^ de, 20)
-            self.B[7] = SHA3.rotate64(A[11] ^ dc, 6)
-            self.B[8] = SHA3.rotate64(A[1] ^ da, 36)
-            self.B[9] = SHA3.rotate64(A[16] ^ dd, 55)
+            self.B[5] = self.rotate64(A[6] ^ db, 44)
+            self.B[6] = self.rotate64(A[21] ^ de, 20)
+            self.B[7] = self.rotate64(A[11] ^ dc, 6)
+            self.B[8] = self.rotate64(A[1] ^ da, 36)
+            self.B[9] = self.rotate64(A[16] ^ dd, 55)
             
-            self.B[10] = SHA3.rotate64(A[12] ^ dc, 43)
-            self.B[11] = SHA3.rotate64(A[2] ^ da, 3)
-            self.B[12] = SHA3.rotate64(A[17] ^ dd, 25)
-            self.B[13] = SHA3.rotate64(A[7] ^ db, 10)
-            self.B[14] = SHA3.rotate64(A[22] ^ de, 39)
+            self.B[10] = self.rotate64(A[12] ^ dc, 43)
+            self.B[11] = self.rotate64(A[2] ^ da, 3)
+            self.B[12] = self.rotate64(A[17] ^ dd, 25)
+            self.B[13] = self.rotate64(A[7] ^ db, 10)
+            self.B[14] = self.rotate64(A[22] ^ de, 39)
             
-            self.B[15] = SHA3.rotate64(A[18] ^ dd, 21)
-            self.B[16] = SHA3.rotate64(A[8] ^ db, 45)
-            self.B[17] = SHA3.rotate64(A[23] ^ de, 8)
-            self.B[18] = SHA3.rotate64(A[13] ^ dc, 15)
-            self.B[19] = SHA3.rotate64(A[3] ^ da, 41)
+            self.B[15] = self.rotate64(A[18] ^ dd, 21)
+            self.B[16] = self.rotate64(A[8] ^ db, 45)
+            self.B[17] = self.rotate64(A[23] ^ de, 8)
+            self.B[18] = self.rotate64(A[13] ^ dc, 15)
+            self.B[19] = self.rotate64(A[3] ^ da, 41)
             
-            self.B[20] = SHA3.rotate64(A[24] ^ de, 14)
-            self.B[21] = SHA3.rotate64(A[14] ^ dc, 61)
-            self.B[22] = SHA3.rotate64(A[4] ^ da, 18)
-            self.B[23] = SHA3.rotate64(A[19] ^ dd, 56)
-            self.B[24] = SHA3.rotate64(A[9] ^ db, 2)
+            self.B[20] = self.rotate64(A[24] ^ de, 14)
+            self.B[21] = self.rotate64(A[14] ^ dc, 61)
+            self.B[22] = self.rotate64(A[4] ^ da, 18)
+            self.B[23] = self.rotate64(A[19] ^ dd, 56)
+            self.B[24] = self.rotate64(A[9] ^ db, 2)
         else:
             # θ step (step 1 and 2 of 3)
             self.C[0] = (A[0]  ^ A[1])  ^ (A[2]  ^ A[3])  ^ A[4]
@@ -278,8 +276,7 @@ class SHA3:
                 self.keccakFRound(A, self.RC[i] & self.wmod)
     
     
-    @staticmethod
-    def toLane(message, rr, ww, off):
+    def toLane(self, message, rr, ww, off):
         '''
         Convert a chunk of char:s to a word
         
@@ -298,8 +295,7 @@ class SHA3:
         return rc
     
     
-    @staticmethod
-    def toLane64(message, rr, off):
+    def toLane64(self, message, rr, off):
         '''
         Convert a chunk of char:s to a 64-bit word
         
@@ -313,8 +309,7 @@ class SHA3:
         return ((message[off + 7] << 56) if (off + 7 < n) else 0) | ((message[off + 6] << 48) if (off + 6 < n) else 0) | ((message[off + 5] << 40) if (off + 5 < n) else 0) | ((message[off + 4] << 32) if (off + 4 < n) else 0) | ((message[off + 3] << 24) if (off + 3 < n) else 0) | ((message[off + 2] << 16) if (off + 2 < n) else 0) | ((message[off + 1] <<  8) if (off + 1 < n) else 0) | ((message[off]) if (off < n) else 0)
     
     
-    @staticmethod
-    def pad10star1(msg, r):
+    def pad10star1(self, msg, r):
         '''
         pad 10*1
         
@@ -386,60 +381,60 @@ class SHA3:
         # Absorbing phase
         if ww == 8:
             for i in range(0, nnn, rr):
-                self.S[ 0] ^= SHA3.toLane64(message, rr, 0)
-                self.S[ 5] ^= SHA3.toLane64(message, rr, 8)
-                self.S[10] ^= SHA3.toLane64(message, rr, 16)
-                self.S[15] ^= SHA3.toLane64(message, rr, 24)
-                self.S[20] ^= SHA3.toLane64(message, rr, 32)
-                self.S[ 1] ^= SHA3.toLane64(message, rr, 40)
-                self.S[ 6] ^= SHA3.toLane64(message, rr, 48)
-                self.S[11] ^= SHA3.toLane64(message, rr, 56)
-                self.S[16] ^= SHA3.toLane64(message, rr, 64)
-                self.S[21] ^= SHA3.toLane64(message, rr, 72)
-                self.S[ 2] ^= SHA3.toLane64(message, rr, 80)
-                self.S[ 7] ^= SHA3.toLane64(message, rr, 88)
-                self.S[12] ^= SHA3.toLane64(message, rr, 96)
-                self.S[17] ^= SHA3.toLane64(message, rr, 104)
-                self.S[22] ^= SHA3.toLane64(message, rr, 112)
-                self.S[ 3] ^= SHA3.toLane64(message, rr, 120)
-                self.S[ 8] ^= SHA3.toLane64(message, rr, 128)
-                self.S[13] ^= SHA3.toLane64(message, rr, 136)
-                self.S[18] ^= SHA3.toLane64(message, rr, 144)
-                self.S[23] ^= SHA3.toLane64(message, rr, 152)
-                self.S[ 4] ^= SHA3.toLane64(message, rr, 160)
-                self.S[ 9] ^= SHA3.toLane64(message, rr, 168)
-                self.S[14] ^= SHA3.toLane64(message, rr, 176)
-                self.S[19] ^= SHA3.toLane64(message, rr, 184)
-                self.S[24] ^= SHA3.toLane64(message, rr, 192)
+                self.S[ 0] ^= self.toLane64(message, rr, 0)
+                self.S[ 5] ^= self.toLane64(message, rr, 8)
+                self.S[10] ^= self.toLane64(message, rr, 16)
+                self.S[15] ^= self.toLane64(message, rr, 24)
+                self.S[20] ^= self.toLane64(message, rr, 32)
+                self.S[ 1] ^= self.toLane64(message, rr, 40)
+                self.S[ 6] ^= self.toLane64(message, rr, 48)
+                self.S[11] ^= self.toLane64(message, rr, 56)
+                self.S[16] ^= self.toLane64(message, rr, 64)
+                self.S[21] ^= self.toLane64(message, rr, 72)
+                self.S[ 2] ^= self.toLane64(message, rr, 80)
+                self.S[ 7] ^= self.toLane64(message, rr, 88)
+                self.S[12] ^= self.toLane64(message, rr, 96)
+                self.S[17] ^= self.toLane64(message, rr, 104)
+                self.S[22] ^= self.toLane64(message, rr, 112)
+                self.S[ 3] ^= self.toLane64(message, rr, 120)
+                self.S[ 8] ^= self.toLane64(message, rr, 128)
+                self.S[13] ^= self.toLane64(message, rr, 136)
+                self.S[18] ^= self.toLane64(message, rr, 144)
+                self.S[23] ^= self.toLane64(message, rr, 152)
+                self.S[ 4] ^= self.toLane64(message, rr, 160)
+                self.S[ 9] ^= self.toLane64(message, rr, 168)
+                self.S[14] ^= self.toLane64(message, rr, 176)
+                self.S[19] ^= self.toLane64(message, rr, 184)
+                self.S[24] ^= self.toLane64(message, rr, 192)
                 self.keccakF(self.S)
                 message = message[rr:]
         else:
             for i in range(0, nnn, rr):
-                self.S[ 0] ^= SHA3.toLane(message, rr, ww,  0)
-                self.S[ 5] ^= SHA3.toLane(message, rr, ww,      ww)
-                self.S[10] ^= SHA3.toLane(message, rr, ww,  2 * ww)
-                self.S[15] ^= SHA3.toLane(message, rr, ww,  3 * ww)
-                self.S[20] ^= SHA3.toLane(message, rr, ww,  4 * ww)
-                self.S[ 1] ^= SHA3.toLane(message, rr, ww,  5 * ww)
-                self.S[ 6] ^= SHA3.toLane(message, rr, ww,  6 * ww)
-                self.S[11] ^= SHA3.toLane(message, rr, ww,  7 * ww)
-                self.S[16] ^= SHA3.toLane(message, rr, ww,  8 * ww)
-                self.S[21] ^= SHA3.toLane(message, rr, ww,  9 * ww)
-                self.S[ 2] ^= SHA3.toLane(message, rr, ww, 10 * ww)
-                self.S[ 7] ^= SHA3.toLane(message, rr, ww, 11 * ww)
-                self.S[12] ^= SHA3.toLane(message, rr, ww, 12 * ww)
-                self.S[17] ^= SHA3.toLane(message, rr, ww, 13 * ww)
-                self.S[22] ^= SHA3.toLane(message, rr, ww, 14 * ww)
-                self.S[ 3] ^= SHA3.toLane(message, rr, ww, 15 * ww)
-                self.S[ 8] ^= SHA3.toLane(message, rr, ww, 16 * ww)
-                self.S[13] ^= SHA3.toLane(message, rr, ww, 17 * ww)
-                self.S[18] ^= SHA3.toLane(message, rr, ww, 18 * ww)
-                self.S[23] ^= SHA3.toLane(message, rr, ww, 19 * ww)
-                self.S[ 4] ^= SHA3.toLane(message, rr, ww, 20 * ww)
-                self.S[ 9] ^= SHA3.toLane(message, rr, ww, 21 * ww)
-                self.S[14] ^= SHA3.toLane(message, rr, ww, 22 * ww)
-                self.S[19] ^= SHA3.toLane(message, rr, ww, 23 * ww)
-                self.S[24] ^= SHA3.toLane(message, rr, ww, 24 * ww)
+                self.S[ 0] ^= self.toLane(message, rr, ww,  0)
+                self.S[ 5] ^= self.toLane(message, rr, ww,      ww)
+                self.S[10] ^= self.toLane(message, rr, ww,  2 * ww)
+                self.S[15] ^= self.toLane(message, rr, ww,  3 * ww)
+                self.S[20] ^= self.toLane(message, rr, ww,  4 * ww)
+                self.S[ 1] ^= self.toLane(message, rr, ww,  5 * ww)
+                self.S[ 6] ^= self.toLane(message, rr, ww,  6 * ww)
+                self.S[11] ^= self.toLane(message, rr, ww,  7 * ww)
+                self.S[16] ^= self.toLane(message, rr, ww,  8 * ww)
+                self.S[21] ^= self.toLane(message, rr, ww,  9 * ww)
+                self.S[ 2] ^= self.toLane(message, rr, ww, 10 * ww)
+                self.S[ 7] ^= self.toLane(message, rr, ww, 11 * ww)
+                self.S[12] ^= self.toLane(message, rr, ww, 12 * ww)
+                self.S[17] ^= self.toLane(message, rr, ww, 13 * ww)
+                self.S[22] ^= self.toLane(message, rr, ww, 14 * ww)
+                self.S[ 3] ^= self.toLane(message, rr, ww, 15 * ww)
+                self.S[ 8] ^= self.toLane(message, rr, ww, 16 * ww)
+                self.S[13] ^= self.toLane(message, rr, ww, 17 * ww)
+                self.S[18] ^= self.toLane(message, rr, ww, 18 * ww)
+                self.S[23] ^= self.toLane(message, rr, ww, 19 * ww)
+                self.S[ 4] ^= self.toLane(message, rr, ww, 20 * ww)
+                self.S[ 9] ^= self.toLane(message, rr, ww, 21 * ww)
+                self.S[14] ^= self.toLane(message, rr, ww, 22 * ww)
+                self.S[19] ^= self.toLane(message, rr, ww, 23 * ww)
+                self.S[24] ^= self.toLane(message, rr, ww, 24 * ww)
                 message = message[rr:]
                 self.keccakF(self.S)
     
@@ -472,60 +467,60 @@ class SHA3:
         # Absorbing phase
         if ww == 8:
             for i in range(0, nnn, rr):
-                self.S[ 0] ^= SHA3.toLane64(message, rr, 0)
-                self.S[ 5] ^= SHA3.toLane64(message, rr, 8)
-                self.S[10] ^= SHA3.toLane64(message, rr, 16)
-                self.S[15] ^= SHA3.toLane64(message, rr, 24)
-                self.S[20] ^= SHA3.toLane64(message, rr, 32)
-                self.S[ 1] ^= SHA3.toLane64(message, rr, 40)
-                self.S[ 6] ^= SHA3.toLane64(message, rr, 48)
-                self.S[11] ^= SHA3.toLane64(message, rr, 56)
-                self.S[16] ^= SHA3.toLane64(message, rr, 64)
-                self.S[21] ^= SHA3.toLane64(message, rr, 72)
-                self.S[ 2] ^= SHA3.toLane64(message, rr, 80)
-                self.S[ 7] ^= SHA3.toLane64(message, rr, 88)
-                self.S[12] ^= SHA3.toLane64(message, rr, 96)
-                self.S[17] ^= SHA3.toLane64(message, rr, 104)
-                self.S[22] ^= SHA3.toLane64(message, rr, 112)
-                self.S[ 3] ^= SHA3.toLane64(message, rr, 120)
-                self.S[ 8] ^= SHA3.toLane64(message, rr, 128)
-                self.S[13] ^= SHA3.toLane64(message, rr, 136)
-                self.S[18] ^= SHA3.toLane64(message, rr, 144)
-                self.S[23] ^= SHA3.toLane64(message, rr, 152)
-                self.S[ 4] ^= SHA3.toLane64(message, rr, 160)
-                self.S[ 9] ^= SHA3.toLane64(message, rr, 168)
-                self.S[14] ^= SHA3.toLane64(message, rr, 176)
-                self.S[19] ^= SHA3.toLane64(message, rr, 184)
-                self.S[24] ^= SHA3.toLane64(message, rr, 192)
+                self.S[ 0] ^= self.toLane64(message, rr, 0)
+                self.S[ 5] ^= self.toLane64(message, rr, 8)
+                self.S[10] ^= self.toLane64(message, rr, 16)
+                self.S[15] ^= self.toLane64(message, rr, 24)
+                self.S[20] ^= self.toLane64(message, rr, 32)
+                self.S[ 1] ^= self.toLane64(message, rr, 40)
+                self.S[ 6] ^= self.toLane64(message, rr, 48)
+                self.S[11] ^= self.toLane64(message, rr, 56)
+                self.S[16] ^= self.toLane64(message, rr, 64)
+                self.S[21] ^= self.toLane64(message, rr, 72)
+                self.S[ 2] ^= self.toLane64(message, rr, 80)
+                self.S[ 7] ^= self.toLane64(message, rr, 88)
+                self.S[12] ^= self.toLane64(message, rr, 96)
+                self.S[17] ^= self.toLane64(message, rr, 104)
+                self.S[22] ^= self.toLane64(message, rr, 112)
+                self.S[ 3] ^= self.toLane64(message, rr, 120)
+                self.S[ 8] ^= self.toLane64(message, rr, 128)
+                self.S[13] ^= self.toLane64(message, rr, 136)
+                self.S[18] ^= self.toLane64(message, rr, 144)
+                self.S[23] ^= self.toLane64(message, rr, 152)
+                self.S[ 4] ^= self.toLane64(message, rr, 160)
+                self.S[ 9] ^= self.toLane64(message, rr, 168)
+                self.S[14] ^= self.toLane64(message, rr, 176)
+                self.S[19] ^= self.toLane64(message, rr, 184)
+                self.S[24] ^= self.toLane64(message, rr, 192)
                 self.keccakF(self.S)
                 message = message[rr:]
         else:
             for i in range(0, nnn, rr):
-                self.S[ 0] ^= SHA3.toLane(message, rr, ww,  0)
-                self.S[ 5] ^= SHA3.toLane(message, rr, ww,      ww)
-                self.S[10] ^= SHA3.toLane(message, rr, ww,  2 * ww)
-                self.S[15] ^= SHA3.toLane(message, rr, ww,  3 * ww)
-                self.S[20] ^= SHA3.toLane(message, rr, ww,  4 * ww)
-                self.S[ 1] ^= SHA3.toLane(message, rr, ww,  5 * ww)
-                self.S[ 6] ^= SHA3.toLane(message, rr, ww,  6 * ww)
-                self.S[11] ^= SHA3.toLane(message, rr, ww,  7 * ww)
-                self.S[16] ^= SHA3.toLane(message, rr, ww,  8 * ww)
-                self.S[21] ^= SHA3.toLane(message, rr, ww,  9 * ww)
-                self.S[ 2] ^= SHA3.toLane(message, rr, ww, 10 * ww)
-                self.S[ 7] ^= SHA3.toLane(message, rr, ww, 11 * ww)
-                self.S[12] ^= SHA3.toLane(message, rr, ww, 12 * ww)
-                self.S[17] ^= SHA3.toLane(message, rr, ww, 13 * ww)
-                self.S[22] ^= SHA3.toLane(message, rr, ww, 14 * ww)
-                self.S[ 3] ^= SHA3.toLane(message, rr, ww, 15 * ww)
-                self.S[ 8] ^= SHA3.toLane(message, rr, ww, 16 * ww)
-                self.S[13] ^= SHA3.toLane(message, rr, ww, 17 * ww)
-                self.S[18] ^= SHA3.toLane(message, rr, ww, 18 * ww)
-                self.S[23] ^= SHA3.toLane(message, rr, ww, 19 * ww)
-                self.S[ 4] ^= SHA3.toLane(message, rr, ww, 20 * ww)
-                self.S[ 9] ^= SHA3.toLane(message, rr, ww, 21 * ww)
-                self.S[14] ^= SHA3.toLane(message, rr, ww, 22 * ww)
-                self.S[19] ^= SHA3.toLane(message, rr, ww, 23 * ww)
-                self.S[24] ^= SHA3.toLane(message, rr, ww, 24 * ww)
+                self.S[ 0] ^= self.toLane(message, rr, ww,  0)
+                self.S[ 5] ^= self.toLane(message, rr, ww,      ww)
+                self.S[10] ^= self.toLane(message, rr, ww,  2 * ww)
+                self.S[15] ^= self.toLane(message, rr, ww,  3 * ww)
+                self.S[20] ^= self.toLane(message, rr, ww,  4 * ww)
+                self.S[ 1] ^= self.toLane(message, rr, ww,  5 * ww)
+                self.S[ 6] ^= self.toLane(message, rr, ww,  6 * ww)
+                self.S[11] ^= self.toLane(message, rr, ww,  7 * ww)
+                self.S[16] ^= self.toLane(message, rr, ww,  8 * ww)
+                self.S[21] ^= self.toLane(message, rr, ww,  9 * ww)
+                self.S[ 2] ^= self.toLane(message, rr, ww, 10 * ww)
+                self.S[ 7] ^= self.toLane(message, rr, ww, 11 * ww)
+                self.S[12] ^= self.toLane(message, rr, ww, 12 * ww)
+                self.S[17] ^= self.toLane(message, rr, ww, 13 * ww)
+                self.S[22] ^= self.toLane(message, rr, ww, 14 * ww)
+                self.S[ 3] ^= self.toLane(message, rr, ww, 15 * ww)
+                self.S[ 8] ^= self.toLane(message, rr, ww, 16 * ww)
+                self.S[13] ^= self.toLane(message, rr, ww, 17 * ww)
+                self.S[18] ^= self.toLane(message, rr, ww, 18 * ww)
+                self.S[23] ^= self.toLane(message, rr, ww, 19 * ww)
+                self.S[ 4] ^= self.toLane(message, rr, ww, 20 * ww)
+                self.S[ 9] ^= self.toLane(message, rr, ww, 21 * ww)
+                self.S[14] ^= self.toLane(message, rr, ww, 22 * ww)
+                self.S[19] ^= self.toLane(message, rr, ww, 23 * ww)
+                self.S[24] ^= self.toLane(message, rr, ww, 24 * ww)
                 message = message[rr:]
                 self.keccakF(self.S)
         
