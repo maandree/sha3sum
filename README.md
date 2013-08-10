@@ -30,7 +30,7 @@ PERFORMANCE COMPARISON:
     sha512sum      ::  0,015s ~   0,183
     sha224sum      ::  0,020s ~   0,244
     sha256sum      ::  0,021s ~   0,256
-    md6sum         ::  0,165s ~   2,012
+    md6sum         ::  0,165s ~   2,01
     
     Based on test against a 2,3 MB file.
 
