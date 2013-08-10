@@ -275,13 +275,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         sys.exit(3)
     stdin = None
     fail = False
+    sha = SHA3()
     for filename in files:
         rc = ''
         fn = '/dev/stdin' if filename is None else filename
         with open(fn, 'rb') as file:
             try:
                 if (filename is not None) or (stdin is None):
-                    SHA3.initialise(r, c, o)
+                    sha.initialise(r, c, o)
                     blksize = 4096
                     try:
                         blksize = os.stat(os.path.realpath(fn)).st_blksize
@@ -294,7 +295,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         if len(chunk) == 0:
                             break
                         if not hex:
-                            SHA3.update(chunk)
+                            sha.update(chunk)
                         else:
                             chunk = list(chunk)
                             n = len(chunk) >> 1
@@ -303,24 +304,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                                 a = ((a & 15) + (0 if a <= '9' else 9)) << 4
                                 b =  (b & 15) + (0 if b <= '9' else 0)
                                 chunk[_] = a | b
-                            SHA3.update(bytes(chunk), n)
-                    bs = SHA3.digest(j == 1)
+                            sha.update(bytes(chunk), n)
+                    bs = sha.digest(j == 1)
                     if j > 2:
-                        SHA3.fastSqueeze(j - 2)
+                        sha.fastSqueeze(j - 2)
                     if j > 1:
-                        bs = SHA3.squeeze();
+                        bs = sha.squeeze();
                     if filename is None:
                         stdin = bs
                 else:
                     bs = stdin
                 if multi == 0:
                     for _ in range(i - 1):
-                        SHA3.initialise(r, c, o)
-                        bs = SHA3.digest(bs, j == 1)
+                        sha.initialise(r, c, o)
+                        bs = sha.digest(bs, j == 1)
                         if j > 2:
-                            SHA3.fastSqueeze(j - 2)
+                            sha.fastSqueeze(j - 2)
                         if j > 1:
-                            bs = SHA3.squeeze();
+                            bs = sha.squeeze();
                     if binary:
                         sys.stdout.buffer.write(bs)
                     else:
@@ -339,12 +340,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         rc += '\n'
                         sys.stdout.buffer.write(rc.encode('UTF-8'))
                     for _ in range(i - 1):
-                        SHA3.initialise(r, c, o)
-                        bs = SHA3.digest(bs, j == 1)
+                        sha.initialise(r, c, o)
+                        bs = sha.digest(bs, j == 1)
                         if j > 2:
-                            SHA3.fastSqueeze(j - 2)
+                            sha.fastSqueeze(j - 2)
                         if j > 1:
-                            bs = SHA3.squeeze();
+                            bs = sha.squeeze();
                         if binary:
                             sys.stdout.buffer.write(bs);
                         else:
