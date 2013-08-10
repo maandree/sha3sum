@@ -67,9 +67,9 @@ PERFORMANCE COMPARISON:
     --multi         Print the chechsum at all iterations.
 
 
-Pending the standardisation of SHA-3, there is no specification of particular SHA-3 functions yet.
-Our defaults are based on Keccak[] being Keccak[r = 1024, c = 576] rather than the functions in
-Wikipedia's entires that uses [r = 576, c = 1024].
+**Pending the standardisation of SHA-3**, there is no specification of particular
+SHA-3 functions yet. Our defaults are based on Keccak[] being Keccak[r = 1024, c = 576]
+rather than the functions in Wikipedia's entires that uses [r = 576, c = 1024].
 
 
 If you want to contribute with an implementation in another
