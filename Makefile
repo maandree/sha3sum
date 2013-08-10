@@ -7,15 +7,18 @@
 # 
 # [GNU All Permissive License]
 
+C_OPTIMISE=-O6
+JAVA_OPTIMISE=-O
+
 LIB_EXT=so
 
 JAVAC=javac
 JAVADIRS=-s "java" -d "bin/java" -cp "java"
-JAVAFLAGS=-Xlint -O
+JAVAFLAGS=-Xlint $(JAVA_OPTIMISE)
 JAVA_FLAGS=$(JAVADIRS) $(JAVAFLAGS)
 
 # NB!  Do not forget to test against -O0, -O4 to -O6 is not safe
-CFLAGS=-W{all,extra} -pedantic -O6
+CFLAGS=-W{all,extra} -pedantic $(C_OPTIMISE)
 CPPFLAGS=
 LDFLAGS=
 C_FLAGS=$(CFLAGS) $(CPPFLAGS) $(LDFLAGS)
@@ -23,14 +26,15 @@ C_FLAGS=$(CFLAGS) $(CPPFLAGS) $(LDFLAGS)
 JNI_C_INCLUDE=-I$${JAVA_HOME}/include
 JNI_C_FLAGS=$(JNI_INCLUDE) -fPIC -shared
 JNI_JAVADIRS=-s "java-c-jni" -d "bin/java-c-jni" -cp "java-c-jni"
-JNI_JAVAFLAGS=-Xlint -O
+JNI_JAVAFLAGS=-Xlint $(JAVA_OPTIMISE)
 JNI_JAVA_FLAGS=$(JNI_JAVADIRS) $(JNI_JAVAFLAGS)
-
 
 JAVA_CLASSES = $(shell find "java" | grep '\.java$$' | sed -e 's_^_bin/_g' -e 's_java$$_class_g')
 C_OBJS = $(shell find "c" | grep '\.h$$' | sed -e 's_^_bin/_g' -e 's_h$$_o_g')
 C_BINS = bin/c/sha3sum
 JNI_CLASSES = $(shell find "java-c-jni" | grep '\.java$$' | sed -e 's_^_bin/_g' -e 's_java$$_class_g')
+
+
 
 all: java c java-c-jni
 

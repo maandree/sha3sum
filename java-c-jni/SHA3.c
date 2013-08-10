@@ -28,7 +28,7 @@
 
 
 #define null    0
-#define byte    jbyte
+#define byte    char
 #define boolean long
 #define true    1
 #define false   0
@@ -713,18 +713,21 @@ JNIEXPORT void JNICALL Java_SHA3_initialise(JNIEnv* env, jclass class, jint bitr
 JNIEXPORT void JNICALL Java_SHA3_update(JNIEnv* env, jclass class, jbyteArray msg, jint msglen)
 {
   (void) class;
-  
-  update((*env)->GetByteArrayElements(env, msg, 0), msglen);
+  if ((msg != 0) && (msglen != 0))
+    update((byte*)((*env)->GetByteArrayElements(env, msg, 0)), msglen);
 }
 
 
 JNIEXPORT jbyteArray JNICALL Java_SHA3_digest(JNIEnv* env, jclass class, jbyteArray msg, jint msglen)
 {
-  byte* rcn;
+  jbyte* rcn;
   jbyteArray rcj;
   (void) class;
   
-  rcn = digest((*env)->GetByteArrayElements(env, msg, 0), msglen);
+  if ((msg != 0) && (msglen != 0))
+    rcn = (jbyte*)digest((byte*)((*env)->GetByteArrayElements(env, msg, 0)), msglen);
+  else
+    rcn = (jbyte*)digest(0, 0);
   rcj = (*env)->NewByteArray(env, (n + 7) >> 3);
   (*env)->SetByteArrayRegion(env, rcj, 0, (n + 7) >> 3, rcn);
   return rcj;
