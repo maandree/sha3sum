@@ -7,6 +7,7 @@
 # 
 # [GNU All Permissive License]
 
+# NB!  Do not forget to test against -O0, -O4 to -O6 is not safe
 C_OPTIMISE=-O6
 JAVA_OPTIMISE=-O
 
@@ -17,7 +18,6 @@ JAVADIRS=-s "java" -d "bin/java" -cp "java"
 JAVAFLAGS=-Xlint $(JAVA_OPTIMISE)
 JAVA_FLAGS=$(JAVADIRS) $(JAVAFLAGS)
 
-# NB!  Do not forget to test against -O0, -O4 to -O6 is not safe
 CFLAGS=-W{all,extra} -pedantic $(C_OPTIMISE)
 CPPFLAGS=
 LDFLAGS=
@@ -71,7 +71,7 @@ bin/java-c-jni/%.so: java-c-jni/%.h java-c-jni/%.c
 .PHONY: clean
 clean:
 	-rm {*/,}*.{t2d,aux,cp,cps,fn,ky,log,pg,pgs,toc,tp,vr,vrs,op,ops} 2>/dev/null
-	-rm {*/,}*.{bak,info,pdf,ps,dvi,gz,class,jar,pyc,o,so,out} 2>/dev/null
+	-rm {*/,}*.{bak,info,pdf,ps,dvi,gz,class,jar,pyc,pyo,o,so,out} 2>/dev/null
 	-rm java-c-jni/*.h 2>/dev/null
 	-rm -r bin 2>/dev/null
 
