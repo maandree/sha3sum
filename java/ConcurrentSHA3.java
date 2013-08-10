@@ -106,7 +106,7 @@ public class ConcurrentSHA3
     /**
      * Message chunk that is being processed
      */
-    private byte[] message;
+    private byte[] message = null;
     
     /**
      * The current state
@@ -373,8 +373,11 @@ public class ConcurrentSHA3
         this.nr = 12 + (this.l << 1);
         this.wmod = w == 64 ? -1L : (1L << this.w) - 1L;
         this.S = new long[25];
-        this.M = new byte[(this.r * this.b) >> 2];
+	if ((this.M == null) || ((this.r * this.b) >> 2 != this.M.length))
+	    this.M = new byte[(this.r * this.b) >> 2];
 	this.mptr = 0;
+	if (this.message == null)
+	    this.message = new byte[8 << 10];
     }
     
     
@@ -405,7 +408,7 @@ public class ConcurrentSHA3
 	System.arraycopy(msg, 0, this.M, this.mptr, msglen);
         int len = this.mptr += msglen;
         len -= len % ((this.r * this.b) >> 3);
-	System.arraycopy(this.M, 0, this.message = new byte[len], 0, len);
+	System.arraycopy(this.M, 0, (this.message.length < len) ? (this.message = new byte[len]) : this.message, 0, len);
 	System.arraycopy(this.M, len, this.M, 0, this.mptr -= len);
 	int n = Math.min(len, rr);
 	
@@ -556,7 +559,6 @@ public class ConcurrentSHA3
 	    System.arraycopy(msg, 0, this.M, this.mptr, msglen);
 	    len = this.pad10star1(this.M, this.mptr + msglen, this.r);
 	}
-        this.M = null;
         
         int rr = this.r >> 3;
         int nn = (this.n + 7) >> 3;

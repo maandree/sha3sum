@@ -91,7 +91,7 @@ public class SHA3
     /**
      * Message chunk that is being processes
      */
-    private static byte[] message;
+    private static byte[] message = null;
     
     /**
      * The current state
@@ -368,8 +368,22 @@ public class SHA3
         SHA3.nr = 12 + (SHA3.l << 1);
         SHA3.wmod = w == 64 ? -1L : (1L << SHA3.w) - 1L;
         SHA3.S = new long[25];
-        SHA3.M = new byte[(SHA3.r * SHA3.b) >> 2];
+	if ((SHA3.M == null) || ((SHA3.r * SHA3.b) >> 2 != SHA3.M.length))
+	    SHA3.M = new byte[(SHA3.r * SHA3.b) >> 2];
 	SHA3.mptr = 0;
+	if (SHA3.message == null)
+	    SHA3.message = new byte[8 << 10];
+    }
+    
+    
+    /**
+     * Free up static resources
+     */
+    public static void dispose()
+    {
+	SHA3.S = null;
+	SHA3.M = null;
+	SHA3.message = null;
     }
     
     
@@ -400,7 +414,7 @@ public class SHA3
 	System.arraycopy(msg, 0, SHA3.M, SHA3.mptr, msglen);
         int len = SHA3.mptr += msglen;
         len -= len % ((SHA3.r * SHA3.b) >> 3);
-	System.arraycopy(SHA3.M, 0, SHA3.message = new byte[len], 0, len);
+	System.arraycopy(SHA3.M, 0, (SHA3.message.length < len) ? (SHA3.message = new byte[len]) : SHA3.message, 0, len);
 	System.arraycopy(SHA3.M, len, SHA3.M, 0, SHA3.mptr -= len);
 	int n = Math.min(len, rr);
 	
@@ -551,7 +565,6 @@ public class SHA3
 	    System.arraycopy(msg, 0, SHA3.M, SHA3.mptr, msglen);
 	    len = SHA3.pad10star1(SHA3.M, SHA3.mptr + msglen, SHA3.r);
 	}
-        SHA3.M = null;
         
         int rr = SHA3.r >> 3;
         int nn = (SHA3.n + 7) >> 3;
