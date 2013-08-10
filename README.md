@@ -24,6 +24,14 @@ PERFORMANCE COMPARISON:
     Python 3       :: 24,373s ~ 297
     Python 2       :: 34,595s ~ 422
     
+    md5sum         ::  0,009s ~   0,110
+    sha1sum        ::  0,013s ~   0,159
+    sha384sum      ::  0,015s ~   0,183
+    sha512sum      ::  0,015s ~   0,183
+    sha224sum      ::  0,020s ~   0,244
+    sha256sum      ::  0,021s ~   0,256
+    md6sum         ::  0,165s ~   2,012
+    
     Based on test against a 2,3 MB file.
 
 
