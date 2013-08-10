@@ -1,8 +1,9 @@
 _/
 bin/
-*~
 \#*\#*
-.\#*
+.*
+!.git*
+*~
 *.sw[op]
 *.bak
 __pycache__/
@@ -14,4 +15,13 @@ __pycache__/
 *.so
 *.gch
 java-c-jni/*.h
+*.info
+*.pdf
+*.ps
+*.dvi
+*.tar
+*.tgz
+*.gz
+*.bz2
+*.xz
 
