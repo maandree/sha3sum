@@ -282,7 +282,7 @@ class SHA3:
     
     def toLane(self, message, rr, ww, off):
         '''
-        Convert a chunk of char:s to a word
+        Convert a chunk of byte:s to a word
         
         @param   message:bytes  The message
         @param        rr:int    Bitrate in bytes
@@ -301,7 +301,7 @@ class SHA3:
     
     def toLane64(self, message, rr, off):
         '''
-        Convert a chunk of char:s to a 64-bit word
+        Convert a chunk of byte:s to a 64-bit word
         
         @param   message:bytes  The message
         @param        rr:int    Bitrate in bytes
