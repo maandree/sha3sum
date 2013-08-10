@@ -280,36 +280,35 @@ class SHA3:
                 self.keccakFRound(A, self.RC[i] & self.wmod)
     
     
-    def toLane(self, message, rr, ww, off):
+    def toLane(self, message, n, ww, off):
         '''
         Convert a chunk of byte:s to a word
         
         @param   message:bytes  The message
-        @param        rr:int    Bitrate in bytes
+        @param         n:int    `min(len(message), rr)`
+                      rr:int    Bitrate in bytes
         @param        ww:int    Word size in bytes
         @param       off:int    The offset in the message
         @return         :int    Lane
         '''
         rc = 0
         i = off + ww - 1
-        n = min(len(message), rr)
         while i >= off:
             rc = (rc << 8) | (message[i] if (i < n) else 0)
             i -= 1
         return rc
     
     
-    def toLane64(self, message, rr, off):
+    def toLane64(self, message, n, off):
         '''
         Convert a chunk of byte:s to a 64-bit word
         
         @param   message:bytes  The message
-        @param        rr:int    Bitrate in bytes
+        @param         n:int    `min(len(message), rr)`
+                      rr:int    Bitrate in bytes
         @param       off:int    The offset in the message
         @return         :int    Lane
         '''
-        n = min(len(message), rr)
-        
         return ((message[off + 7] << 56) if (off + 7 < n) else 0) | \
                ((message[off + 6] << 48) if (off + 6 < n) else 0) | \
                ((message[off + 5] << 40) if (off + 5 < n) else 0) | \
@@ -392,62 +391,64 @@ class SHA3:
         # Absorbing phase
         if ww == 8:
             for i in range(0, nnn, rr):
-                self.S[ 0] ^= self.toLane64(message, rr, 0)
-                self.S[ 5] ^= self.toLane64(message, rr, 8)
-                self.S[10] ^= self.toLane64(message, rr, 16)
-                self.S[15] ^= self.toLane64(message, rr, 24)
-                self.S[20] ^= self.toLane64(message, rr, 32)
-                self.S[ 1] ^= self.toLane64(message, rr, 40)
-                self.S[ 6] ^= self.toLane64(message, rr, 48)
-                self.S[11] ^= self.toLane64(message, rr, 56)
-                self.S[16] ^= self.toLane64(message, rr, 64)
-                self.S[21] ^= self.toLane64(message, rr, 72)
-                self.S[ 2] ^= self.toLane64(message, rr, 80)
-                self.S[ 7] ^= self.toLane64(message, rr, 88)
-                self.S[12] ^= self.toLane64(message, rr, 96)
-                self.S[17] ^= self.toLane64(message, rr, 104)
-                self.S[22] ^= self.toLane64(message, rr, 112)
-                self.S[ 3] ^= self.toLane64(message, rr, 120)
-                self.S[ 8] ^= self.toLane64(message, rr, 128)
-                self.S[13] ^= self.toLane64(message, rr, 136)
-                self.S[18] ^= self.toLane64(message, rr, 144)
-                self.S[23] ^= self.toLane64(message, rr, 152)
-                self.S[ 4] ^= self.toLane64(message, rr, 160)
-                self.S[ 9] ^= self.toLane64(message, rr, 168)
-                self.S[14] ^= self.toLane64(message, rr, 176)
-                self.S[19] ^= self.toLane64(message, rr, 184)
-                self.S[24] ^= self.toLane64(message, rr, 192)
+                n = min(len(message), rr)
+                self.S[ 0] ^= self.toLane64(message, n, 0)
+                self.S[ 5] ^= self.toLane64(message, n, 8)
+                self.S[10] ^= self.toLane64(message, n, 16)
+                self.S[15] ^= self.toLane64(message, n, 24)
+                self.S[20] ^= self.toLane64(message, n, 32)
+                self.S[ 1] ^= self.toLane64(message, n, 40)
+                self.S[ 6] ^= self.toLane64(message, n, 48)
+                self.S[11] ^= self.toLane64(message, n, 56)
+                self.S[16] ^= self.toLane64(message, n, 64)
+                self.S[21] ^= self.toLane64(message, n, 72)
+                self.S[ 2] ^= self.toLane64(message, n, 80)
+                self.S[ 7] ^= self.toLane64(message, n, 88)
+                self.S[12] ^= self.toLane64(message, n, 96)
+                self.S[17] ^= self.toLane64(message, n, 104)
+                self.S[22] ^= self.toLane64(message, n, 112)
+                self.S[ 3] ^= self.toLane64(message, n, 120)
+                self.S[ 8] ^= self.toLane64(message, n, 128)
+                self.S[13] ^= self.toLane64(message, n, 136)
+                self.S[18] ^= self.toLane64(message, n, 144)
+                self.S[23] ^= self.toLane64(message, n, 152)
+                self.S[ 4] ^= self.toLane64(message, n, 160)
+                self.S[ 9] ^= self.toLane64(message, n, 168)
+                self.S[14] ^= self.toLane64(message, n, 176)
+                self.S[19] ^= self.toLane64(message, n, 184)
+                self.S[24] ^= self.toLane64(message, n, 192)
                 self.keccakF(self.S)
                 message = message[rr:]
         else:
             for i in range(0, nnn, rr):
-                self.S[ 0] ^= self.toLane(message, rr, ww,  0)
-                self.S[ 5] ^= self.toLane(message, rr, ww,      ww)
-                self.S[10] ^= self.toLane(message, rr, ww,  2 * ww)
-                self.S[15] ^= self.toLane(message, rr, ww,  3 * ww)
-                self.S[20] ^= self.toLane(message, rr, ww,  4 * ww)
-                self.S[ 1] ^= self.toLane(message, rr, ww,  5 * ww)
-                self.S[ 6] ^= self.toLane(message, rr, ww,  6 * ww)
-                self.S[11] ^= self.toLane(message, rr, ww,  7 * ww)
-                self.S[16] ^= self.toLane(message, rr, ww,  8 * ww)
-                self.S[21] ^= self.toLane(message, rr, ww,  9 * ww)
-                self.S[ 2] ^= self.toLane(message, rr, ww, 10 * ww)
-                self.S[ 7] ^= self.toLane(message, rr, ww, 11 * ww)
-                self.S[12] ^= self.toLane(message, rr, ww, 12 * ww)
-                self.S[17] ^= self.toLane(message, rr, ww, 13 * ww)
-                self.S[22] ^= self.toLane(message, rr, ww, 14 * ww)
-                self.S[ 3] ^= self.toLane(message, rr, ww, 15 * ww)
-                self.S[ 8] ^= self.toLane(message, rr, ww, 16 * ww)
-                self.S[13] ^= self.toLane(message, rr, ww, 17 * ww)
-                self.S[18] ^= self.toLane(message, rr, ww, 18 * ww)
-                self.S[23] ^= self.toLane(message, rr, ww, 19 * ww)
-                self.S[ 4] ^= self.toLane(message, rr, ww, 20 * ww)
-                self.S[ 9] ^= self.toLane(message, rr, ww, 21 * ww)
-                self.S[14] ^= self.toLane(message, rr, ww, 22 * ww)
-                self.S[19] ^= self.toLane(message, rr, ww, 23 * ww)
-                self.S[24] ^= self.toLane(message, rr, ww, 24 * ww)
-                message = message[rr:]
+                n = min(len(message), rr)
+                self.S[ 0] ^= self.toLane(message, n, ww,  0)
+                self.S[ 5] ^= self.toLane(message, n, ww,      ww)
+                self.S[10] ^= self.toLane(message, n, ww,  2 * ww)
+                self.S[15] ^= self.toLane(message, n, ww,  3 * ww)
+                self.S[20] ^= self.toLane(message, n, ww,  4 * ww)
+                self.S[ 1] ^= self.toLane(message, n, ww,  5 * ww)
+                self.S[ 6] ^= self.toLane(message, n, ww,  6 * ww)
+                self.S[11] ^= self.toLane(message, n, ww,  7 * ww)
+                self.S[16] ^= self.toLane(message, n, ww,  8 * ww)
+                self.S[21] ^= self.toLane(message, n, ww,  9 * ww)
+                self.S[ 2] ^= self.toLane(message, n, ww, 10 * ww)
+                self.S[ 7] ^= self.toLane(message, n, ww, 11 * ww)
+                self.S[12] ^= self.toLane(message, n, ww, 12 * ww)
+                self.S[17] ^= self.toLane(message, n, ww, 13 * ww)
+                self.S[22] ^= self.toLane(message, n, ww, 14 * ww)
+                self.S[ 3] ^= self.toLane(message, n, ww, 15 * ww)
+                self.S[ 8] ^= self.toLane(message, n, ww, 16 * ww)
+                self.S[13] ^= self.toLane(message, n, ww, 17 * ww)
+                self.S[18] ^= self.toLane(message, n, ww, 18 * ww)
+                self.S[23] ^= self.toLane(message, n, ww, 19 * ww)
+                self.S[ 4] ^= self.toLane(message, n, ww, 20 * ww)
+                self.S[ 9] ^= self.toLane(message, n, ww, 21 * ww)
+                self.S[14] ^= self.toLane(message, n, ww, 22 * ww)
+                self.S[19] ^= self.toLane(message, n, ww, 23 * ww)
+                self.S[24] ^= self.toLane(message, n, ww, 24 * ww)
                 self.keccakF(self.S)
+                message = message[rr:]
     
     
     def digest(self, msg = None, msglen = None, withReturn = None):
@@ -478,62 +479,64 @@ class SHA3:
         # Absorbing phase
         if ww == 8:
             for i in range(0, nnn, rr):
-                self.S[ 0] ^= self.toLane64(message, rr, 0)
-                self.S[ 5] ^= self.toLane64(message, rr, 8)
-                self.S[10] ^= self.toLane64(message, rr, 16)
-                self.S[15] ^= self.toLane64(message, rr, 24)
-                self.S[20] ^= self.toLane64(message, rr, 32)
-                self.S[ 1] ^= self.toLane64(message, rr, 40)
-                self.S[ 6] ^= self.toLane64(message, rr, 48)
-                self.S[11] ^= self.toLane64(message, rr, 56)
-                self.S[16] ^= self.toLane64(message, rr, 64)
-                self.S[21] ^= self.toLane64(message, rr, 72)
-                self.S[ 2] ^= self.toLane64(message, rr, 80)
-                self.S[ 7] ^= self.toLane64(message, rr, 88)
-                self.S[12] ^= self.toLane64(message, rr, 96)
-                self.S[17] ^= self.toLane64(message, rr, 104)
-                self.S[22] ^= self.toLane64(message, rr, 112)
-                self.S[ 3] ^= self.toLane64(message, rr, 120)
-                self.S[ 8] ^= self.toLane64(message, rr, 128)
-                self.S[13] ^= self.toLane64(message, rr, 136)
-                self.S[18] ^= self.toLane64(message, rr, 144)
-                self.S[23] ^= self.toLane64(message, rr, 152)
-                self.S[ 4] ^= self.toLane64(message, rr, 160)
-                self.S[ 9] ^= self.toLane64(message, rr, 168)
-                self.S[14] ^= self.toLane64(message, rr, 176)
-                self.S[19] ^= self.toLane64(message, rr, 184)
-                self.S[24] ^= self.toLane64(message, rr, 192)
+                n = min(len(message), rr)
+                self.S[ 0] ^= self.toLane64(message, n, 0)
+                self.S[ 5] ^= self.toLane64(message, n, 8)
+                self.S[10] ^= self.toLane64(message, n, 16)
+                self.S[15] ^= self.toLane64(message, n, 24)
+                self.S[20] ^= self.toLane64(message, n, 32)
+                self.S[ 1] ^= self.toLane64(message, n, 40)
+                self.S[ 6] ^= self.toLane64(message, n, 48)
+                self.S[11] ^= self.toLane64(message, n, 56)
+                self.S[16] ^= self.toLane64(message, n, 64)
+                self.S[21] ^= self.toLane64(message, n, 72)
+                self.S[ 2] ^= self.toLane64(message, n, 80)
+                self.S[ 7] ^= self.toLane64(message, n, 88)
+                self.S[12] ^= self.toLane64(message, n, 96)
+                self.S[17] ^= self.toLane64(message, n, 104)
+                self.S[22] ^= self.toLane64(message, n, 112)
+                self.S[ 3] ^= self.toLane64(message, n, 120)
+                self.S[ 8] ^= self.toLane64(message, n, 128)
+                self.S[13] ^= self.toLane64(message, n, 136)
+                self.S[18] ^= self.toLane64(message, n, 144)
+                self.S[23] ^= self.toLane64(message, n, 152)
+                self.S[ 4] ^= self.toLane64(message, n, 160)
+                self.S[ 9] ^= self.toLane64(message, n, 168)
+                self.S[14] ^= self.toLane64(message, n, 176)
+                self.S[19] ^= self.toLane64(message, n, 184)
+                self.S[24] ^= self.toLane64(message, n, 192)
                 self.keccakF(self.S)
                 message = message[rr:]
         else:
             for i in range(0, nnn, rr):
-                self.S[ 0] ^= self.toLane(message, rr, ww,  0)
-                self.S[ 5] ^= self.toLane(message, rr, ww,      ww)
-                self.S[10] ^= self.toLane(message, rr, ww,  2 * ww)
-                self.S[15] ^= self.toLane(message, rr, ww,  3 * ww)
-                self.S[20] ^= self.toLane(message, rr, ww,  4 * ww)
-                self.S[ 1] ^= self.toLane(message, rr, ww,  5 * ww)
-                self.S[ 6] ^= self.toLane(message, rr, ww,  6 * ww)
-                self.S[11] ^= self.toLane(message, rr, ww,  7 * ww)
-                self.S[16] ^= self.toLane(message, rr, ww,  8 * ww)
-                self.S[21] ^= self.toLane(message, rr, ww,  9 * ww)
-                self.S[ 2] ^= self.toLane(message, rr, ww, 10 * ww)
-                self.S[ 7] ^= self.toLane(message, rr, ww, 11 * ww)
-                self.S[12] ^= self.toLane(message, rr, ww, 12 * ww)
-                self.S[17] ^= self.toLane(message, rr, ww, 13 * ww)
-                self.S[22] ^= self.toLane(message, rr, ww, 14 * ww)
-                self.S[ 3] ^= self.toLane(message, rr, ww, 15 * ww)
-                self.S[ 8] ^= self.toLane(message, rr, ww, 16 * ww)
-                self.S[13] ^= self.toLane(message, rr, ww, 17 * ww)
-                self.S[18] ^= self.toLane(message, rr, ww, 18 * ww)
-                self.S[23] ^= self.toLane(message, rr, ww, 19 * ww)
-                self.S[ 4] ^= self.toLane(message, rr, ww, 20 * ww)
-                self.S[ 9] ^= self.toLane(message, rr, ww, 21 * ww)
-                self.S[14] ^= self.toLane(message, rr, ww, 22 * ww)
-                self.S[19] ^= self.toLane(message, rr, ww, 23 * ww)
-                self.S[24] ^= self.toLane(message, rr, ww, 24 * ww)
-                message = message[rr:]
+                n = min(len(message), rr)
+                self.S[ 0] ^= self.toLane(message, n, ww,  0)
+                self.S[ 5] ^= self.toLane(message, n, ww,      ww)
+                self.S[10] ^= self.toLane(message, n, ww,  2 * ww)
+                self.S[15] ^= self.toLane(message, n, ww,  3 * ww)
+                self.S[20] ^= self.toLane(message, n, ww,  4 * ww)
+                self.S[ 1] ^= self.toLane(message, n, ww,  5 * ww)
+                self.S[ 6] ^= self.toLane(message, n, ww,  6 * ww)
+                self.S[11] ^= self.toLane(message, n, ww,  7 * ww)
+                self.S[16] ^= self.toLane(message, n, ww,  8 * ww)
+                self.S[21] ^= self.toLane(message, n, ww,  9 * ww)
+                self.S[ 2] ^= self.toLane(message, n, ww, 10 * ww)
+                self.S[ 7] ^= self.toLane(message, n, ww, 11 * ww)
+                self.S[12] ^= self.toLane(message, n, ww, 12 * ww)
+                self.S[17] ^= self.toLane(message, n, ww, 13 * ww)
+                self.S[22] ^= self.toLane(message, n, ww, 14 * ww)
+                self.S[ 3] ^= self.toLane(message, n, ww, 15 * ww)
+                self.S[ 8] ^= self.toLane(message, n, ww, 16 * ww)
+                self.S[13] ^= self.toLane(message, n, ww, 17 * ww)
+                self.S[18] ^= self.toLane(message, n, ww, 18 * ww)
+                self.S[23] ^= self.toLane(message, n, ww, 19 * ww)
+                self.S[ 4] ^= self.toLane(message, n, ww, 20 * ww)
+                self.S[ 9] ^= self.toLane(message, n, ww, 21 * ww)
+                self.S[14] ^= self.toLane(message, n, ww, 22 * ww)
+                self.S[19] ^= self.toLane(message, n, ww, 23 * ww)
+                self.S[24] ^= self.toLane(message, n, ww, 24 * ww)
                 self.keccakF(self.S)
+                message = message[rr:]
         
         # Squeezing phase
         if withReturn:

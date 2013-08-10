@@ -21,8 +21,8 @@ PERFORMANCE COMPARISON:
     C ISO C90      ::  0,082s ~   1
     Java/C JNI     ::  0,175s ~   2,13
     Java 1.2+      ::  0,228s ~   2,78
-    Python 3       :: 25,057s ~ 306
-    Python 2       :: 37,488s ~ 457
+    Python 3       :: 24,373s ~ 297
+    Python 2       :: 34,595s ~ 422
     
     Based on test against a 2,3 MB file.
 
