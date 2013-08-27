@@ -78,6 +78,8 @@ PERFORMANCE COMPARISON:
 **Pending the standardisation of SHA-3**, there is no specification of particular
 SHA-3 functions yet. Our defaults are based on Keccak[] being Keccak[r = 1024, c = 576]
 rather than the functions in Wikipedia's entires that uses [r = 576, c = 1024].
+No release will made until SHA-3 has been standardise, this is to prevent the
+program to change behaviour caused by mismatch with standardisation.
 
 
 If you want to contribute with an implementation in another
