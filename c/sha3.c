@@ -19,24 +19,30 @@
 #include "sha3.h"
 
 
-#if __x86_64__ || __ppc64__
-  #define llong long int
+#ifdef WITH_C99
+  #define static_inline static inline
 #else
-  #define llong long long int
+  #define static_inline inline
 #endif
 
-
-#define null    0
-#define byte    char
-#define boolean long
-#define true    1
-#define false   0
+#define null 0
+#define true 1
+#define false 0
 
 
 
 /**
  * Round contants
  */
+#ifdef WITH_C99
+static const llong RC[] = {
+  0x0000000000000001LL, 0x0000000000008082LL, 0x800000000000808ALL, 0x8000000080008000LL,
+  0x000000000000808BLL, 0x0000000080000001LL, 0x8000000080008081LL, 0x8000000000008009LL,
+  0x000000000000008ALL, 0x0000000000000088LL, 0x0000000080008009LL, 0x000000008000000ALL,
+  0x000000008000808BLL, 0x800000000000008BLL, 0x8000000000008089LL, 0x8000000000008003LL,
+  0x8000000000008002LL, 0x8000000000000080LL, 0x000000000000800ALL, 0x800000008000000ALL,
+  0x8000000080008081LL, 0x8000000000008080LL, 0x0000000080000001LL, 0x8000000080008008LL};
+#else
 static const llong RC[] = {
   0x0000000000000001L, 0x0000000000008082L, 0x800000000000808AL, 0x8000000080008000L,
   0x000000000000808BL, 0x0000000080000001L, 0x8000000080008081L, 0x8000000000008009L,
@@ -44,6 +50,7 @@ static const llong RC[] = {
   0x000000008000808BL, 0x800000000000008BL, 0x8000000000008089L, 0x8000000000008003L,
   0x8000000000008002L, 0x8000000000000080L, 0x000000000000800AL, 0x800000008000000AL,
   0x8000000080008081L, 0x8000000000008080L, 0x0000000080000001L, 0x8000000080008008L};
+#endif
 
 /**
  * Keccak-f round temporary
@@ -139,7 +146,7 @@ static long mlen = 0;
  * @param  doff    The destination array offset
  * @param  length  The number of elements to copy
  */
-inline void arraycopy(byte* src, long soff, byte* dest, long doff, long length)
+static_inline void arraycopy(byte* src, long soff, byte* dest, long doff, long length)
 {
   long i;
   src += soff;
@@ -209,7 +216,7 @@ inline void arraycopy(byte* src, long soff, byte* dest, long doff, long length)
  * @param  doff    The destination array offset
  * @param  length  The number of elements to copy
  */
-inline void revarraycopy(byte* src, long soff, byte* dest, long doff, long length)
+static_inline void revarraycopy(byte* src, long soff, byte* dest, long doff, long length)
 {
   long copyi;
   for (copyi = length - 1; copyi >= 0; copyi--)
@@ -234,7 +241,7 @@ inline void revarraycopy(byte* src, long soff, byte* dest, long doff, long lengt
  * @param   N:long   Rotation steps, may not be 0
  * @return   :llong  The value rotated
  */
-#define rotate64(X, N)  ((llong)((unsigned llong)(X) >> (64 - (N))) + ((X) << (N)))
+#define rotate64(X, N)  ((llong)((ullong)(X) >> (64 - (N))) + ((X) << (N)))
 
 
 /**
@@ -243,7 +250,7 @@ inline void revarraycopy(byte* src, long soff, byte* dest, long doff, long lengt
  * @param   x  The value of which to calculate the binary logarithm
  * @return     The binary logarithm
  */
-static long lb(long x)
+static_inline long lb(long x)
 {
   long rc = 0;
   if ((x & 0xFF00) != 0)  { rc +=  8;  x >>=  8; }
@@ -260,7 +267,7 @@ static long lb(long x)
  * @param  A   The current state
  * @param  rc  Round constant
  */
-static void keccakFRound(llong* A, llong rc)
+static void keccakFRound(llong* restrict A, llong rc)
 {
   llong da, db, dc, dd, de;
   
@@ -321,7 +328,7 @@ static void keccakFRound(llong* A, llong rc)
  * 
  * @param  A  The current state
  */
-static void keccakF(llong* A)
+static void keccakF(llong* restrict A)
 {
   long i;
   if (nr == 24)
@@ -367,7 +374,7 @@ static void keccakF(llong* A)
  * @param   off      The offset in the message
  * @return           Lane
  */
-inline llong toLane(byte* message, long msglen, long rr, long ww, long off)
+static_inline llong toLane(byte* restrict message, long msglen, long rr, long ww, long off)
 {
   llong rc = 0;
   long n = min(msglen, rr), i;
@@ -386,7 +393,7 @@ inline llong toLane(byte* message, long msglen, long rr, long ww, long off)
  * @param   off      The offset in the message
  * @return           Lane
  */
-inline llong toLane64(byte* message, long msglen, long rr, long off)
+static_inline llong toLane64(byte* restrict message, long msglen, long rr, long off)
 {
   long n = min(msglen, rr);
   return ((off + 7 < n) ? ((llong)(message[off + 7] & 255) << 56) : 0L) |
@@ -409,7 +416,7 @@ inline llong toLane64(byte* message, long msglen, long rr, long off)
  * @param   outlen  The length of the padded message (out parameter)
  * @return          The message padded
  */
-inline byte* pad10star1(byte* msg, long len, long r, long* outlen)
+static_inline byte* pad10star1(byte* restrict msg, long len, long r, long* restrict outlen)
 {
   byte* message;
   
@@ -422,7 +429,7 @@ inline byte* pad10star1(byte* msg, long len, long r, long* outlen)
   
   if ((r - 8 <= ll) && (ll <= r - 2))
     {
-      message = (byte*)malloc(len = nrf + 1);
+      message = (byte*)malloc((len = nrf + 1) * sizeof(byte));
       message[nrf] = (byte)(b ^ 128);
     }
   else
@@ -431,7 +438,7 @@ inline byte* pad10star1(byte* msg, long len, long r, long* outlen)
       long N;
       len = (nrf + 1) << 3;
       len = ((len - (len % r) + (r - 8)) >> 3) + 1;
-      message = (byte*)malloc(len);
+      message = (byte*)malloc(len * sizeof(byte));
       message[nrf] = b;
       N = len - nrf - 1;
       M = message + nrf + 1;
@@ -525,7 +532,7 @@ extern void initialise(long bitrate, long capacity, long output)
       wmod--;
     }
   S = (llong*)malloc(25 * sizeof(llong));
-  M = (byte*)malloc(mlen = (r * b) >> 2);
+  M = (byte*)malloc((mlen = (r * b) >> 2) * sizeof(byte));
   mptr = 0;
   
   for (i = 0; i < 25; i++)
@@ -555,7 +562,7 @@ extern void dispose()
  * @param  msg     The partial message
  * @param  msglen  The length of the partial message
  */
-extern void update(byte* msg, long msglen)
+extern void update(byte* restrict msg, long msglen)
 {
   long rr = r >> 3;
   long ww = w >> 3;
@@ -565,16 +572,11 @@ extern void update(byte* msg, long msglen)
   long nnn;
   
   if (mptr + msglen > mlen)
-    {
-      byte* buf = (byte*)malloc(mlen = (mlen + msglen) << 1);
-      arraycopy(M, 0, buf, 0, mptr);
-      free(M);
-      M = buf;
-    }
+    M = (byte*)realloc(M, mlen = (mlen + msglen) << 1);
   arraycopy(msg, 0, M, mptr, msglen);
   len = mptr += msglen;
   len -= len % ((r * b) >> 3);
-  message = (byte*)malloc(len);
+  message = (byte*)malloc(len * sizeof(byte));
   arraycopy(M, 0, message, 0, len);
   mptr -= len;
   revarraycopy(M, nnn = len, M, 0, mptr);
@@ -622,7 +624,7 @@ extern void update(byte* msg, long msglen)
  * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
  * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
  */
-extern byte* digest(byte* msg, long msglen, boolean withReturn)
+extern byte* digest(byte* restrict msg, long msglen, boolean withReturn)
 {
   byte* message;
   byte* _msg;
@@ -638,18 +640,13 @@ extern byte* digest(byte* msg, long msglen, boolean withReturn)
   else
     {
       if (mptr + msglen > mlen)
-	{
-	  byte* buf = (byte*)malloc(mlen += msglen);
-	  arraycopy(M, 0, buf, 0, mptr);
-	  free(M);
-	  M = buf;
-	}
+	M = (byte*)realloc(M, mlen += msglen);
       arraycopy(msg, 0, M, mptr, msglen);
       message = pad10star1(M, mptr + msglen, r, &len);
     }
   free(M);
   M = null;
-  rc = (byte*)malloc((n + 7) >> 3);
+  rc = (byte*)malloc(((n + 7) >> 3) * sizeof(byte));
   _msg = message;
   nnn = len;
   
@@ -756,7 +753,7 @@ extern void fastSqueeze(long times)
  * 
  * @return  The hash sum
  */
-extern byte* squeeze()
+extern byte* squeeze(void)
 {
   long nn, ww, olen, i, j, ptr, ni;
   byte* rc;
@@ -764,7 +761,7 @@ extern byte* squeeze()
   keccakF(S); /* Last squeeze did not do a ending squeeze */
   
   ww = w >> 3;
-  rc = (byte*)malloc(nn = (n + 7) >> 3);
+  rc = (byte*)malloc((nn = (n + 7) >> 3) * sizeof(byte));
   olen = n;
   j = ptr = 0;
   ni = (25 < r >> 3) ? 25 : (r >> 3);

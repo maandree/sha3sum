@@ -17,6 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <stdio.h>
+#include <alloca.h>
 #include <sys/stat.h>
 
 #include "sha3.h"
@@ -34,13 +35,10 @@
 /**
  * Prints a number of bytes to stdout
  * 
- * @param  bytes  The bytes to print
- * @param  n      The number of bytes
+ * @param  BYTES:char*  The bytes to print
+ * @param  N:long       The number of bytes
  */
-inline void putchars(char* bytes, long n)
-{
-  fwrite(bytes, 1, n, stdout);
-}
+#define putchars(BYTES, N)  fwrite(BYTES, 1, N, stdout)
 
 
 /**
@@ -63,7 +61,7 @@ SET set_new()
  * 
  * @param  set  The set
  */
-void set_free(SET set)
+void set_free(SET restrict set)
 {
   if (*(set +  0))  set_free((void**)*(set +  0));
   if (*(set +  1))  set_free((void**)*(set +  1));
@@ -92,7 +90,7 @@ void set_free(SET set)
  * @param  item  The item
  * @param  n     The length of the item
  */
-void set_add(SET set, char* item, long n)
+void set_add(SET restrict set, char* restrict item, long n)
 {
   long i, j;
   void** at = set;
@@ -127,7 +125,7 @@ void set_add(SET set, char* item, long n)
  * @param   n     The length of the item
  * @return        Whether the set contains the item
  */
-long set_contains(SET set, char* item, long n)
+long set_contains(SET restrict set, byte* restrict item, long n)
 {
   long i;
   void** at = set;
@@ -154,7 +152,7 @@ long set_contains(SET set, char* item, long n)
  * @param   b  Second comparand
  * @return     Whether the comparands are equal
  */
-long eq(char* a, char* b)
+long eq(char* restrict a, char* restrict b)
 {
   while (*a)
     if (*a++ != *b++)
@@ -169,7 +167,7 @@ long eq(char* a, char* b)
  * @param   str  String representation
  * @return       Native representation
  */
-long parseInt(char* str)
+long parseInt(char* restrict str)
 {
   long rc = 0;
   while (*str)
@@ -187,18 +185,21 @@ long parseInt(char* str)
  */
 int main(int argc, char** argv)
 {
-  char* cmd = *argv;
+  char* out_alloc;
+  byte* stdin_alloc;
   
   long _o, o, _s, s, _r, r, _c, c, _w, w, _i, i, _j, j;
   long _O, O, _S, S, _R, R, _C, C, _W, W, _I, I, _J, J;
-  long binary = false, hex = false, dashed = false, freelinger = true;
+  long binary = false, hex = false, dashed = false;
   long multi = 0, fptr = 0, bn;
   
-  char** files = (char**)malloc(argc * sizeof(char*));
-  char** linger = (char**)malloc(sizeof(char*) << 1);
+  char** files = (char**)alloca((argc + 2) * sizeof(char*));
+  char** linger = files + argc;
+  char* linger0 = (char*)alloca(sizeof(char) << 13);
   
   long a = 0, an = argc - 1;
   char** args = argv + 1;
+  char* cmd = *argv;
   
   
   _O = _S = _R = _C = _W = _I = _J = false;
@@ -302,10 +303,6 @@ int main(int argc, char** argv)
 	      printf("\n");
 	      fflush(stdout);
 	      fflush(stderr);
-	      if (freelinger)
-		free(*linger);
-	      free(linger);
-	      free(files);
 	      return 0;
 	    }
 	  else
@@ -334,16 +331,9 @@ int main(int argc, char** argv)
 		  fprintf(stderr, "%s: unrecognised option: %s\n", cmd, *linger);
 		  fflush(stdout);
 		  fflush(stderr);
-		  if (freelinger)
-		    free(*linger);
-		  free(linger);
-		  free(files);
 		  return 1;
 		}
 	    }
-	  if (freelinger)
-	    free(*linger);
-	  freelinger = false;
 	  *linger = null;
 	  if (arg == null)
 	    continue;
@@ -367,7 +357,7 @@ int main(int argc, char** argv)
 	      }
 	  if (idx >= 0)
 	    {
-	      linger[0] = (char*)malloc(idx);
+	      linger[0] = linger0;
 	      linger[1] = arg + idx + 1;
 	      for (j = 0; j < idx; j++)
 		*(*linger + j) = *(arg + j);
@@ -383,7 +373,6 @@ int main(int argc, char** argv)
 	      {
 		linger[0] = arg;
 		linger[1] = null;
-		freelinger = false;
 	      }
 	}
       else if ((arg[0] == '-') && arg[1])
@@ -407,7 +396,7 @@ int main(int argc, char** argv)
 	  else
 	    {
 	      {
-		char* _ = (char*)malloc(3);
+		char* _ = linger0;
 		*_++ = '-'; *_++ = *arg; *_ = 0;
 		linger[0] = _ - 2;
 	      }
@@ -422,8 +411,6 @@ int main(int argc, char** argv)
       else
 	files[fptr++] = arg;
     }
-  
-  free(linger);
   
   
   i = _I ? I : _i;
@@ -548,27 +535,27 @@ int main(int argc, char** argv)
   if (i < 1)
     {
       ERR("sorry, I will only do at least one hash iteration!");
-      free(files);
       return 3;
     }
   if (j < 1)
     {
       ERR("sorry, I will only do at least one squeeze iteration!");
-      free(files);
       return 3;
     }
   
   #undef ERR
   
   bn = (o + 7) >> 3;
+  out_alloc = (char*)alloca(bn * 2 * sizeof(char) + bn * sizeof(byte));
+  stdin_alloc = (byte*)(out_alloc + bn * 2);
   {
-    char* stdin;
+    byte* stdin;
     char* filename;
     char* fn;
     long f, fail, _;
     struct stat attr;
     
-    char* out = binary ? null : (char*)malloc(bn * 2);
+    char* out = binary ? null : out_alloc;
     
     fail = false;
     stdin = null;
@@ -577,8 +564,8 @@ int main(int argc, char** argv)
       {
 	FILE* file;
 	long blksize;
-	char* chunk;
-	char* bs;
+	byte* chunk;
+	byte* bs;
 	
 	filename = *(files + f);
 	fn = filename ? filename : "/dev/stdin";
@@ -596,7 +583,7 @@ int main(int argc, char** argv)
 	    blksize = stat(*(argv + f), &attr) ? 0 : attr.st_blksize;
 	    if (blksize <= 0)
 	      blksize = 4096;
-	    chunk = (char*)malloc(blksize);
+	    chunk = (byte*)alloca(blksize * sizeof(byte));
 	    for (;;)
 	      {
 		long read = fread(chunk, 1, blksize, file);
@@ -609,7 +596,7 @@ int main(int argc, char** argv)
 		    int n = read >> 1;
 		    for (_ = 0; _ < n; _++)
 		      {
-			char a = *(chunk + (_ << 1)), b = *(chunk + ((_ << 1) | 1));
+			byte a = *(chunk + (_ << 1)), b = *(chunk + ((_ << 1) | 1));
 			a = (a & 15) + (a <= '9' ? 0 : 9);
 			b = (b & 15) + (b <= '9' ? 0 : 9);
 			*(chunk + _) = (a << 4) | b;
@@ -617,7 +604,6 @@ int main(int argc, char** argv)
 		    update(chunk, n);
 		  }
 	      }
-	    free(chunk);
 	    bs = digest(null, 0, j == 1);
 	    if (j > 2)
 	      fastSqueeze(j - 2);
@@ -627,9 +613,9 @@ int main(int argc, char** argv)
 	    
 	    if (filename == null)
 	      {
-		stdin = (char*)malloc(bn * sizeof(char));
+		stdin = stdin_alloc;
 		for (_ = 0; _ < bn; _++)
-		  *(stdin + _) = *(bs + _);
+		  *(stdin_alloc + _) = *(bs + _);
 	      }
           }
 	else
@@ -639,7 +625,7 @@ int main(int argc, char** argv)
 	  {
 	    for (_ = 1; _ < i; _++)
 	      {
-		char* _bs = bs;
+		byte* _bs = bs;
 		initialise(r, c, o);
 		bs = digest(bs, bn, j == 1);
 		if (j > 2)
@@ -650,13 +636,13 @@ int main(int argc, char** argv)
 		dispose();
 	      }
 	    if (binary)
-	      putchars(bs, bn);
+	      putchars((char*)bs, bn);
 	    else
 	      {
 		long b, outptr = 0;
 		for (b = 0; b < bn; b++)
 		  {
-		    char v = bs[b];
+		    byte v = bs[b];
 		    *(out + outptr++) = HEXADECA[(v >> 4) & 15];
 		    *(out + outptr++) = HEXADECA[v & 15];
 		  }
@@ -667,12 +653,12 @@ int main(int argc, char** argv)
 	  {
 	    long b;
 	    if (binary)
-	      putchars(bs, bn);
+	      putchars((char*)bs, bn);
 	    else
 	      {
 		for (b = 0; b < bn; b++)
 		  {
-		    char v = bs[b];
+		    byte v = bs[b];
 		    out[b * 2    ] = HEXADECA[(v >> 4) & 15];
 		    out[b * 2 + 1] = HEXADECA[v & 15];
 		  }
@@ -680,7 +666,7 @@ int main(int argc, char** argv)
 	      }
 	    for (_ = 1; _ < i; _++)
 	      {
-		char* _bs = bs;
+		byte* _bs = bs;
 		initialise(r, c, o);
 		bs = digest(bs, bn, j == 1);
 		if (j > 2)
@@ -690,12 +676,12 @@ int main(int argc, char** argv)
 		free(_bs);
 		dispose();
 		if (binary)
-		  putchars(bs, bn);
+		  putchars((char*)bs, bn);
 		else
 		  {
 		    for (b = 0; b < bn; b++)
 		      {
-			char v = bs[b];
+			byte v = bs[b];
 			out[b * 2    ] = HEXADECA[(v >> 4) & 15];
 			out[b * 2 + 1] = HEXADECA[v & 15];
 		      }
@@ -705,14 +691,15 @@ int main(int argc, char** argv)
 	  }
 	else
 	  {
-	    long b, loophere;
+	    long b;
+	    char loophere;
 	    char* loop = null;
 	    SET got = set_new();
 	    for (_ = 0; _ < i; _++)
 	      {
 		if (_ > 0)
 		  {
-		    char* _bs = bs;
+		    byte* _bs = bs;
 		    initialise(r, c, o);
 		    bs = digest(bs, bn, j == 1);
 		    if (j > 2)
@@ -724,7 +711,7 @@ int main(int argc, char** argv)
 		  }
 		for (b = 0; b < bn; b++)
 		  {
-		    char v = bs[b];
+		    byte v = bs[b];
 		    out[b * 2    ] = HEXADECA[(v >> 4) & 15];
 		    out[b * 2 + 1] = HEXADECA[v & 15];
 		  }
@@ -732,7 +719,7 @@ int main(int argc, char** argv)
 		  {
 		    if (set_contains(got, bs, bn))
 		      {
-			loop = (char*)malloc(bn * 2);
+			loop = (char*)malloc(bn * 2 * sizeof(char));
 			for (b = 0; b < bn * 2; b++)
 			  *(loop + b) = *(out + b);
 		      }
@@ -759,21 +746,12 @@ int main(int argc, char** argv)
 	fclose(file);
       }
     
-    if (out != null)
-      free(out);
-    if (stdin != null)
-      free(stdin);
-    
     fflush(stdout);
     fflush(stderr);
     if (fail)
-      {
-	free(files);
-	return 5;
-      }
+      return 5;
   }
   
-  free(files);
   return 0;
 }
 

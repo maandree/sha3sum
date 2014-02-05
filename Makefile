@@ -21,6 +21,9 @@ JAVAFLAGS=-Xlint $(JAVA_OPTIMISE)
 JAVA_FLAGS=$(JAVADIRS) $(JAVAFLAGS)
 
 CFLAGS=-W{all,extra} -pedantic $(C_OPTIMISE) -fPIC
+ifeq ($(WITH_C99),yes)
+  CFLAGS+=-std=c99 -DWITH_C99
+endif
 SOFLAGS=-W{all,extra} -pedantic $(C_OPTIMISE) -shared
 CPPFLAGS=
 LDFLAGS=
