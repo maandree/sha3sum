@@ -65,7 +65,7 @@ PERFORMANCE COMPARISON:
     -j SQUEEZES
     --squeezes     The number of hash squeezes to run.    (default: 1)
     
-    -h
+    -x
     --hex          Read the input in hexadecimal, rather than binary.
     
     -b

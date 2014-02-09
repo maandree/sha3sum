@@ -243,7 +243,7 @@ int main(int argc, char** argv)
       char* arg = a == an ? null : *(args + a);
       if (*linger)
 	{
-	  if (eq(*linger, "-H") || eq(*linger, "--help"))
+	  if (eq(*linger, "-h") || eq(*linger, "--help"))
 	    {
 	      printf("\n");
 	      printf("SHA-3/Keccak checksum calculator\n");
@@ -274,7 +274,7 @@ int main(int argc, char** argv)
 	      printf("        -j SQUEEZES\n");
 	      printf("        --squeezes      The number of hash squeezes to run.     (default: %li)\n", _j);
 	      printf("        \n");
-	      printf("        -h\n");
+	      printf("        -x\n");
 	      printf("        --hex           Read the input in hexadecimal, rather than binary.\n");
 	      printf("        \n");
 	      printf("        -b\n");
@@ -388,7 +388,7 @@ int main(int argc, char** argv)
 	      multi++;
 	      arg++;
 	    }
-	  else if (*arg == 'h')
+	  else if (*arg == 'x')
 	    {
 	      hex = true;
 	      arg++;

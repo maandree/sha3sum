@@ -72,7 +72,7 @@ if __name__ == '__main__':
     
     for arg in args + [None]:
         if linger is not None:
-            if linger[0] in ('-H', '--help'):
+            if linger[0] in ('-h', '--help'):
                 sys.stderr.buffer.write(('''
 SHA-3/Keccak checksum calculator
 
@@ -102,7 +102,7 @@ OPTIONS:
         -j SQUEEZES
         --squeezes      The number of hash squeezes to run.     (default: %d)
         
-        -h
+        -x
         --hex           Read the input in hexadecimal, rather than binary.
         
         -b
@@ -184,7 +184,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             elif arg[0] == 'b':
                 multi += 1
                 arg = arg[1:]
-            elif arg[0] == 'h':
+            elif arg[0] == 'x':
                 hex = True
                 arg = arg[1:]
             elif len(arg) == 1:

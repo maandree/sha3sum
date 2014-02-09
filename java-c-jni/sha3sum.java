@@ -84,7 +84,7 @@ public class sha3sum
 	    if (linger != null)
 	    {
 		linger[0] = linger[0].intern();
-		if ((linger[0] == "-H") || (linger[0] == "--help"))
+		if ((linger[0] == "-h") || (linger[0] == "--help"))
 		{
 		    System.out.println("");
 		    System.out.println("SHA-3/Keccak checksum calculator");
@@ -115,7 +115,7 @@ public class sha3sum
 		    System.out.println("        -j SQUEEZES");
 		    System.out.println("        --squeezes      The number of hash squeezes to run.     (default: " + _j + ")");
 		    System.out.println("        ");
-		    System.out.println("        -h");
+		    System.out.println("        -x");
 		    System.out.println("        --hex           Read the input in hexadecimal, rather than binary.");
 		    System.out.println("        ");
 		    System.out.println("        -b");
@@ -208,7 +208,7 @@ public class sha3sum
                     multi++;
 		    arg = arg.substring(1);
 		}
-                else if (arg.charAt(0) == 'h')
+                else if (arg.charAt(0) == 'x')
 		{
                     hex = true;
 		    arg = arg.substring(1);
