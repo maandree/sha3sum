@@ -646,6 +646,7 @@ int main(int argc, char** argv)
 		    *(out + outptr++) = HEXADECA[(v >> 4) & 15];
 		    *(out + outptr++) = HEXADECA[v & 15];
 		  }
+		out[outptr] = '\0';
 		printf("%s %s\n", out, filename ? filename : "-");
 	      }
 	  }
@@ -662,6 +663,7 @@ int main(int argc, char** argv)
 		    out[b * 2    ] = HEXADECA[(v >> 4) & 15];
 		    out[b * 2 + 1] = HEXADECA[v & 15];
 		  }
+		out[b*2] = '\0';
 		printf("%s %s\n", out, filename ? filename : "-");
 	      }
 	    for (_ = 1; _ < i; _++)
@@ -685,6 +687,7 @@ int main(int argc, char** argv)
 			out[b * 2    ] = HEXADECA[(v >> 4) & 15];
 			out[b * 2 + 1] = HEXADECA[v & 15];
 		      }
+		    out[b*2] = '\0';
 		    printf("%s\n", out);
 		  }
 	      }
