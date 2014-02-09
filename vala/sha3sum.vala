@@ -654,7 +654,7 @@ static int main(string[] cmdargs)
 	{   string arg = args[a];
 	    if (linger != null)
 	    {
-			if ((linger[0] == "-h") || (linger[0] == "--help"))
+			if ((linger[0] == "-H") || (linger[0] == "--help"))
 			{
 				stdout.printf("\n");
 				stdout.printf("SHA-3/Keccak checksum calculator\n");
