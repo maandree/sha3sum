@@ -72,7 +72,7 @@ if __name__ == '__main__':
     
     for arg in args + [None]:
         if linger is not None:
-            if linger[0] in ('-h', '--help'):
+            if linger[0] in ('-H', '--help'):
                 sys.stderr.buffer.write(('''
 SHA-3/Keccak checksum calculator
 

@@ -243,7 +243,7 @@ int main(int argc, char** argv)
       char* arg = a == an ? null : *(args + a);
       if (*linger)
 	{
-	  if (eq(*linger, "-h") || eq(*linger, "--help"))
+	  if (eq(*linger, "-H") || eq(*linger, "--help"))
 	    {
 	      printf("\n");
 	      printf("SHA-3/Keccak checksum calculator\n");

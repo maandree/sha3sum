@@ -84,7 +84,7 @@ public class sha3sum
 	    if (linger != null)
 	    {
 		linger[0] = linger[0].intern();
-		if ((linger[0] == "-h") || (linger[0] == "--help"))
+		if ((linger[0] == "-H") || (linger[0] == "--help"))
 		{
 		    System.out.println("");
 		    System.out.println("SHA-3/Keccak checksum calculator");
