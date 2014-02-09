@@ -122,7 +122,7 @@ public class sha3sum
 		    System.out.println("        --binary        Print the checksum in binary, rather than hexadecimal.");
 		    System.out.println("        ");
 		    System.out.println("        -m");
-		    System.out.println("        --multi         Print the chechsum at all iterations.");
+		    System.out.println("        --multi         Print the checksum at all iterations.");
 		    System.out.println("");
 		    System.out.println("");
 		    System.out.println("COPYRIGHT:");

@@ -96,7 +96,7 @@ OPTIONS:
         --binary        Print the checksum in binary, rather than hexadecimal.
         
         -m
-        --multi         Print the chechsum at all iterations.
+        --multi         Print the checksum at all iterations.
 
 
 COPYRIGHT:
