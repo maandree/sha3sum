@@ -281,7 +281,7 @@ int main(int argc, char** argv)
 	      printf("        --binary        Print the checksum in binary, rather than hexadecimal.\n");
 	      printf("        \n");
 	      printf("        -m\n");
-	      printf("        --multi         Print the chechsum at all iterations.\n");
+	      printf("        --multi         Print the checksum at all iterations.\n");
 	      printf("\n");
 	      printf("\n");
 	      printf("COPYRIGHT:\n");
