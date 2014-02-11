@@ -25,6 +25,14 @@
   #define static_inline inline
 #endif
 
+#ifdef WITH_THREADLOCAL
+  #define threadlocal __thread
+  /* This is compiler dependent, if your compiler does
+   * not support this you need to define __thread yourself. */
+#else
+  #define threadlocal /* no threading support */
+#endif
+
 #define null 0
 #define true 1
 #define false 0
@@ -55,74 +63,74 @@ static const llong RC[] = {
 /**
  * Keccak-f round temporary
  */
-static llong B[25];
+static threadlocal llong B[25];
 
 /**
  * Keccak-f round temporary
  */
-static llong C[5];
+static threadlocal llong C[5];
 
 
 /**
  * The bitrate
  */
-static long r = 0;
+static threadlocal long r = 0;
 
 /**
  * The capacity
  */
-static long c = 0;
+static threadlocal long c = 0;
 
 /**
  * The output size
  */
-static long n = 0;
+static threadlocal long n = 0;
 
 /**
  * The state size
  */
-static long b = 0;
+static threadlocal long b = 0;
 
 /**
  * The word size
  */
-static long w = 0;
+static threadlocal long w = 0;
 
 /**
  * The word mask
  */
-static llong wmod = 0;
+static threadlocal llong wmod = 0;
 
 /**
  * ℓ, the binary logarithm of the word size
  */
-static long l = 0;
+static threadlocal long l = 0;
 
 /**
  * 12 + 2ℓ, the number of rounds
  */
-static long nr = 0;
+static threadlocal long nr = 0;
 
 
 /**
  * The current state
  */
-static llong* S = null;
+static threadlocal llong* S = null;
 
 /**
  * Left over water to fill the sponge with at next update
  */
-static byte* M = null;
+static threadlocal byte* M = null;
 
 /**
  * Pointer for {@link #M}
  */
-static long mptr = 0;
+static threadlocal long mptr = 0;
 
 /**
  * Size of {@link #M}
  */
-static long mlen = 0;
+static threadlocal long mlen = 0;
 
 
 
