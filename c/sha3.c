@@ -598,6 +598,8 @@ extern void sha3_update(byte* restrict msg, long msglen)
       long mlen_ = mlen;
       char* M_ = (byte*)malloc(mlen = (mlen + msglen) << 1);
       sha3_arraycopy(M, 0, M_, 0, mlen_);
+      for (i = 0; i < mlen_; i++)
+	*(M + i) = 0;
       free(M);
       M = M_;
     }
@@ -680,6 +682,8 @@ extern byte* sha3_digest(byte* restrict msg, long msglen, boolean withReturn)
 	  long mlen_ = mlen;
 	  char* M_ = (byte*)malloc(mlen += msglen);
 	  sha3_arraycopy(M, 0, M_, 0, mlen_);
+	  for (i = 0; i < mlen_; i++)
+	    *(M + i) = 0;
 	  free(M);
 	  M = M_;
 	}
