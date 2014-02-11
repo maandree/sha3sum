@@ -1,7 +1,7 @@
 /**
  * sha3sum – SHA-3 (Keccak) checksum calculator
  * 
- * Copyright © 2013  Mattias Andrée (maandree@member.fsf.org)
+ * Copyright © 2013, 2014  Mattias Andrée (maandree@member.fsf.org)
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -127,7 +127,7 @@ public class sha3sum
 		    System.out.println("");
 		    System.out.println("COPYRIGHT:");
 		    System.out.println("");
-		    System.out.println("Copyright © 2013  Mattias Andrée (maandree@member.fsf.org)");
+		    System.out.println("Copyright © 2013, 2014  Mattias Andrée (maandree@member.fsf.org)");
 		    System.out.println("");
 		    System.out.println("This program is free software: you can redistribute it and/or modify");
 		    System.out.println("it under the terms of the GNU Affero General Public License as published by");
