@@ -842,3 +842,14 @@ extern byte* sha3_squeeze(void)
   return rc;
 }
 
+
+/**
+ * Retrieve the state of the Keccak sponge
+ * 
+ * @return  A 25-element array with the state, changes will be applied to the sponge
+ */
+extern llong* sha3_state(void)
+{
+  return S;
+}
+
