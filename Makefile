@@ -20,12 +20,16 @@ JAVADIRS=-s "java" -d "bin/java" -cp "java"
 JAVAFLAGS=-Xlint $(JAVA_OPTIMISE)
 JAVA_FLAGS=$(JAVADIRS) $(JAVAFLAGS)
 
+WITH_WIPE=yes
 CFLAGS=-W{all,extra} -pedantic $(C_OPTIMISE) -fPIC
 ifeq ($(WITH_C99),yes)
   CFLAGS+=-std=c99 -DWITH_C99
 endif
 ifeq ($(WITH_THREADLOCAL),yes)
-  CFLAGS+=-DWITH_THREADLOCAL
+  CFLAGS+=-DWITH_THREADLOCAL -DWITH_WIPE
+endif
+ifeq ($(WITH_WIPE),yes)
+  CFLAGS+=-DWITH_WIPE
 endif
 SOFLAGS=-W{all,extra} -pedantic $(C_OPTIMISE) -shared
 CPPFLAGS=

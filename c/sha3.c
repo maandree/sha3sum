@@ -552,13 +552,24 @@ extern void sha3_initialise(long bitrate, long capacity, long output)
  */
 extern void sha3_dispose()
 {
+  #ifdef WITH_WIPE
+  long i;
+  #endif
   if (S != null)
     {
+      #ifdef WITH_WIPE
+      for (i = 0; i < 25; i++)
+	*(S + i) = 0;
+      #endif
       free(S);
       S = null;
     }
   if (M != null)
     {
+      #ifdef WITH_WIPE
+      for (i = 0; i < mlen; i++)
+	*(M + i) = 0;
+      #endif
       free(M);
       M = null;
     }
@@ -580,7 +591,17 @@ extern void sha3_update(byte* restrict msg, long msglen)
   long nnn;
   
   if (mptr + msglen > mlen)
+    #ifdef WITH_WIPE
     M = (byte*)realloc(M, mlen = (mlen + msglen) << 1);
+    #else
+    {
+      long mlen_ = mlen;
+      char* M_ = (byte*)malloc(mlen = (mlen + msglen) << 1);
+      sha3_arraycopy(M, 0, M_, 0, mlen_);
+      free(M);
+      M = M_;
+    }
+    #endif
   sha3_arraycopy(msg, 0, M, mptr, msglen);
   len = mptr += msglen;
   len -= len % ((r * b) >> 3);
@@ -620,6 +641,10 @@ extern void sha3_update(byte* restrict msg, long msglen)
 	len -= rr;
       }
   
+  #ifdef WITH_WIPE
+  for (i = 0; i < nnn; i++)
+    *(_msg + i) = 0;
+  #endif
   free(_msg);
 }
 
@@ -648,10 +673,24 @@ extern byte* sha3_digest(byte* restrict msg, long msglen, boolean withReturn)
   else
     {
       if (mptr + msglen > mlen)
+        #ifdef WITH_WIPE
 	M = (byte*)realloc(M, mlen += msglen);
+        #else
+	{
+	  long mlen_ = mlen;
+	  char* M_ = (byte*)malloc(mlen += msglen);
+	  sha3_arraycopy(M, 0, M_, 0, mlen_);
+	  free(M);
+	  M = M_;
+	}
+        #endif
       sha3_arraycopy(msg, 0, M, mptr, msglen);
       message = sha3_pad10star1(M, mptr + msglen, r, &len);
     }
+  #ifdef WITH_WIPE
+  for (i = 0; i < mlen; i++)
+    *(M + i) = 0;
+  #endif
   free(M);
   M = null;
   rc = (byte*)malloc(((n + 7) >> 3) * sizeof(byte));
@@ -688,6 +727,10 @@ extern byte* sha3_digest(byte* restrict msg, long msglen, boolean withReturn)
 	len -= rr;
       }
   
+  #ifdef WITH_WIPE
+  for (i = 0; i < nnn; i++)
+    *(_msg + i) = 0;
+  #endif
   free(_msg);
   
   /* Squeezing phase */
