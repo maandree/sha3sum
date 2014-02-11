@@ -56,7 +56,7 @@ extern void sha3_dispose(void);
 
 
 /**
- * Absorb the more of the message message to the Keccak sponge
+ * Absorb the more of the message to the Keccak sponge
  * 
  * @param  msg     The partial message
  * @param  msglen  The length of the partial message
