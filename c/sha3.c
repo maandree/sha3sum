@@ -146,7 +146,7 @@ static long mlen = 0;
  * @param  doff    The destination array offset
  * @param  length  The number of elements to copy
  */
-static_inline void arraycopy(byte* src, long soff, byte* dest, long doff, long length)
+static_inline void sha3_arraycopy(byte* src, long soff, byte* dest, long doff, long length)
 {
   long i;
   src += soff;
@@ -216,7 +216,7 @@ static_inline void arraycopy(byte* src, long soff, byte* dest, long doff, long l
  * @param  doff    The destination array offset
  * @param  length  The number of elements to copy
  */
-static_inline void revarraycopy(byte* src, long soff, byte* dest, long doff, long length)
+static_inline void sha3_revarraycopy(byte* src, long soff, byte* dest, long doff, long length)
 {
   long copyi;
   for (copyi = length - 1; copyi >= 0; copyi--)
@@ -250,7 +250,7 @@ static_inline void revarraycopy(byte* src, long soff, byte* dest, long doff, lon
  * @param   x  The value of which to calculate the binary logarithm
  * @return     The binary logarithm
  */
-static_inline long lb(long x)
+static_inline long sha3_lb(long x)
 {
   long rc = 0;
   if ((x & 0xFF00) != 0)  { rc +=  8;  x >>=  8; }
@@ -267,7 +267,7 @@ static_inline long lb(long x)
  * @param  A   The current state
  * @param  rc  Round constant
  */
-static void keccakFRound(llong* restrict A, llong rc)
+static void sha3_keccakFRound(llong* restrict A, llong rc)
 {
   llong da, db, dc, dd, de;
   
@@ -328,39 +328,39 @@ static void keccakFRound(llong* restrict A, llong rc)
  * 
  * @param  A  The current state
  */
-static void keccakF(llong* restrict A)
+static void sha3_keccakF(llong* restrict A)
 {
   long i;
   if (nr == 24)
     {
-      keccakFRound(A, 0x0000000000000001);
-      keccakFRound(A, 0x0000000000008082);
-      keccakFRound(A, 0x800000000000808A);
-      keccakFRound(A, 0x8000000080008000);
-      keccakFRound(A, 0x000000000000808B);
-      keccakFRound(A, 0x0000000080000001);
-      keccakFRound(A, 0x8000000080008081);
-      keccakFRound(A, 0x8000000000008009);
-      keccakFRound(A, 0x000000000000008A);
-      keccakFRound(A, 0x0000000000000088);
-      keccakFRound(A, 0x0000000080008009);
-      keccakFRound(A, 0x000000008000000A);
-      keccakFRound(A, 0x000000008000808B);
-      keccakFRound(A, 0x800000000000008B);
-      keccakFRound(A, 0x8000000000008089);
-      keccakFRound(A, 0x8000000000008003);
-      keccakFRound(A, 0x8000000000008002);
-      keccakFRound(A, 0x8000000000000080);
-      keccakFRound(A, 0x000000000000800A);
-      keccakFRound(A, 0x800000008000000A);
-      keccakFRound(A, 0x8000000080008081);
-      keccakFRound(A, 0x8000000000008080);
-      keccakFRound(A, 0x0000000080000001);
-      keccakFRound(A, 0x8000000080008008);
+      sha3_keccakFRound(A, 0x0000000000000001);
+      sha3_keccakFRound(A, 0x0000000000008082);
+      sha3_keccakFRound(A, 0x800000000000808A);
+      sha3_keccakFRound(A, 0x8000000080008000);
+      sha3_keccakFRound(A, 0x000000000000808B);
+      sha3_keccakFRound(A, 0x0000000080000001);
+      sha3_keccakFRound(A, 0x8000000080008081);
+      sha3_keccakFRound(A, 0x8000000000008009);
+      sha3_keccakFRound(A, 0x000000000000008A);
+      sha3_keccakFRound(A, 0x0000000000000088);
+      sha3_keccakFRound(A, 0x0000000080008009);
+      sha3_keccakFRound(A, 0x000000008000000A);
+      sha3_keccakFRound(A, 0x000000008000808B);
+      sha3_keccakFRound(A, 0x800000000000008B);
+      sha3_keccakFRound(A, 0x8000000000008089);
+      sha3_keccakFRound(A, 0x8000000000008003);
+      sha3_keccakFRound(A, 0x8000000000008002);
+      sha3_keccakFRound(A, 0x8000000000000080);
+      sha3_keccakFRound(A, 0x000000000000800A);
+      sha3_keccakFRound(A, 0x800000008000000A);
+      sha3_keccakFRound(A, 0x8000000080008081);
+      sha3_keccakFRound(A, 0x8000000000008080);
+      sha3_keccakFRound(A, 0x0000000080000001);
+      sha3_keccakFRound(A, 0x8000000080008008);
     }
   else
     for (i = 0; i < nr; i++)
-      keccakFRound(A, RC[i] & wmod);
+      sha3_keccakFRound(A, RC[i] & wmod);
 }
 
 
@@ -374,7 +374,7 @@ static void keccakF(llong* restrict A)
  * @param   off      The offset in the message
  * @return           Lane
  */
-static_inline llong toLane(byte* restrict message, long msglen, long rr, long ww, long off)
+static_inline llong sha3_toLane(byte* restrict message, long msglen, long rr, long ww, long off)
 {
   llong rc = 0;
   long n = min(msglen, rr), i;
@@ -393,7 +393,7 @@ static_inline llong toLane(byte* restrict message, long msglen, long rr, long ww
  * @param   off      The offset in the message
  * @return           Lane
  */
-static_inline llong toLane64(byte* restrict message, long msglen, long rr, long off)
+static_inline llong sha3_toLane64(byte* restrict message, long msglen, long rr, long off)
 {
   long n = min(msglen, rr);
   return ((off + 7 < n) ? ((llong)(message[off + 7] & 255) << 56) : 0L) |
@@ -416,7 +416,7 @@ static_inline llong toLane64(byte* restrict message, long msglen, long rr, long 
  * @param   outlen  The length of the padded message (out parameter)
  * @return          The message padded
  */
-static_inline byte* pad10star1(byte* restrict msg, long len, long r, long* restrict outlen)
+static_inline byte* sha3_pad10star1(byte* restrict msg, long len, long r, long* restrict outlen)
 {
   byte* message;
   
@@ -498,7 +498,7 @@ static_inline byte* pad10star1(byte* restrict msg, long len, long r, long* restr
       
       message[len - 1] = -128;
     }
-  arraycopy(msg, 0, message, 0, nrf);
+  sha3_arraycopy(msg, 0, message, 0, nrf);
   
   *outlen = len;
   return message;
@@ -512,7 +512,7 @@ static_inline byte* pad10star1(byte* restrict msg, long len, long r, long* restr
  * @param  capacity  The capacity
  * @param  output    The output size
  */
-extern void initialise(long bitrate, long capacity, long output)
+extern void sha3_initialise(long bitrate, long capacity, long output)
 {
   long i;
   
@@ -521,7 +521,7 @@ extern void initialise(long bitrate, long capacity, long output)
   c = capacity;
   b = r + c;
   w = b / 25;
-  l = lb(w);
+  l = sha3_lb(w);
   nr = 12 + (l << 1);
   if (w == 64)
     wmod = -1;
@@ -542,7 +542,7 @@ extern void initialise(long bitrate, long capacity, long output)
 /**
  * Dispose of the Keccak sponge
  */
-extern void dispose()
+extern void sha3_dispose()
 {
   if (S != null)
     {
@@ -562,7 +562,7 @@ extern void dispose()
  * @param  msg     The partial message
  * @param  msglen  The length of the partial message
  */
-extern void update(byte* restrict msg, long msglen)
+extern void sha3_update(byte* restrict msg, long msglen)
 {
   long rr = r >> 3;
   long ww = w >> 3;
@@ -573,41 +573,41 @@ extern void update(byte* restrict msg, long msglen)
   
   if (mptr + msglen > mlen)
     M = (byte*)realloc(M, mlen = (mlen + msglen) << 1);
-  arraycopy(msg, 0, M, mptr, msglen);
+  sha3_arraycopy(msg, 0, M, mptr, msglen);
   len = mptr += msglen;
   len -= len % ((r * b) >> 3);
   message = (byte*)malloc(len * sizeof(byte));
-  arraycopy(M, 0, message, 0, len);
+  sha3_arraycopy(M, 0, message, 0, len);
   mptr -= len;
-  revarraycopy(M, nnn = len, M, 0, mptr);
+  sha3_revarraycopy(M, nnn = len, M, 0, mptr);
   _msg = message;
   
   /* Absorbing phase */
   if (ww == 8)
     for (i = 0; i < nnn; i += rr)
       {
-	#define __S(Si, OFF)  S[Si] ^= toLane64(message, len, rr, OFF)
+	#define __S(Si, OFF)  S[Si] ^= sha3_toLane64(message, len, rr, OFF)
 	__S( 0,   0);  __S( 5,   8);  __S(10,  16);  __S(15,  24);  __S(20,  32);
 	__S( 1,  40);  __S( 6,  48);  __S(11,  56);  __S(16,  64);  __S(21,  72);
 	__S( 2,  80);  __S( 7,  88);  __S(12,  96);  __S(17, 104);  __S(22, 112);
 	__S( 3, 120);  __S( 8, 128);  __S(13, 136);  __S(18, 144);  __S(23, 152);
 	__S( 4, 160);  __S( 9, 168);  __S(14, 176);  __S(19, 184);  __S(24, 192);
         #undef __S
-	keccakF(S);
+	sha3_keccakF(S);
 	message += rr;
 	len -= rr;
       }
   else
     for (i = 0; i < nnn; i += rr)
       {
-	#define __S(Si, OFF)  S[Si] ^= toLane(message, len, rr, ww, OFF * w)
+	#define __S(Si, OFF)  S[Si] ^= sha3_toLane(message, len, rr, ww, OFF * w)
 	__S( 0,  0);  __S( 5,  1);  __S(10,  2);  __S(15,  3);  __S(20,  4);
 	__S( 1,  5);  __S( 6,  6);  __S(11,  7);  __S(16,  8);  __S(21,  9);
 	__S( 2, 10);  __S( 7, 11);  __S(12, 12);  __S(17, 13);  __S(22, 14);
 	__S( 3, 15);  __S( 8, 16);  __S(13, 17);  __S(18, 18);  __S(23, 19);
 	__S( 4, 20);  __S( 9, 21);  __S(14, 22);  __S(19, 23);  __S(24, 24);
         #undef __S
-	keccakF(S);
+	sha3_keccakF(S);
 	message += rr;
 	len -= rr;
       }
@@ -624,7 +624,7 @@ extern void update(byte* restrict msg, long msglen)
  * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
  * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
  */
-extern byte* digest(byte* restrict msg, long msglen, boolean withReturn)
+extern byte* sha3_digest(byte* restrict msg, long msglen, boolean withReturn)
 {
   byte* message;
   byte* _msg;
@@ -636,13 +636,13 @@ extern byte* digest(byte* restrict msg, long msglen, boolean withReturn)
   long nnn;
   
   if ((msg == null) || (msglen == 0))
-    message = pad10star1(M, mptr, r, &len);
+    message = sha3_pad10star1(M, mptr, r, &len);
   else
     {
       if (mptr + msglen > mlen)
 	M = (byte*)realloc(M, mlen += msglen);
-      arraycopy(msg, 0, M, mptr, msglen);
-      message = pad10star1(M, mptr + msglen, r, &len);
+      sha3_arraycopy(msg, 0, M, mptr, msglen);
+      message = sha3_pad10star1(M, mptr + msglen, r, &len);
     }
   free(M);
   M = null;
@@ -654,28 +654,28 @@ extern byte* digest(byte* restrict msg, long msglen, boolean withReturn)
   if (ww == 8)
     for (i = 0; i < nnn; i += rr)
       {
-	#define __S(Si, OFF)  S[Si] ^= toLane64(message, len, rr, OFF)
+	#define __S(Si, OFF)  S[Si] ^= sha3_toLane64(message, len, rr, OFF)
 	__S( 0,   0);  __S( 5,   8);  __S(10,  16);  __S(15,  24);  __S(20,  32);
 	__S( 1,  40);  __S( 6,  48);  __S(11,  56);  __S(16,  64);  __S(21,  72);
 	__S( 2,  80);  __S( 7,  88);  __S(12,  96);  __S(17, 104);  __S(22, 112);
 	__S( 3, 120);  __S( 8, 128);  __S(13, 136);  __S(18, 144);  __S(23, 152);
 	__S( 4, 160);  __S( 9, 168);  __S(14, 176);  __S(19, 184);  __S(24, 192);
         #undef __S
-	keccakF(S);
+	sha3_keccakF(S);
 	message += rr;
 	len -= rr;
       }
   else
     for (i = 0; i < nnn; i += rr)
       {
-	#define __S(Si, OFF)  S[Si] ^= toLane(message, len, rr, ww, OFF * w)
+	#define __S(Si, OFF)  S[Si] ^= sha3_toLane(message, len, rr, ww, OFF * w)
 	__S( 0,  0);  __S( 5,  1);  __S(10,  2);  __S(15,  3);  __S(20,  4);
 	__S( 1,  5);  __S( 6,  6);  __S(11,  7);  __S(16,  8);  __S(21,  9);
 	__S( 2, 10);  __S( 7, 11);  __S(12, 12);  __S(17, 13);  __S(22, 14);
 	__S( 3, 15);  __S( 8, 16);  __S(13, 17);  __S(18, 18);  __S(23, 19);
 	__S( 4, 20);  __S( 9, 21);  __S(14, 22);  __S(19, 23);  __S(24, 24);
         #undef __S
-	keccakF(S);
+	sha3_keccakF(S);
 	message += rr;
 	len -= rr;
       }
@@ -704,7 +704,7 @@ extern byte* digest(byte* restrict msg, long msglen, boolean withReturn)
 	    }
 	  olen -= r;
 	  if (olen > 0)
-	    keccakF(S);
+	    sha3_keccakF(S);
 	}
       if ((n & 7))
 	rc[n >> 3] &= (1 << (n & 7)) - 1;
@@ -712,7 +712,7 @@ extern byte* digest(byte* restrict msg, long msglen, boolean withReturn)
       return rc;
     }
   while ((olen -= r) > 0)
-    keccakF(S);
+    sha3_keccakF(S);
   return null;
 }
 
@@ -722,11 +722,11 @@ extern byte* digest(byte* restrict msg, long msglen, boolean withReturn)
  * 
  * @param  times  The number of rounds
  */
-extern void simpleSqueeze(long times)
+extern void sha3_simpleSqueeze(long times)
 {
   long i;
   for (i = 0; i < times; i++)
-    keccakF(S);
+    sha3_keccakF(S);
 }
 
 
@@ -735,15 +735,15 @@ extern void simpleSqueeze(long times)
  * 
  * @param  times  The number of digests
  */
-extern void fastSqueeze(long times)
+extern void sha3_fastSqueeze(long times)
 {
   long i, olen;
   for (i = 0; i < times; i++)
     {
-      keccakF(S); /* Last squeeze did not do a ending squeeze */
+      sha3_keccakF(S); /* Last squeeze did not do a ending squeeze */
       olen = n;
       while ((olen -= r) > 0)
-	keccakF(S);
+	sha3_keccakF(S);
     }
 }
 
@@ -753,12 +753,12 @@ extern void fastSqueeze(long times)
  * 
  * @return  The hash sum
  */
-extern byte* squeeze(void)
+extern byte* sha3_squeeze(void)
 {
   long nn, ww, olen, i, j, ptr, ni;
   byte* rc;
   
-  keccakF(S); /* Last squeeze did not do a ending squeeze */
+  sha3_keccakF(S); /* Last squeeze did not do a ending squeeze */
   
   ww = w >> 3;
   rc = (byte*)malloc((nn = (n + 7) >> 3) * sizeof(byte));
@@ -783,7 +783,7 @@ extern byte* squeeze(void)
 	}
       olen -= r;
       if (olen > 0)
-	keccakF(S);
+	sha3_keccakF(S);
     }
   if (n & 7)
     rc[nn - 1] &= (1 << (n & 7)) - 1;

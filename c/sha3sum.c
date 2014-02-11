@@ -579,7 +579,7 @@ int main(int argc, char** argv)
 	
 	if ((filename != null) || (stdin == null))
 	  {
-	    initialise(r, c, o);
+	    sha3_initialise(r, c, o);
 	    blksize = stat(*(argv + f), &attr) ? 0 : attr.st_blksize;
 	    if (blksize <= 0)
 	      blksize = 4096;
@@ -590,7 +590,7 @@ int main(int argc, char** argv)
 		if (read <= 0)
 		  break;
 		if (hex == false)
-		  update(chunk, read);
+		  sha3_update(chunk, read);
 		else
 		  {
 		    int n = read >> 1;
@@ -601,15 +601,15 @@ int main(int argc, char** argv)
 			b = (b & 15) + (b <= '9' ? 0 : 9);
 			*(chunk + _) = (a << 4) | b;
 		      }
-		    update(chunk, n);
+		    sha3_update(chunk, n);
 		  }
 	      }
-	    bs = digest(null, 0, j == 1);
+	    bs = sha3_digest(null, 0, j == 1);
 	    if (j > 2)
-	      fastSqueeze(j - 2);
+	      sha3_fastSqueeze(j - 2);
 	    if (j > 1)
-	      bs = squeeze();
-	    dispose();
+	      bs = sha3_squeeze();
+	    sha3_dispose();
 	    
 	    if (filename == null)
 	      {
@@ -626,14 +626,14 @@ int main(int argc, char** argv)
 	    for (_ = 1; _ < i; _++)
 	      {
 		byte* _bs = bs;
-		initialise(r, c, o);
-		bs = digest(bs, bn, j == 1);
+		sha3_initialise(r, c, o);
+		bs = sha3_digest(bs, bn, j == 1);
 		if (j > 2)
-		  fastSqueeze(j - 2);
+		  sha3_fastSqueeze(j - 2);
 		if (j > 1)
-		  bs = squeeze();
+		  bs = sha3_squeeze();
 		free(_bs);
-		dispose();
+		sha3_dispose();
 	      }
 	    if (binary)
 	      putchars((char*)bs, bn);
@@ -669,14 +669,14 @@ int main(int argc, char** argv)
 	    for (_ = 1; _ < i; _++)
 	      {
 		byte* _bs = bs;
-		initialise(r, c, o);
-		bs = digest(bs, bn, j == 1);
+		sha3_initialise(r, c, o);
+		bs = sha3_digest(bs, bn, j == 1);
 		if (j > 2)
-		  fastSqueeze(j - 2);
+		  sha3_fastSqueeze(j - 2);
 		if (j > 1)
-		  bs = squeeze();
+		  bs = sha3_squeeze();
 		free(_bs);
-		dispose();
+		sha3_dispose();
 		if (binary)
 		  putchars((char*)bs, bn);
 		else
@@ -703,14 +703,14 @@ int main(int argc, char** argv)
 		if (_ > 0)
 		  {
 		    byte* _bs = bs;
-		    initialise(r, c, o);
-		    bs = digest(bs, bn, j == 1);
+		    sha3_initialise(r, c, o);
+		    bs = sha3_digest(bs, bn, j == 1);
 		    if (j > 2)
-		      fastSqueeze(j - 2);
+		      sha3_fastSqueeze(j - 2);
 		    if (j > 1)
-		      bs = squeeze();
+		      bs = sha3_squeeze();
 		    free(_bs);
-		    dispose();
+		    sha3_dispose();
 		  }
 		for (b = 0; b < bn; b++)
 		  {

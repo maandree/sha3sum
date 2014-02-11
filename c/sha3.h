@@ -46,13 +46,13 @@
  * @param  capacity  The capacity
  * @param  output    The output size
  */
-extern void initialise(long bitrate, long capacity, long output);
+extern void sha3_initialise(long bitrate, long capacity, long output);
 
 
 /**
  * Dispose of the Keccak sponge
  */
-extern void dispose(void);
+extern void sha3_dispose(void);
 
 
 /**
@@ -61,7 +61,7 @@ extern void dispose(void);
  * @param  msg     The partial message
  * @param  msglen  The length of the partial message
  */
-extern void update(byte* restrict msg, long msglen);
+extern void sha3_update(byte* restrict msg, long msglen);
 
 
 /**
@@ -72,7 +72,7 @@ extern void update(byte* restrict msg, long msglen);
  * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
  * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
  */
-extern byte* digest(byte* restrict msg, long msglen, boolean withReturn);
+extern byte* sha3_digest(byte* restrict msg, long msglen, boolean withReturn);
 
 
 /**
@@ -80,7 +80,7 @@ extern byte* digest(byte* restrict msg, long msglen, boolean withReturn);
  * 
  * @param  times  The number of rounds
  */
-extern void simpleSqueeze(long times);
+extern void sha3_simpleSqueeze(long times);
 
 
 /**
@@ -88,7 +88,7 @@ extern void simpleSqueeze(long times);
  * 
  * @param  times  The number of digests
  */
-extern void fastSqueeze(long times);
+extern void sha3_fastSqueeze(long times);
 
 
 /**
@@ -96,5 +96,5 @@ extern void fastSqueeze(long times);
  * 
  * @return  The hash sum
  */
-extern byte* squeeze(void);
+extern byte* sha3_squeeze(void);
 
