@@ -275,7 +275,7 @@ static_inline long sha3_lb(long x)
  * @param  A   The current state
  * @param  rc  Round constant
  */
-static void sha3_keccakFRound(llong* restrict A, llong rc)
+static void sha3_keccakFRound(llong* restrict_ A, llong rc)
 {
   llong da, db, dc, dd, de;
   
@@ -336,7 +336,7 @@ static void sha3_keccakFRound(llong* restrict A, llong rc)
  * 
  * @param  A  The current state
  */
-static void sha3_keccakF(llong* restrict A)
+static void sha3_keccakF(llong* restrict_ A)
 {
   long i;
   if (nr == 24)
@@ -382,7 +382,7 @@ static void sha3_keccakF(llong* restrict A)
  * @param   off      The offset in the message
  * @return           Lane
  */
-static_inline llong sha3_toLane(byte* restrict message, long msglen, long rr, long ww, long off)
+static_inline llong sha3_toLane(byte* restrict_ message, long msglen, long rr, long ww, long off)
 {
   llong rc = 0;
   long n = min(msglen, rr), i;
@@ -401,7 +401,7 @@ static_inline llong sha3_toLane(byte* restrict message, long msglen, long rr, lo
  * @param   off      The offset in the message
  * @return           Lane
  */
-static_inline llong sha3_toLane64(byte* restrict message, long msglen, long rr, long off)
+static_inline llong sha3_toLane64(byte* restrict_ message, long msglen, long rr, long off)
 {
   long n = min(msglen, rr);
   return ((off + 7 < n) ? ((llong)(message[off + 7] & 255) << 56) : 0L) |
@@ -424,7 +424,7 @@ static_inline llong sha3_toLane64(byte* restrict message, long msglen, long rr, 
  * @param   outlen  The length of the padded message (out parameter)
  * @return          The message padded
  */
-static_inline byte* sha3_pad10star1(byte* restrict msg, long len, long r, long* restrict outlen)
+static_inline byte* sha3_pad10star1(byte* restrict_ msg, long len, long r, long* restrict_ outlen)
 {
   byte* message;
   
@@ -581,7 +581,7 @@ extern void sha3_dispose()
  * @param  msg     The partial message
  * @param  msglen  The length of the partial message
  */
-extern void sha3_update(byte* restrict msg, long msglen)
+extern void sha3_update(byte* restrict_ msg, long msglen)
 {
   long rr = r >> 3;
   long ww = w >> 3;
@@ -659,7 +659,7 @@ extern void sha3_update(byte* restrict msg, long msglen)
  * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
  * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
  */
-extern byte* sha3_digest(byte* restrict msg, long msglen, boolean withReturn)
+extern byte* sha3_digest(byte* restrict_ msg, long msglen, boolean withReturn)
 {
   byte* message;
   byte* _msg;

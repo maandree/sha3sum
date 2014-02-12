@@ -24,12 +24,13 @@
 
 #ifdef WITH_C99
   #include <inttypes.h>
+  #define restrict_ restrict
   #define byte int_fast8_t
   #define boolean int_fast8_t
   #define llong int_fast64_t
   #define ullong uint_fast64_t
 #else
-  #define restrict /* introduced in C99 */
+  #define restrict_ /* introduced in C99 */
   #define byte char
   #define boolean char
   #if __x86_64__ || __ppc64__
@@ -64,7 +65,7 @@ extern void sha3_dispose(void);
  * @param  msg     The partial message
  * @param  msglen  The length of the partial message
  */
-extern void sha3_update(byte* restrict msg, long msglen);
+extern void sha3_update(byte* restrict_ msg, long msglen);
 
 
 /**
@@ -75,7 +76,7 @@ extern void sha3_update(byte* restrict msg, long msglen);
  * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
  * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
  */
-extern byte* sha3_digest(byte* restrict msg, long msglen, boolean withReturn);
+extern byte* sha3_digest(byte* restrict_ msg, long msglen, boolean withReturn);
 
 
 /**
