@@ -16,6 +16,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef __SHA3_H__
+#define __SHA3_H__
+
 #include <stdlib.h>
 
 
@@ -105,4 +108,7 @@ extern byte* sha3_squeeze(void);
  * @return  A 25-element array with the state, changes will be applied to the sponge
  */
 extern llong* sha3_state(void);
+
+
+#endif
 
