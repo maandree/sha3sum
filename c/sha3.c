@@ -697,7 +697,7 @@ extern byte* sha3_digest(byte* restrict_ msg, long msglen, boolean withReturn)
   #endif
   free(M);
   M = null;
-  rc = (byte*)malloc(((n + 7) >> 3) * sizeof(byte));
+  rc = withReturn ? (byte*)malloc(((n + 7) >> 3) * sizeof(byte)) : null;
   _msg = message;
   nnn = len;
   
