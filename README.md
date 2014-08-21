@@ -45,19 +45,19 @@ PERFORMANCE COMPARISON:
 *OPTIONS:*
 
     -r BITRATE
-    --bitrate      The bitrate to use for SHA-3.          (default: 1024)
+    --bitrate      The bitrate to use for checksum.       (default: 1024)
     
     -c CAPACITY
-    --capacity     The capacity to use for SHA-3.         (default: 576)
+    --capacity     The capacity to use for checksum.      (default: 576)
     
     -w WORDSIZE
-    --wordsize     The word size to use for SHA-3.        (default: 64)
+    --wordsize     The word size to use for checksum.     (default: 64)
     
     -o OUTPUTSIZE
-    --outputsize   The output size to use for SHA-3.      (default: 512)
+    --outputsize   The output size to use for checksum.   (default: 512)
     
     -s STATESIZE
-    --statesize    The state size to use for SHA-3.       (default: 1600)
+    --statesize    The state size to use for checksum.    (default: 1600)
     
     -i ITERATIONS
     --iterations   The number of hash iterations to run.  (default: 1)

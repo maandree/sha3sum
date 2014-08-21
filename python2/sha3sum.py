@@ -82,19 +82,19 @@ USAGE:  sha3sum [option...] < file
 
 OPTIONS:
         -r BITRATE
-        --bitrate       The bitrate to use for SHA-3.           (default: %d)
+        --bitrate       The bitrate to use for checksum.        (default: %d)
         
         -c CAPACITY
-        --capacity      The capacity to use for SHA-3.          (default: %d)
+        --capacity      The capacity to use for checksum.       (default: %d)
         
         -w WORDSIZE
-        --wordsize      The word size to use for SHA-3.         (default: %d)
+        --wordsize      The word size to use for checksum.      (default: %d)
         
         -o OUTPUTSIZE
-        --outputsize    The output size to use for SHA-3.       (default: %d)
+        --outputsize    The output size to use for checksum.    (default: %d)
         
         -s STATESIZE
-        --statesize     The state size to use for SHA-3.        (default: %d)
+        --statesize     The state size to use for checksum.     (default: %d)
         
         -i ITERATIONS
         --iterations    The number of hash iterations to run.   (default: %d)
