@@ -407,19 +407,22 @@ inline llong toLane64(byte* message, long msglen, long rr, long off)
  * @param   msg     The message to pad
  * @param   len     The length of the message
  * @param   r       The bitrate
+ * @param   bits    The number of bits in the end of the message that does not make a whole byte
  * @param   outlen  The length of the padded message (out parameter)
  * @return          The message padded
  */
-inline byte* pad10star1(byte* msg, long len, long r, long* outlen)
+inline byte* pad10star1(byte* msg, long len, long r, long bits, long* outlen)
 {
   byte* message;
+  byte b;
+  long i, ll, nbrf, nrf;
   
-  long nrf = (len <<= 3) >> 3;
-  long nbrf = len & 7;
-  long ll = len % r;
-  long i;
+  len = ((len - (bits + 7) / 8) << 3) + bits;
+  nrf = len >> 3;
+  nbrf = len & 7;
+  ll = len % r;
   
-  byte b = (byte)(nbrf == 0 ? 1 : ((msg[nrf] >> (8 - nbrf)) | (1 << nbrf)));
+  b = (byte)(nbrf == 0 ? 1 : (msg[nrf] | (1 << nbrf)));
   
   if ((r - 8 <= ll) && (ll <= r - 2))
     {
@@ -620,10 +623,13 @@ void update(byte* msg, long msglen)
  * 
  * @param   msg         The rest of the message, may be {@code null}
  * @param   msglen      The length of the partial message
+ * @param   bits        The number of bits at the end of the message not covered by <tt>msglen</tt>
+ * @param   suffix      The suffix concatenate to the message
+ * @param   suffix_len  The length of the suffix
  * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
  * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
  */
-byte* digest(byte* msg, long msglen, boolean withReturn)
+byte* digest(byte* msg, long msglen, long bits, int* suffix, long suffix_len, boolean withReturn)
 {
   byte* message;
   byte* _msg;
@@ -634,20 +640,37 @@ byte* digest(byte* msg, long msglen, boolean withReturn)
   long i, j = 0, ptr = 0, _;
   long nnn;
   
-  if ((msg == null) || (msglen == 0))
-    message = pad10star1(M, mptr, r, &len);
-  else
+  if (msg == null)
+    msglen = bits = 0;
+  
+  msglen += bits >> 3;
+  if ((bits &= 7))
     {
-      if (mptr + msglen > mlen)
+      msg[msglen] &= (1 << bits) - 1;
+      msg = (byte*)realloc(msg, msglen + ((suffix_len + bits + 7) >> 3));
+      for (i = 0; i < suffix_len; i++)
 	{
-	  byte* buf = (byte*)malloc(mlen += msglen);
-	  arraycopy(M, 0, buf, 0, mptr);
-	  free(M);
-	  M = buf;
-	}
-      arraycopy(msg, 0, M, mptr, msglen);
-      message = pad10star1(M, mptr + msglen, r, &len);
+	  msg[msglen] |= suffix[i] << bits;
+	  if (bits == 8)
+	    {
+	      bits = 0;
+	      msglen++;
+	    }
+        }
+      if (bits)
+	msglen++;
     }
+  
+  if (mptr + msglen > mlen)
+    {
+      byte* buf = (byte*)malloc(mlen += msglen);
+      arraycopy(M, 0, buf, 0, mptr);
+      free(M);
+      M = buf;
+    }
+  arraycopy(msg, 0, M, mptr, msglen);
+  message = pad10star1(M, mptr + msglen, r, bits, &len);
+  
   free(M);
   M = null;
   rc = (byte*)malloc((n + 7) >> 3);
@@ -814,16 +837,20 @@ JNIEXPORT void JNICALL Java_SHA3_update(JNIEnv* env, jclass class, jbyteArray ms
 }
 
 
-JNIEXPORT jbyteArray JNICALL Java_SHA3_digest(JNIEnv* env, jclass class, jbyteArray msg, jint msglen, jboolean withReturn)
+JNIEXPORT jbyteArray JNICALL Java_SHA3_digest(JNIEnv* env, jclass class, jbyteArray msg, jint msglen, jint bits, jintArray suffix, jboolean withReturn)
 {
   jbyte* rcn;
   jbyteArray rcj = null;
+  int* suffix_elems = (int*)((*env)->GetIntArrayElements(env, suffix, 0));
+  long suffix_len = (long)((*env)->GetArrayLength(env, suffix));
+  
   (void) class;
   
   if ((msg != null) && (msglen != 0))
-    rcn = (jbyte*)digest((byte*)((*env)->GetByteArrayElements(env, msg, 0)), msglen, withReturn);
+    rcn = (jbyte*)digest((byte*)((*env)->GetByteArrayElements(env, msg, 0)), msglen,
+			 bits, suffix_elems, suffix_len, withReturn);
   else
-    rcn = (jbyte*)digest(null, 0, withReturn);
+    rcn = (jbyte*)digest(null, 0, 0, suffix_elems, suffix_len, withReturn);
   if (withReturn)
     {
       rcj = (*env)->NewByteArray(env, (n + 7) >> 3);

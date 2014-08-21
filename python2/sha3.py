@@ -27,6 +27,27 @@ class SHA3:
     '''
     
     
+    KECCAK_SUFFIX = ''
+    '''
+    :str  Suffix the message when calculating the Keccak hash sum
+    '''
+    
+    SHA3_SUFFIX = '01'
+    '''
+    :str  Suffix the message when calculating the SHA-3 hash sum
+    '''
+    
+    RawSHAKE_SUFFIX = '11'
+    '''
+    :str  Suffix the message when calculating the RawSHAKE hash sum
+    '''
+    
+    SHAKE_SUFFIX = '1111'
+    '''
+    :str  Suffix the message when calculating the SHAKE hash sum
+    '''
+    
+    
     def __init__(self):
         '''
         Constructor
@@ -319,21 +340,22 @@ class SHA3:
                ((message[off]) if (off < n) else 0)
     
     
-    def pad10star1(self, msg, r):
+    def pad10star1(self, msg, r, bits):
         '''
         pad 10*1
         
-        @param   msg:bytes  The message to pad
-        @param     r:int    The bitrate
-        @return     :bytes  The message padded
+        @param    msg:bytes  The message to pad
+        @param      r:int    The bitrate
+        @param   bits:int    The number of bits in the end of the message that does not make a whole byte
+        @return      :bytes  The message padded
         '''
-        nnn = len(msg) << 3
+        nnn = ((len(msg) - (bits + 7) // 8) << 3) + bits
         
         nrf = nnn >> 3
         nbrf = nnn & 7
         ll = nnn % r
         
-        bbbb = 1 if nbrf == 0 else ((msg[nrf] >> (8 - nbrf)) | (1 << nbrf))
+        bbbb = 1 if nbrf == 0 else (msg[nrf] | (1 << nbrf))
         
         message = None
         if ((r - 8 <= ll) and (ll <= r - 2)):
@@ -374,7 +396,7 @@ class SHA3:
         Absorb the more of the message message to the Keccak sponge
         
         @param  msg:bytes   The partial message
-        @param  msglen:int  The length of the partial message
+        @param  msglen:int  The length of the partial message in whole bytes
         '''
         if msglen is not None:
             msg = msg[:msglen]
@@ -451,24 +473,36 @@ class SHA3:
                 message = message[rr:]
     
     
-    def digest(self, msg = None, msglen = None, withReturn = None):
+    def digest(self, msg = None, msglen = None, bits = 0, suffix = SHA3_SUFFIX, withReturn = None):
         '''
         Absorb the last part of the message and squeeze the Keccak sponge
         
         @param   msg:bytes?       The rest of the message
-        @param   msglen:int       The length of the partial message
+        @param   msglen:int       The length of the partial message in whole bytes
+        @param   bits:int         The number of bits at the end of the message not covered by `msglen`
+        @param   suffix:str       The suffix concatenate to the message
         @param   withReturn:bool  Whether to return the hash instead of just do a quick squeeze phrase and return `None`
         @return  :bytes?          The hash sum, or `None` if `withReturn` is `False`
         '''
-        if (msg is not None) and isinstance(msg, bool):
-            (msg, withReturn) = (withReturn, msg)
-        elif (msglen is not None) and isinstance(msglen, bool):
-            (msglen, withReturn) = (withReturn, msglen)
         if msg is None:
-            msg = []
-        elif msglen is not None:
-            msg = msg[:msglen]
-        message = self.pad10star1(self.M + msg, self.r)
+            msg, last_byte = [], 0
+            bits = 0
+        else:
+            msg, last_byte = msg[:msglen + bits // 8], (0 if bits % 8 == 0 else msg[msglen])
+            bits %= 8
+            last_byte &= (1 << bits) - 1
+        msg_end = []
+        for bit in suffix:
+            last_byte |= int(bit) << bits
+            bits += 1
+            if bits == 8:
+                msg_end.append(last_byte)
+                last_byte = 0
+                bits = 0
+        if not bits == 0:
+            msg_end.append(last_byte)
+        msg += msg_end
+        message = self.pad10star1(self.M + msg, self.r, bits)
         self.M = None
         nnn = len(message)
         

@@ -317,7 +317,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                                 b =  (b & 15) + (0 if b <= '9' else 0)
                                 chunk[_] = a | b
                             sha.update(chunk, n)
-                    bs = sha.digest(j == 1)
+                    bs = sha.digest(withReturn = j == 1)
                     if j > 2:
                         sha.fastSqueeze(j - 2)
                     if j > 1:
@@ -329,7 +329,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 if multi == 0:
                     for _ in range(i - 1):
                         sha.initialise(r, c, o)
-                        bs = sha.digest(bs, j == 1)
+                        bs = sha.digest(bs, withReturn = j == 1)
                         if j > 2:
                             sha.fastSqueeze(j - 2)
                         if j > 1:
@@ -390,7 +390,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                         printerr('\033[01;31mLoop found\033[00m')
                 flush()
             except Exception as err:
-                printerr(cmd + ': connot read file: ' + fn + ': ' + str(err))
+                printerr(cmd + ': cannot read file: ' + fn + ': ' + str(err))
                 fail = True
         flush()
     if fail:

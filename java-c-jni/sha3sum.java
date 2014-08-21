@@ -355,9 +355,9 @@ public class sha3sum
 			else
 			{
 			    int n = read >> 1;
-			    for (int _ = 0; _ < n; _++)
-			    {	byte a = chunk[_ << 1], b = chunk[(_ << 1) | 1];
-				chunk[_] = (byte)((((a & 15) + (a <= '9' ? 0 : 9)) << 4) | ((b & 15) + (b <= '9' ? 0 : 9)));
+			    for (int k = 0; k < n; k++)
+			    {	byte a = chunk[k << 1], b = chunk[(k << 1) | 1];
+				chunk[k] = (byte)((((a & 15) + (a <= '9' ? 0 : 9)) << 4) | ((b & 15) + (b <= '9' ? 0 : 9)));
 			    }
 			    SHA3.update(chunk, n);
 			}
@@ -374,7 +374,7 @@ public class sha3sum
 		    bs = stdin;
 		if (multi == 0)
 		{
-		    for (int _ = 1; _ < i; _++)
+		    for (int k = 1; k < i; k++)
 		    {
 			SHA3.initialise(r, c, o);
 			bs = SHA3.digest(bs, j == 1);
@@ -409,7 +409,7 @@ public class sha3sum
 			out[out.length - 1] = '\n';
 			System.out.write(out);
 		    }
-		    for (int _ = 1; _ < i; _++)
+		    for (int k = 1; k < i; k++)
 		    {
 			SHA3.initialise(r, c, o);
 			bs = SHA3.digest(bs, j == 1);
@@ -434,9 +434,9 @@ public class sha3sum
 		    HashSet<String> got = new HashSet<String>();
 		    String loop = null;
 		    byte[] out = new byte[(bs.length << 1)];
-		    for (int _ = 0; _ < i; _++)
+		    for (int k = 0; k < i; k++)
 		    {
-			if (_ > 0)
+			if (k > 0)
 			{   SHA3.initialise(r, c, o);
 			    bs = SHA3.digest(bs, j == 1);
 			    if (j > 2)

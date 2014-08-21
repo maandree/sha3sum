@@ -18,6 +18,8 @@
  */
 #include "sha3.h"
 
+#include <string.h>
+
 
 #ifdef WITH_C99
   #define static_inline static inline
@@ -421,19 +423,22 @@ static_inline llong sha3_toLane64(byte* restrict_ message, long msglen, long rr,
  * @param   msg     The message to pad
  * @param   len     The length of the message
  * @param   r       The bitrate
+ * @param   bits    The number of bits in the end of the message that does not make a whole byte
  * @param   outlen  The length of the padded message (out parameter)
  * @return          The message padded
  */
-static_inline byte* sha3_pad10star1(byte* restrict_ msg, long len, long r, long* restrict_ outlen)
+static_inline byte* sha3_pad10star1(byte* restrict_ msg, long len, long r, long bits, long* restrict_ outlen)
 {
   byte* message;
+  byte b;
+  long i, ll, nbrf, nrf;
   
-  long nrf = (len <<= 3) >> 3;
-  long nbrf = len & 7;
-  long ll = len % r;
-  long i;
+  len = ((len - (bits + 7) / 8) << 3) + bits;
+  nrf = len >> 3;
+  nbrf = len & 7;
+  ll = len % r;
   
-  byte b = (byte)(nbrf == 0 ? 1 : ((msg[nrf] >> (8 - nbrf)) | (1 << nbrf)));
+  b = (byte)(nbrf == 0 ? 1 : (msg[nrf] | (1 << nbrf)));
   
   if ((r - 8 <= ll) && (ll <= r - 2))
     {
@@ -591,7 +596,7 @@ extern void sha3_update(byte* restrict_ msg, long msglen)
   long nnn;
   
   if (mptr + msglen > mlen)
-    #ifdef WITH_WIPE
+    #ifndef WITH_WIPE
     M = (byte*)realloc(M, mlen = (mlen + msglen) << 1);
     #else
     {
@@ -656,10 +661,12 @@ extern void sha3_update(byte* restrict_ msg, long msglen)
  * 
  * @param   msg         The rest of the message, may be {@code null}
  * @param   msglen      The length of the partial message
+ * @param   bits        The number of bits at the end of the message not covered by `msglen`
+ * @param   suffix      The suffix concatenate to the message
  * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
  * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
  */
-extern byte* sha3_digest(byte* restrict_ msg, long msglen, boolean withReturn)
+extern byte* sha3_digest(byte* restrict_ msg, long msglen, long bits, char* restrict_ suffix, boolean withReturn)
 {
   byte* message;
   byte* _msg;
@@ -669,28 +676,57 @@ extern byte* sha3_digest(byte* restrict_ msg, long msglen, boolean withReturn)
   long ww = w >> 3, ni;
   long i, j = 0, ptr = 0, _;
   long nnn;
+  long suffix_len = strlen(suffix);
   
-  if ((msg == null) || (msglen == 0))
-    message = sha3_pad10star1(M, mptr, r, &len);
-  else
+  if (msg == null)
+    msglen = bits = 0;
+  
+  msglen += bits >> 3;
+  if ((bits &= 7))
     {
-      if (mptr + msglen > mlen)
-        #ifdef WITH_WIPE
-	M = (byte*)realloc(M, mlen += msglen);
-        #else
+      msg[msglen] &= (1 << bits) - 1;
+      #ifndef WITH_WIPE
+      msg = (byte*)realloc(msg, msglen + ((suffix_len + bits + 7) >> 3));
+      #else
+      {
+	char* old_msg = msg;
+	msg = (byte*)malloc(msglen + ((suffix_len + bits + 7) >> 3));
+	memcpy(msg, old_msg, msglen + 1);
+	for (i = 0; i <= msglen; i++)
+	  *(old_msg + i) = 0;
+	free(old_msg);
+      }
+      #endif
+      for (i = 0; i < suffix_len; i++)
 	{
-	  long mlen_ = mlen;
-	  char* M_ = (byte*)malloc(mlen += msglen);
-	  sha3_arraycopy(M, 0, M_, 0, mlen_);
-	  for (i = 0; i < mlen_; i++)
-	    *(M + i) = 0;
-	  free(M);
-	  M = M_;
-	}
-        #endif
-      sha3_arraycopy(msg, 0, M, mptr, msglen);
-      message = sha3_pad10star1(M, mptr + msglen, r, &len);
+	  msg[msglen] |= (suffix[i] == '1') << bits;
+	  if (bits == 8)
+	    {
+	      bits = 0;
+	      msglen++;
+	    }
+        }
+      if (bits)
+	msglen++;
     }
+  
+  if (mptr + msglen > mlen)
+    #ifndef WITH_WIPE
+    M = (byte*)realloc(M, mlen += msglen);
+    #else
+    {
+      long mlen_ = mlen;
+      char* M_ = (byte*)malloc(mlen += msglen);
+      sha3_arraycopy(M, 0, M_, 0, mlen_);
+      for (i = 0; i < mlen_; i++)
+	*(M + i) = 0;
+      free(M);
+      M = M_;
+    }
+    #endif
+  sha3_arraycopy(msg, 0, M, mptr, msglen);
+  message = sha3_pad10star1(M, mptr + msglen, r, bits, &len);
+  
   #ifdef WITH_WIPE
   for (i = 0; i < mlen; i++)
     *(M + i) = 0;

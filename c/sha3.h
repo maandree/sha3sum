@@ -42,6 +42,26 @@
 #endif
 
 
+/**
+ * Suffix the message when calculating the Keccak hash sum
+ */
+#define KECCAK_SUFFIX  ""
+
+/**
+ * Suffix the message when calculating the SHA-3 hash sum
+ */
+#define SHA3_SUFFIX  "01"
+  
+/**
+ * Suffix the message when calculating the RawSHAKE hash sum
+ */
+#define RawSHAKE_SUFFIX  "11"
+  
+/**
+ * Suffix the message when calculating the SHAKE hash sum
+ */
+#define SHAKE_SUFFIX  "1111"
+
 
 /**
  * Initialise Keccak sponge
@@ -73,10 +93,12 @@ extern void sha3_update(byte* restrict_ msg, long msglen);
  * 
  * @param   msg         The rest of the message, may be {@code null}
  * @param   msglen      The length of the partial message
+ * @param   bits        The number of bits at the end of the message not covered by `msglen`
+ * @param   suffix      The suffix concatenate to the message
  * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
  * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
  */
-extern byte* sha3_digest(byte* restrict_ msg, long msglen, boolean withReturn);
+extern byte* sha3_digest(byte* restrict_ msg, long msglen, long bits, char* restrict_ suffix, boolean withReturn);
 
 
 /**

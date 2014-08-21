@@ -28,6 +28,28 @@ import java.util.*;
 public class SHA3
 {
     /**
+     * Suffix the message when calculating the Keccak hash sum
+     */
+    public static final String KECCAK_SUFFIX = "";
+    
+    /**
+     * Suffix the message when calculating the SHA-3 hash sum
+     */
+    public static final String SHA3_SUFFIX = "01";
+    
+    /**
+     * Suffix the message when calculating the RawSHAKE hash sum
+     */
+    public static final String RawSHAKE_SUFFIX = "11";
+    
+    /**
+     * Suffix the message when calculating the SHAKE hash sum
+     */
+    public static final String SHAKE_SUFFIX = "1111";
+    
+    
+    
+    /**
      * Hidden constructor
      */
     private SHA3()
@@ -91,19 +113,44 @@ public class SHA3
      */
     public static byte[] digest()
     {
-	return digest(null, 0, true);
+	return digest(null, 0, 0, SHA3.SHA3_SUFFIX, true);
     }
     
     
     /**
      * Squeeze the Keccak sponge
      * 
-     * @paran   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
+     * @param   suffix  The suffix concatenate to the message
+     * @return          The hash sum
+     */
+    public static byte[] digest(String suffix)
+    {
+	return digest(null, 0, 0, suffix, true);
+    }
+    
+    
+    /**
+     * Squeeze the Keccak sponge
+     * 
+     * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
      * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
      */
     public static byte[] digest(boolean withReturn)
     {
-	return digest(null, 0, withReturn);
+	return digest(null, 0, 0, SHA3.SHA3_SUFFIX, withReturn);
+    }
+    
+    
+    /**
+     * Squeeze the Keccak sponge
+     * 
+     * @param   suffix      The suffix concatenate to the message
+     * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
+     * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
+     */
+    public static byte[] digest(String suffix, boolean withReturn)
+    {
+	return digest(null, 0, 0, suffix, withReturn);
     }
     
     
@@ -115,20 +162,7 @@ public class SHA3
      */
     public static byte[] digest(byte[] msg)
     {
-	return digest(msg, msg == null ? 0 : msg.length, true);
-    }
-    
-    
-    /**
-     * Absorb the last part of the message and squeeze the Keccak sponge
-     * 
-     * @param   msg         The rest of the message
-     * @paran   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
-     * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
-     */
-    public static byte[] digest(byte[] msg, boolean withReturn)
-    {
-	return digest(msg, msg == null ? 0 : msg.length, withReturn);
+	return digest(msg, msg == null ? 0 : msg.length, 0, SHA3.SHA3_SUFFIX, true);
     }
     
     
@@ -136,12 +170,139 @@ public class SHA3
      * Absorb the last part of the message and squeeze the Keccak sponge
      * 
      * @param   msg     The rest of the message
-     * @param   msglen  The length of the partial message
+     * @param   suffix  The suffix concatenate to the message
+     * @return          The hash sum
+     */
+    public static byte[] digest(byte[] msg, String suffix)
+    {
+	return digest(msg, msg == null ? 0 : msg.length, 0, suffix, true);
+    }
+    
+    
+    /**
+     * Absorb the last part of the message and squeeze the Keccak sponge
+     * 
+     * @param   msg         The rest of the message
+     * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
+     * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
+     */
+    public static byte[] digest(byte[] msg, boolean withReturn)
+    {
+	return digest(msg, msg == null ? 0 : msg.length, 0, SHA3.SHA3_SUFFIX, withReturn);
+    }
+    
+    
+    /**
+     * Absorb the last part of the message and squeeze the Keccak sponge
+     * 
+     * @param   msg         The rest of the message
+     * @param   suffix      The suffix concatenate to the message
+     * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
+     * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
+     */
+    public static byte[] digest(byte[] msg, String suffix, boolean withReturn)
+    {
+	return digest(msg, msg == null ? 0 : msg.length, 0, suffix, withReturn);
+    }
+    
+    
+    /**
+     * Absorb the last part of the message and squeeze the Keccak sponge
+     * 
+     * @param   msg     The rest of the message
+     * @param   msglen  The length of the partial message in while bytes
      * @return          The hash sum
      */
     public static byte[] digest(byte[] msg, int msglen)
     {
-	return digest(msg, msg == null ? 0 : msg.length, true);
+	return digest(msg, msg == null ? 0 : msg.length, 0, SHA3.SHA3_SUFFIX, true);
+    }
+    
+    
+    /**
+     * Absorb the last part of the message and squeeze the Keccak sponge
+     * 
+     * @param   msg     The rest of the message
+     * @param   msglen  The length of the partial message in while bytes
+     * @param   suffix  The suffix concatenate to the message
+     * @return          The hash sum
+     */
+    public static byte[] digest(byte[] msg, int msglen, String suffix)
+    {
+	return digest(msg, msg == null ? 0 : msg.length, 0, suffix, true);
+    }
+    
+    
+    /**
+     * Absorb the last part of the message and squeeze the Keccak sponge
+     * 
+     * @param   msg     The rest of the message
+     * @param   msglen  The length of the partial message in while bytes
+     * @param   bits    The number of bits at the end of the message not covered by <tt>msglen</tt>
+     * @return          The hash sum
+     */
+    public static byte[] digest(byte[] msg, int msglen, int bits)
+    {
+	return digest(msg, msg == null ? 0 : msg.length, bits, SHA3.SHA3_SUFFIX, true);
+    }
+    
+    
+    /**
+     * Absorb the last part of the message and squeeze the Keccak sponge
+     * 
+     * @param   msg     The rest of the message
+     * @param   msglen  The length of the partial message in while bytes
+     * @param   bits    The number of bits at the end of the message not covered by <tt>msglen</tt>
+     * @param   suffix  The suffix concatenate to the message
+     * @return          The hash sum
+     */
+    public static byte[] digest(byte[] msg, int msglen, int bits, String suffix)
+    {
+	return digest(msg, msg == null ? 0 : msg.length, bits, suffix, true);
+    }
+    
+    
+    /**
+     * Absorb the last part of the message and squeeze the Keccak sponge
+     * 
+     * @param   msg         The rest of the message
+     * @param   msglen      The length of the partial message in while bytes
+     * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
+     * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
+     */
+    public static byte[] digest(byte[] msg, int msglen, boolean withReturn)
+    {
+	return digest(msg, msg == null ? 0 : msg.length, 0, SHA3.SHA3_SUFFIX, withReturn);
+    }
+    
+    
+    /**
+     * Absorb the last part of the message and squeeze the Keccak sponge
+     * 
+     * @param   msg         The rest of the message
+     * @param   msglen      The length of the partial message in while bytes
+     * @param   suffix      The suffix concatenate to the message
+     * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
+     * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
+     */
+    public static byte[] digest(byte[] msg, int msglen, String suffix, boolean withReturn)
+    {
+	return digest(msg, msg == null ? 0 : msg.length, 0, suffix, withReturn);
+    }
+    
+    
+    /**
+     * Absorb the last part of the message and squeeze the Keccak sponge
+     * 
+     * @param   msg         The rest of the message
+     * @param   msglen      The length of the partial message in while bytes
+     * @param   bits        The number of bits at the end of the message not covered by <tt>msglen</tt>
+     * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
+     * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
+     */
+    public static byte[] digest(byte[] msg, int msglen, int bits, boolean withReturn)
+    {
+	return digest(msg, msg == null ? 0 : msg.length, 0, SHA3.SHA3_SUFFIX, withReturn);
     }
     
     
@@ -150,10 +311,32 @@ public class SHA3
      * 
      * @param   msg         The rest of the message
      * @param   msglen      The length of the partial message
+     * @param   bits        The number of bits at the end of the message not covered by <tt>msglen</tt>
+     * @param   suffix      The suffix concatenate to the message
      * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
      * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
      */
-    public static native byte[] digest(byte[] msg, int msglen, boolean withReturn);
+    public static byte[] digest(byte[] msg, int msglen, int bits, String suffix, boolean withReturn)
+    {
+	int[] suffix_ = new int[suffix.length()];
+	for (int i = 0, n = suffix_.length; i < n; i++)
+	    suffix_[i] = suffix.charAt(i) == '1' ? 1 : 0;
+	
+	return digest(msg, msglen, bits, suffix_, withReturn);
+    }
+    
+    
+    /**
+     * Absorb the last part of the message and squeeze the Keccak sponge
+     * 
+     * @param   msg         The rest of the message
+     * @param   msglen      The length of the partial message
+     * @param   bits        The number of bits at the end of the message not covered by <tt>msglen</tt>
+     * @param   suffix      The suffix concatenate to the message
+     * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
+     * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
+     */
+    public static native byte[] digest(byte[] msg, int msglen, int bits, int[] suffix, boolean withReturn);
     
     
     /**

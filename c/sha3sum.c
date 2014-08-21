@@ -61,7 +61,7 @@ SET set_new()
  * 
  * @param  set  The set
  */
-void set_free(SET restrict set)
+void set_free(SET restrict_ set)
 {
   if (*(set +  0))  set_free((void**)*(set +  0));
   if (*(set +  1))  set_free((void**)*(set +  1));
@@ -90,7 +90,7 @@ void set_free(SET restrict set)
  * @param  item  The item
  * @param  n     The length of the item
  */
-void set_add(SET restrict set, char* restrict item, long n)
+void set_add(SET restrict_ set, char* restrict_ item, long n)
 {
   long i, j;
   void** at = set;
@@ -125,7 +125,7 @@ void set_add(SET restrict set, char* restrict item, long n)
  * @param   n     The length of the item
  * @return        Whether the set contains the item
  */
-long set_contains(SET restrict set, byte* restrict item, long n)
+long set_contains(SET restrict_ set, byte* restrict_ item, long n)
 {
   long i;
   void** at = set;
@@ -152,7 +152,7 @@ long set_contains(SET restrict set, byte* restrict item, long n)
  * @param   b  Second comparand
  * @return     Whether the comparands are equal
  */
-long eq(char* restrict a, char* restrict b)
+long eq(char* restrict_ a, char* restrict_ b)
 {
   while (*a)
     if (*a++ != *b++)
@@ -167,7 +167,7 @@ long eq(char* restrict a, char* restrict b)
  * @param   str  String representation
  * @return       Native representation
  */
-long parseInt(char* restrict str)
+long parseInt(char* restrict_ str)
 {
   long rc = 0;
   while (*str)
@@ -604,7 +604,7 @@ int main(int argc, char** argv)
 		    sha3_update(chunk, n);
 		  }
 	      }
-	    bs = sha3_digest(null, 0, j == 1);
+	    bs = sha3_digest(null, 0, 0, SHA3_SUFFIX, j == 1);
 	    if (j > 2)
 	      sha3_fastSqueeze(j - 2);
 	    if (j > 1)
@@ -627,7 +627,7 @@ int main(int argc, char** argv)
 	      {
 		byte* _bs = bs;
 		sha3_initialise(r, c, o);
-		bs = sha3_digest(bs, bn, j == 1);
+		bs = sha3_digest(bs, bn, 0, SHA3_SUFFIX, j == 1);
 		if (j > 2)
 		  sha3_fastSqueeze(j - 2);
 		if (j > 1)
@@ -670,7 +670,7 @@ int main(int argc, char** argv)
 	      {
 		byte* _bs = bs;
 		sha3_initialise(r, c, o);
-		bs = sha3_digest(bs, bn, j == 1);
+		bs = sha3_digest(bs, bn, 0, SHA3_SUFFIX, j == 1);
 		if (j > 2)
 		  sha3_fastSqueeze(j - 2);
 		if (j > 1)
@@ -704,7 +704,7 @@ int main(int argc, char** argv)
 		  {
 		    byte* _bs = bs;
 		    sha3_initialise(r, c, o);
-		    bs = sha3_digest(bs, bn, j == 1);
+		    bs = sha3_digest(bs, bn, 0, SHA3_SUFFIX, j == 1);
 		    if (j > 2)
 		      sha3_fastSqueeze(j - 2);
 		    if (j > 1)

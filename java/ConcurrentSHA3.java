@@ -26,6 +26,27 @@
 public class ConcurrentSHA3
 {
     /**
+     * Suffix the message when calculating the Keccak hash sum
+     */
+    public static final String KECCAK_SUFFIX = "";
+    
+    /**
+     * Suffix the message when calculating the SHA-3 hash sum
+     */
+    public static final String SHA3_SUFFIX = "01";
+    
+    /**
+     * Suffix the message when calculating the RawSHAKE hash sum
+     */
+    public static final String RawSHAKE_SUFFIX = "11";
+    
+    /**
+     * Suffix the message when calculating the SHAKE hash sum
+     */
+    public static final String SHAKE_SUFFIX = "1111";
+    
+    
+    /**
      * Round contants
      */
     private static final long[] RC = {
@@ -323,18 +344,21 @@ public class ConcurrentSHA3
     /**
      * pad 10*1
      * 
-     * @param   msg  The message to pad
-     * @param   len  The length of the message
-     * @param   r    The bitrate
-     * @return       The actual length of {@link #message}
+     * @param   msg   The message to pad
+     * @param   len   The length of the message
+     * @param   r     The bitrate
+     * @param   bits  The number of bits in the end of the message that does not make a whole byte
+     * @return        The actual length of {@link #message}
      */
-    private int pad10star1(byte[] msg, int len, int r)
+    private int pad10star1(byte[] msg, int len, int r, int bits)
     {
-        int nrf = (len <<= 3) >> 3;
+	len = ((len - (bits + 7) / 8) << 3) + bits;
+	
+        int nrf = len >> 3;
         int nbrf = len & 7;
         int ll = len % r;
         
-        byte b = (byte)(nbrf == 0 ? 1 : ((msg[nrf] >> (8 - nbrf)) | (1 << nbrf)));
+        byte b = (byte)(nbrf == 0 ? 1 : (msg[nrf] | (1 << nbrf)));
         
         if ((r - 8 <= ll) && (ll <= r - 2))
 	{
@@ -485,7 +509,19 @@ public class ConcurrentSHA3
      */
     public byte[] digest()
     {
-	return this.digest(null, 0, true);
+	return digest(null, 0, 0, SHA3.SHA3_SUFFIX, true);
+    }
+    
+    
+    /**
+     * Squeeze the Keccak sponge
+     * 
+     * @param   suffix  The suffix concatenate to the message
+     * @return          The hash sum
+     */
+    public byte[] digest(String suffix)
+    {
+	return digest(null, 0, 0, suffix, true);
     }
     
     
@@ -497,7 +533,20 @@ public class ConcurrentSHA3
      */
     public byte[] digest(boolean withReturn)
     {
-	return this.digest(null, 0, withReturn);
+	return digest(null, 0, 0, SHA3.SHA3_SUFFIX, withReturn);
+    }
+    
+    
+    /**
+     * Squeeze the Keccak sponge
+     * 
+     * @param   suffix      The suffix concatenate to the message
+     * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
+     * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
+     */
+    public byte[] digest(String suffix, boolean withReturn)
+    {
+	return digest(null, 0, 0, suffix, withReturn);
     }
     
     
@@ -509,7 +558,20 @@ public class ConcurrentSHA3
      */
     public byte[] digest(byte[] msg)
     {
-	return this.digest(msg, msg == null ? 0 : msg.length, true);
+	return digest(msg, msg == null ? 0 : msg.length, 0, SHA3.SHA3_SUFFIX, true);
+    }
+    
+    
+    /**
+     * Absorb the last part of the message and squeeze the Keccak sponge
+     * 
+     * @param   msg     The rest of the message
+     * @param   suffix  The suffix concatenate to the message
+     * @return          The hash sum
+     */
+    public byte[] digest(byte[] msg, String suffix)
+    {
+	return digest(msg, msg == null ? 0 : msg.length, 0, suffix, true);
     }
     
     
@@ -522,7 +584,21 @@ public class ConcurrentSHA3
      */
     public byte[] digest(byte[] msg, boolean withReturn)
     {
-	return this.digest(msg, msg == null ? 0 : msg.length, withReturn);
+	return digest(msg, msg == null ? 0 : msg.length, 0, SHA3.SHA3_SUFFIX, withReturn);
+    }
+    
+    
+    /**
+     * Absorb the last part of the message and squeeze the Keccak sponge
+     * 
+     * @param   msg         The rest of the message
+     * @param   suffix      The suffix concatenate to the message
+     * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
+     * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
+     */
+    public byte[] digest(byte[] msg, String suffix, boolean withReturn)
+    {
+	return digest(msg, msg == null ? 0 : msg.length, 0, suffix, withReturn);
     }
     
     
@@ -530,12 +606,99 @@ public class ConcurrentSHA3
      * Absorb the last part of the message and squeeze the Keccak sponge
      * 
      * @param   msg     The rest of the message
-     * @param   msglen  The length of the partial message
+     * @param   msglen  The length of the partial message in while bytes
      * @return          The hash sum
      */
     public byte[] digest(byte[] msg, int msglen)
     {
-	return this.digest(msg, msg == null ? 0 : msg.length, true);
+	return digest(msg, msg == null ? 0 : msg.length, 0, SHA3.SHA3_SUFFIX, true);
+    }
+    
+    
+    /**
+     * Absorb the last part of the message and squeeze the Keccak sponge
+     * 
+     * @param   msg     The rest of the message
+     * @param   msglen  The length of the partial message in while bytes
+     * @param   suffix  The suffix concatenate to the message
+     * @return          The hash sum
+     */
+    public byte[] digest(byte[] msg, int msglen, String suffix)
+    {
+	return digest(msg, msg == null ? 0 : msg.length, 0, suffix, true);
+    }
+    
+    
+    /**
+     * Absorb the last part of the message and squeeze the Keccak sponge
+     * 
+     * @param   msg     The rest of the message
+     * @param   msglen  The length of the partial message in while bytes
+     * @param   bits    The number of bits at the end of the message not covered by <tt>msglen</tt>
+     * @return          The hash sum
+     */
+    public byte[] digest(byte[] msg, int msglen, int bits)
+    {
+	return digest(msg, msg == null ? 0 : msg.length, bits, SHA3.SHA3_SUFFIX, true);
+    }
+    
+    
+    /**
+     * Absorb the last part of the message and squeeze the Keccak sponge
+     * 
+     * @param   msg     The rest of the message
+     * @param   msglen  The length of the partial message in while bytes
+     * @param   bits    The number of bits at the end of the message not covered by <tt>msglen</tt>
+     * @param   suffix  The suffix concatenate to the message
+     * @return          The hash sum
+     */
+    public byte[] digest(byte[] msg, int msglen, int bits, String suffix)
+    {
+	return digest(msg, msg == null ? 0 : msg.length, bits, suffix, true);
+    }
+    
+    
+    /**
+     * Absorb the last part of the message and squeeze the Keccak sponge
+     * 
+     * @param   msg         The rest of the message
+     * @param   msglen      The length of the partial message in while bytes
+     * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
+     * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
+     */
+    public byte[] digest(byte[] msg, int msglen, boolean withReturn)
+    {
+	return digest(msg, msg == null ? 0 : msg.length, 0, SHA3.SHA3_SUFFIX, withReturn);
+    }
+    
+    
+    /**
+     * Absorb the last part of the message and squeeze the Keccak sponge
+     * 
+     * @param   msg         The rest of the message
+     * @param   msglen      The length of the partial message in while bytes
+     * @param   suffix      The suffix concatenate to the message
+     * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
+     * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
+     */
+    public byte[] digest(byte[] msg, int msglen, String suffix, boolean withReturn)
+    {
+	return digest(msg, msg == null ? 0 : msg.length, 0, suffix, withReturn);
+    }
+    
+    
+    /**
+     * Absorb the last part of the message and squeeze the Keccak sponge
+     * 
+     * @param   msg         The rest of the message
+     * @param   msglen      The length of the partial message in while bytes
+     * @param   bits        The number of bits at the end of the message not covered by <tt>msglen</tt>
+     * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
+     * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
+     */
+    public byte[] digest(byte[] msg, int msglen, int bits, boolean withReturn)
+    {
+	return digest(msg, msg == null ? 0 : msg.length, 0, SHA3.SHA3_SUFFIX, withReturn);
     }
     
     
@@ -544,21 +707,52 @@ public class ConcurrentSHA3
      * 
      * @param   msg         The rest of the message
      * @param   msglen      The length of the partial message
+     * @param   bits        The number of bits at the end of the message not covered by <tt>msglen</tt>
+     * @param   suffix      The suffix concatenate to the message
      * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
      * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
      */
-    public byte[] digest(byte[] msg, int msglen, boolean withReturn)
+    public byte[] digest(byte[] msg, int msglen, int bits, String suffix, boolean withReturn)
     {
 	int len;
+	byte last_byte = 0;
         if ((msg == null) || (msglen == 0))
-            len = this.pad10star1(this.M, this.mptr, this.r);
-	else
 	{
-	    if (this.mptr + msglen > this.M.length)
-		System.arraycopy(this.M, 0, this.M = new byte[this.M.length + msglen], 0, this.mptr);
-	    System.arraycopy(msg, 0, this.M, this.mptr, msglen);
-	    len = this.pad10star1(this.M, this.mptr + msglen, this.r);
+	    msg = new byte[0];
+	    bits = 0;
 	}
+	
+	msglen += bits / 8;
+	if ((bits %= 8) != 0)
+	    last_byte = msg[msglen];
+	
+	byte[] msg_end = new byte[(suffix.length() + bits + 7) / 8];
+	int msg_end_ptr = 0;
+	for (int i = 0, n = suffix.length(); i < n; i++)
+	{
+	    byte bit = (byte)(suffix.charAt(i) - '0');
+	    last_byte |= bit << bits++;
+	    if (bits == 8)
+	    {
+		msg_end[msg_end_ptr++] = last_byte;
+		last_byte = 0;
+		bits = 0;
+	    }
+	}
+	if (bits != 0)
+	    msg_end[msg_end_ptr++] = last_byte;
+	if (msg_end_ptr > 0)
+	{
+	    if (msglen + msg_end_ptr > msg.length)
+		System.arraycopy(msg, 0, msg = new byte[msglen + msg_end_ptr], 0, msglen);
+	    System.arraycopy(msg_end, 0, msg, msglen, msg_end_ptr);
+	    msglen += msg_end_ptr;
+	}
+	
+	if (this.mptr + msglen > this.M.length)
+	    System.arraycopy(this.M, 0, this.M = new byte[this.M.length + msglen], 0, this.mptr);
+	System.arraycopy(msg, 0, this.M, this.mptr, msglen);
+	len = this.pad10star1(this.M, this.mptr + msglen, this.r, bits);
         
         int rr = this.r >> 3;
         int nn = (this.n + 7) >> 3;
@@ -645,7 +839,7 @@ public class ConcurrentSHA3
 		while ((i < ni) && (j < nn))
 		{
 		    long v = this.S[(i % 5) * 5 + i / 5];
-		    for (int _ = 0; _ < ww; _++)
+		    for (int k = 0; k < ww; k++)
 		    {
 			if (j < nn)
 			{
@@ -744,7 +938,7 @@ public class ConcurrentSHA3
 	    while ((i < ni) && (j < nn))
 	    {
 		long v = this.S[(i % 5) * 5 + i / 5];
-		for (int _ = 0; _ < ww; _++)
+		for (int k = 0; k < ww; k++)
 		{
                     if (j < nn)
 		    {
