@@ -7,8 +7,8 @@
 # 
 # [GNU All Permissive License]
 
-# NB!  Do not forget to test against -O0, -O4 to -O6 is not safe
-C_OPTIMISE=-O6
+# NB!  Do not forget to test against -O0, -O4 to -O6 and -Ofast is not safe
+C_OPTIMISE=-Ofast
 JAVA_OPTIMISE=-O
 
 LIB_EXT=so

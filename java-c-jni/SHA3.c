@@ -645,21 +645,25 @@ byte* digest(byte* msg, long msglen, long bits, int* suffix, long suffix_len, bo
   
   msglen += bits >> 3;
   if ((bits &= 7))
-    {
       msg[msglen] &= (1 << bits) - 1;
+  if (suffix_len)
+    {
       msg = (byte*)realloc(msg, msglen + ((suffix_len + bits + 7) >> 3));
+      if (!bits)
+	msg[msglen] = 0;
       for (i = 0; i < suffix_len; i++)
 	{
-	  msg[msglen] |= suffix[i] << bits;
+	  msg[msglen] |= suffix[i] << bits++;
 	  if (bits == 8)
 	    {
 	      bits = 0;
 	      msglen++;
+	      msg[msglen] = 0;
 	    }
         }
-      if (bits)
-	msglen++;
     }
+  if (bits)
+    msglen++;
   
   if (mptr + msglen > mlen)
     {

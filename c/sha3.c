@@ -525,7 +525,7 @@ static_inline byte* sha3_pad10star1(byte* restrict_ msg, long len, long r, long 
  * @param  capacity  The capacity
  * @param  output    The output size
  */
-extern void sha3_initialise(long bitrate, long capacity, long output)
+void sha3_initialise(long bitrate, long capacity, long output)
 {
   long i;
   
@@ -555,7 +555,7 @@ extern void sha3_initialise(long bitrate, long capacity, long output)
 /**
  * Dispose of the Keccak sponge
  */
-extern void sha3_dispose()
+void sha3_dispose()
 {
   #ifdef WITH_WIPE
   long i;
@@ -586,7 +586,7 @@ extern void sha3_dispose()
  * @param  msg     The partial message
  * @param  msglen  The length of the partial message
  */
-extern void sha3_update(byte* restrict_ msg, long msglen)
+void sha3_update(byte* restrict_ msg, long msglen)
 {
   long rr = r >> 3;
   long ww = w >> 3;
@@ -666,7 +666,7 @@ extern void sha3_update(byte* restrict_ msg, long msglen)
  * @param   withReturn  Whether to return the hash instead of just do a quick squeeze phrase and return {@code null}
  * @return              The hash sum, or {@code null} if <tt>withReturn</tt> is {@code false}
  */
-extern byte* sha3_digest(byte* restrict_ msg, long msglen, long bits, char* restrict_ suffix, boolean withReturn)
+byte* sha3_digest(byte* restrict_ msg, long msglen, long bits, char* restrict_ suffix, boolean withReturn)
 {
   byte* message;
   byte* _msg;
@@ -683,32 +683,36 @@ extern byte* sha3_digest(byte* restrict_ msg, long msglen, long bits, char* rest
   
   msglen += bits >> 3;
   if ((bits &= 7))
+    msg[msglen] &= (1 << bits) - 1;
+  if (suffix_len)
     {
-      msg[msglen] &= (1 << bits) - 1;
       #ifndef WITH_WIPE
       msg = (byte*)realloc(msg, msglen + ((suffix_len + bits + 7) >> 3));
       #else
       {
 	char* old_msg = msg;
 	msg = (byte*)malloc(msglen + ((suffix_len + bits + 7) >> 3));
-	memcpy(msg, old_msg, msglen + 1);
-	for (i = 0; i <= msglen; i++)
+	memcpy(msg, old_msg, msglen + !!bits);
+	for (i = 0; i < msglen + !!bits; i++)
 	  *(old_msg + i) = 0;
 	free(old_msg);
       }
       #endif
+      if (!bits)
+	msg[msglen] = 0;
       for (i = 0; i < suffix_len; i++)
 	{
-	  msg[msglen] |= (suffix[i] == '1') << bits;
+	  msg[msglen] |= (suffix[i] - '0') << bits++;
 	  if (bits == 8)
 	    {
 	      bits = 0;
 	      msglen++;
+	      msg[msglen] = 0;
 	    }
         }
-      if (bits)
-	msglen++;
     }
+  if (bits)
+    msglen++;
   
   if (mptr + msglen > mlen)
     #ifndef WITH_WIPE
@@ -813,7 +817,7 @@ extern byte* sha3_digest(byte* restrict_ msg, long msglen, long bits, char* rest
  * 
  * @param  times  The number of rounds
  */
-extern void sha3_simpleSqueeze(long times)
+void sha3_simpleSqueeze(long times)
 {
   long i;
   for (i = 0; i < times; i++)
@@ -826,7 +830,7 @@ extern void sha3_simpleSqueeze(long times)
  * 
  * @param  times  The number of digests
  */
-extern void sha3_fastSqueeze(long times)
+void sha3_fastSqueeze(long times)
 {
   long i, olen;
   for (i = 0; i < times; i++)
@@ -844,7 +848,7 @@ extern void sha3_fastSqueeze(long times)
  * 
  * @return  The hash sum
  */
-extern byte* sha3_squeeze(void)
+byte* sha3_squeeze(void)
 {
   long nn, ww, olen, i, j, ptr, ni;
   byte* rc;
@@ -888,7 +892,7 @@ extern byte* sha3_squeeze(void)
  * 
  * @return  A 25-element array with the state, changes will be applied to the sponge
  */
-extern llong* sha3_state(void)
+llong* sha3_state(void)
 {
   return S;
 }
