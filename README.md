@@ -5,7 +5,6 @@ COMPLETE STATUS:
     Python 2       :: optimised for Python 3
     C ISO C90      :: optimised
     Java/C JNI     :: optimised
-    Vala           :: under development
     NASM           :: planned (maybe)
     Python 3 + C   :: planned (maybe)
     Haskell        :: planned (maybe)
@@ -14,6 +13,7 @@ COMPLETE STATUS:
     Common Lisp    :: planned (perhaps)
     Scala          :: planned (perhaps)
     Magic          :: planned (perhaps)
+    Vala           :: maybe in the future
 
 
 PERFORMANCE COMPARISON:
