@@ -475,13 +475,13 @@ int main(int argc, char** argv)
 	}
     }
   
-  if ((_R & _C & _O) == null) /* s? */
+  if ((_R | _C | _O) == null) /* s? */
     {
       s = _S ? s : _s;
       c = -((r = (o = (((s << 5) / 100 + 7) >> 3) << 3) << 1) - s);
       o = o < 8 ? 8 : o;
     }
-  else if ((_R & _C) == null) /* !o s? */
+  else if ((_R | _C) == null) /* !o s? */
     {
       r = _r;
       c = _c;
