@@ -850,7 +850,7 @@ void sha3_fastSqueeze(long times)
  */
 byte* sha3_squeeze(void)
 {
-  long nn, ww, olen, i, j, ptr, ni;
+  long nn, ww, olen, i, j, _, ptr, ni;
   byte* rc;
   
   sha3_keccakF(S); /* Last squeeze did not do a ending squeeze */
@@ -866,7 +866,7 @@ byte* sha3_squeeze(void)
       i = 0;
       while ((i < ni) && (j < nn))
 	{
-	  long _, v = S[(i % 5) * 5 + i / 5];
+	  llong v = S[(i % 5) * 5 + i / 5];
 	  for (_ = 0; _ < ww; _++)
 	    {
 	      if (j < nn)
