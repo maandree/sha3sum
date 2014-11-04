@@ -602,7 +602,7 @@ void update(byte* msg, long msglen)
   else
     for (i = 0; i < nnn; i += rr)
       {
-	#define __S(Si, OFF)  S[Si] ^= toLane(message, len, rr, ww, OFF * w)
+	#define __S(Si, OFF)  S[Si] ^= toLane(message, len, rr, ww, OFF * ww)
 	__S( 0,  0);  __S( 5,  1);  __S(10,  2);  __S(15,  3);  __S(20,  4);
 	__S( 1,  5);  __S( 6,  6);  __S(11,  7);  __S(16,  8);  __S(21,  9);
 	__S( 2, 10);  __S( 7, 11);  __S(12, 12);  __S(17, 13);  __S(22, 14);
@@ -699,7 +699,7 @@ byte* digest(byte* msg, long msglen, long bits, int* suffix, long suffix_len, bo
   else
     for (i = 0; i < nnn; i += rr)
       {
-	#define __S(Si, OFF)  S[Si] ^= toLane(message, len, rr, ww, OFF * w)
+	#define __S(Si, OFF)  S[Si] ^= toLane(message, len, rr, ww, OFF * ww)
 	__S( 0,  0);  __S( 5,  1);  __S(10,  2);  __S(15,  3);  __S(20,  4);
 	__S( 1,  5);  __S( 6,  6);  __S(11,  7);  __S(16,  8);  __S(21,  9);
 	__S( 2, 10);  __S( 7, 11);  __S(12, 12);  __S(17, 13);  __S(22, 14);
