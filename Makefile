@@ -7,7 +7,7 @@
 # 
 # [GNU All Permissive License]
 
-# NB!  Do not forget to test against -O0, -O4 to -O6 and -Ofast is not safe
+# NB!  Do not forget to test against -O0, -O4 to -O6 (ignored in GCC) and -Ofast is not safe
 C_OPTIMISE=-Ofast
 JAVA_OPTIMISE=-O
 
@@ -21,7 +21,7 @@ JAVAFLAGS=-Xlint $(JAVA_OPTIMISE)
 JAVA_FLAGS=$(JAVADIRS) $(JAVAFLAGS)
 
 WITH_WIPE=yes
-CFLAGS=-W{all,extra} -pedantic $(C_OPTIMISE) -fPIC
+CFLAGS=-Wall -Wextra -pedantic $(C_OPTIMISE) -fPIC
 ifeq ($(WITH_C99),yes)
   CFLAGS+=-std=c99 -DWITH_C99
 endif
@@ -31,7 +31,7 @@ endif
 ifeq ($(WITH_WIPE),yes)
   CFLAGS+=-DWITH_WIPE
 endif
-SOFLAGS=-W{all,extra} -pedantic $(C_OPTIMISE) -shared
+SOFLAGS=-Wall -Wextra -pedantic $(C_OPTIMISE) -shared
 CPPFLAGS=
 LDFLAGS=
 C_FLAGS=$(CFLAGS) $(CPPFLAGS) $(LDFLAGS)
@@ -99,8 +99,6 @@ bin/java-c-jni/sha3.jar: bin/java-c-jni/SHA3.class
 
 .PHONY: clean
 clean:
-	-rm {*/,}*.{t2d,aux,cp,cps,fn,ky,log,pg,pgs,toc,tp,vr,vrs,op,ops} 2>/dev/null
-	-rm {*/,}*.{bak,info,pdf,ps,dvi,gz,class,jar,pyc,pyo,o,so,out,gch} 2>/dev/null
-	-rm java-c-jni/*.h 2>/dev/null
-	-rm -r bin 2>/dev/null
+	-rm java-c-jni/*.h
+	-rm -r bin obj
 
