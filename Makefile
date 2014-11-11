@@ -11,6 +11,9 @@
 C_OPTIMISE=-Ofast
 JAVA_OPTIMISE=-O
 
+# Set shell so that shell expansion works
+SHELL=/bin/bash
+
 LIB_EXT=so
 
 JAVAC=javac
