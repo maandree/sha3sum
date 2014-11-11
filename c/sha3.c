@@ -290,14 +290,14 @@ static void sha3_keccakFRound(llong* restrict_ A, llong rc)
   __C(4,  20, 21, 22, 23, 24);
   #undef __C
   
-  da = C[4] ^ rotate64(C[1], 1);
-  dd = C[2] ^ rotate64(C[4], 1);
-  db = C[0] ^ rotate64(C[2], 1);
-  de = C[3] ^ rotate64(C[0], 1);
-  dc = C[1] ^ rotate64(C[3], 1);
-  
   if (w == 64)
     {
+      da = C[4] ^ rotate64(C[1], 1);
+      dd = C[2] ^ rotate64(C[4], 1);
+      db = C[0] ^ rotate64(C[2], 1);
+      de = C[3] ^ rotate64(C[0], 1);
+      dc = C[1] ^ rotate64(C[3], 1);
+      
       /* ρ and π steps, with last two part of θ */
       #define __B(Bi, Ai, Dv, R)  B[Bi] = rotate64(A[Ai] ^ Dv, R)
       B[0] = A[0] ^ da;     __B( 1, 15, dd, 28);  __B( 2,  5, db,  1);  __B( 3, 20, de, 27);  __B( 4, 10, dc, 62);
@@ -309,6 +309,12 @@ static void sha3_keccakFRound(llong* restrict_ A, llong rc)
     }
   else
     {
+      da = C[4] ^ rotate(C[1], 1);
+      dd = C[2] ^ rotate(C[4], 1);
+      db = C[0] ^ rotate(C[2], 1);
+      de = C[3] ^ rotate(C[0], 1);
+      dc = C[1] ^ rotate(C[3], 1);
+      
       /* ρ and π steps, with last two part of θ */
       #define __B(Bi, Ai, Dv, R)  B[Bi] = rotate(A[Ai] ^ Dv, R)
       B[0] = A[0] ^ da;     __B( 1, 15, dd, 28);  __B( 2,  5, db,  1);  __B( 3, 20, de, 27);  __B( 4, 10, dc, 62);
