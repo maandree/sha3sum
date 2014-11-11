@@ -832,7 +832,7 @@ public class ConcurrentSHA3
 	    
 	    int olen = this.n;
 	    int j = 0;
-	    int ni = Math.min(25, rr);
+	    int ni = rr / ww;
 	    while (olen > 0)
 	    {
 		int i = 0;
@@ -931,7 +931,7 @@ public class ConcurrentSHA3
 	
         int olen = this.n;
         int j = 0, ptr = 0;
-        int ni = Math.min(25, this.r >> 3);
+        int ni = (this.r >> 3) / ww;
         while (olen > 0)
 	{
             int i = 0;

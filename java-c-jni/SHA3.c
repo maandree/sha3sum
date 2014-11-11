@@ -723,7 +723,7 @@ byte* digest(byte* msg, long msglen, long bits, int* suffix, long suffix_len, bo
   olen = n;
   if (withReturn)
     {
-      ni = min(25, rr);
+      ni = rr / ww;
       while (olen > 0)
 	{
 	  i = 0;
@@ -801,7 +801,7 @@ byte* squeeze()
   rc = (byte*)malloc(nn = (n + 7) >> 3);
   olen = n;
   j = ptr = 0;
-  ni = (25 < r >> 3) ? 25 : (r >> 3);
+  ni = (r >> 3) / ww;
   
   while (olen > 0)
     {

@@ -572,7 +572,7 @@ class SHA3:
             
             olen = self.n
             j = 0
-            ni = min(25, rr)
+            ni = rr // ww
             while olen > 0:
                 i = 0
                 while (i < ni) and (j < nn):
@@ -637,7 +637,7 @@ class SHA3:
         olen = self.n
         j = 0
         ptr = 0
-        ni = min(25, self.r >> 3)
+        ni = (self.r >> 3) // ww
         
         while olen > 0:
             i = 0

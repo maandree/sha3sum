@@ -838,7 +838,7 @@ public class SHA3
 	    
 	    int olen = SHA3.n;
 	    int j = 0;
-	    int ni = Math.min(25, rr);
+	    int ni = rr / ww;
 	    while (olen > 0)
 	    {
 		int i = 0;
@@ -937,7 +937,7 @@ public class SHA3
 	
         int olen = SHA3.n;
         int j = 0, ptr = 0;
-        int ni = Math.min(25, SHA3.r >> 3);
+        int ni = (SHA3.r >> 3) / ww;
         while (olen > 0)
 	{
             int i = 0;
