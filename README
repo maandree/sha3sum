@@ -1,0 +1,82 @@
+SHA-3 has note been standardised yet!
+
+---------------------------------------------------------------------
+
+Checksum utility for Keccak and its close
+derivatives SHA-3, SHAKE and RawSHAKE.
+
+---------------------------------------------------------------------
+
+Performance benchmark on a 1 GiB file (yes,
+that is quite large) with /dev/urandom data:
+
+$ keccak-224sum
+real	0m9.550s
+user	0m9.223s
+sys	0m0.320s
+
+$ keccak-256sum
+real	0m9.841s
+user	0m9.560s
+sys	0m0.260s
+
+$ keccak-384sum
+real	0m12.902s
+user	0m12.580s
+sys	0m0.313s
+
+$ keccak-512sum
+real	0m18.084s
+user	0m17.823s
+sys	0m0.243s
+
+$ keccaksum
+real	0m10.438s
+user	0m10.140s
+sys	0m0.287s
+
+$ sha1sum
+real	0m3.421s
+user	0m3.157s
+sys	0m0.253s
+
+$ sha224sum
+real	0m8.196s
+user	0m7.910s
+sys	0m0.263s
+
+$ sha256sum
+real	0m9.361s
+user	0m9.097s
+sys	0m0.257s
+
+$ sha384sum
+real	0m5.450s
+user	0m5.223s
+sys	0m0.220s
+
+$ sha512sum
+real	0m4.507s
+user	0m4.247s
+sys	0m0.257s
+
+$ md5sum
+real	0m2.987s
+user	0m2.703s
+sys	0m0.283s
+
+$ md6sum
+real	1m28.873s
+user	1m28.470s
+sys	0m0.360s
+
+
+Note:
+The times are a bit random, and only one run
+has been made. "user" is the most interesting
+data. Additionally, only the pure keccak variants
+have been tested because the difference is
+between them and the other are quite small;
+and of course the other hashing utilities from
+other packages using other algorithm-families.
+
