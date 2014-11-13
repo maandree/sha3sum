@@ -16,3 +16,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "common.h"
+
+
+int main(int argc, char* argv[])
+{
+  libkeccak_generalised_spec_t spec;
+  
+  libkeccak_generalised_spec_initialise(&spec);
+  return print_checksum(argv[1], &spec, 1, "", REPRESENTATION_UPPER_CASE, 1, argv[0]);
+}
+
