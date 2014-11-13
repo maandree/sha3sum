@@ -24,6 +24,7 @@ int main(int argc, char* argv[])
 {
   libkeccak_generalised_spec_t spec;
   libkeccak_generalised_spec_initialise(&spec);
-  return RUN("Keccak", "keccaksum", "");
+  libkeccak_spec_sha3((libkeccak_spec_t*)&spec, 512);
+  return RUN("SHA-3", "sha3-512sum", LIBKECCAK_SHA3_SUFFIX);
 }
 

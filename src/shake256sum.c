@@ -24,6 +24,7 @@ int main(int argc, char* argv[])
 {
   libkeccak_generalised_spec_t spec;
   libkeccak_generalised_spec_initialise(&spec);
-  return RUN("Keccak", "keccaksum", "");
+  libkeccak_spec_shake((libkeccak_spec_t*)&spec, 256, 256);
+  return RUN("SHAKE", "shake256sum", LIBKECCAK_SHAKE_SUFFIX);
 }
 

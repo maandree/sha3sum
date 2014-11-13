@@ -24,6 +24,9 @@
 #include <argparser.h>
 
 
+#define libkeccak_spec_keccak libkeccak_spec_sha3
+
+
 
 /**
  * Wrapper for `run` that also initialises the command line parser
