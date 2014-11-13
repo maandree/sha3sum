@@ -18,12 +18,56 @@
  */
 #include "common.h"
 
+#include <stdlib.h>
+
+#include <argparser.h>
+
+
+#define ADD(arg, desc, ...)  \
+  args_add_option(args_new_argumented(NULL, arg, 0, __VA_ARGS__, NULL), desc)
+
 
 int main(int argc, char* argv[])
 {
   libkeccak_generalised_spec_t spec;
+  long squeezes = 1;
+  int r, verbose = 1;
+  size_t i;
   
   libkeccak_generalised_spec_initialise(&spec);
-  return print_checksum(argv[1], &spec, 1, "", REPRESENTATION_UPPER_CASE, 1, argv[0]);
+  
+  args_init("Keccak checksum calculator",
+	    "keccaksum [options...] [--] [files...]", NULL,
+	    NULL, 1, 0, args_standard_abbreviations);
+  
+  ADD("RATE",     "Select rate",          "-r", "--bitrate", "--rate");
+  ADD("CAPACITY", "Select capacity",      "-c", "--capacity");
+  ADD("SIZE",     "Select output size",   "-n", "-o", "--output-size", "--output");
+  ADD("SIZE",     "Select state size",    "-s", "-b", "--state-size", "--state");
+  ADD("SIZE",     "Select word size",     "-w", "--word-size", "--word");
+  ADD("COUNT",    "Select squeeze count", "-z", "--squeezes");
+  /* TODO more options */
+  
+  args_parse(argc, argv);
+  
+  /* TODO stricter parsing */
+  
+  if (args_opts_used("-r"))  spec.bitrate    = atol(*(args_opts_get("-r")));
+  if (args_opts_used("-c"))  spec.capacity   = atol(*(args_opts_get("-c")));
+  if (args_opts_used("-n"))  spec.output     = atol(*(args_opts_get("-n")));
+  if (args_opts_used("-s"))  spec.state_size = atol(*(args_opts_get("-s")));
+  if (args_opts_used("-w"))  spec.word_size  = atol(*(args_opts_get("-w")));
+  if (args_opts_used("-z"))  squeezes        = atol(*(args_opts_get("-z")));
+  
+  if (args_files_count == 0)
+    r = print_checksum("-", &spec, squeezes, "", REPRESENTATION_UPPER_CASE, verbose, *argv);
+  else
+    for (i = 0; i < args_files_count; i++, verbose = 0)
+      if ((r = print_checksum(args_files[i], &spec, squeezes, "", REPRESENTATION_UPPER_CASE, verbose, *argv)))
+	break;
+  
+  args_dispose();
+  cleanup();
+  return r;
 }
 

@@ -59,5 +59,8 @@ int print_checksum(const char* restrict filename, libkeccak_generalised_spec_t* 
 		   const char* restrict execname);
 
 
+void cleanup(void);
+
+
 #endif
 

@@ -42,6 +42,11 @@
 
 
 
+static char* restrict hashsum = NULL;
+static char* restrict hexsum = NULL;
+
+
+
 /**
  * Print the checksum of a file
  * 
@@ -62,8 +67,6 @@ int print_checksum(const char* restrict filename, libkeccak_generalised_spec_t* 
   libkeccak_spec_t spec;
   libkeccak_state_t state;
   int r, fd;
-  static char* restrict hashsum = NULL;
-  static char* restrict hexsum = NULL;
   size_t length;
   
   if (r = libkeccak_degeneralise_spec(gspec, &spec), r)
@@ -120,6 +123,9 @@ int print_checksum(const char* restrict filename, libkeccak_generalised_spec_t* 
 	return USER_ERROR("unknown error in algorithm parameters");
       }
   
+  if (squeezes <= 0)
+    return USER_ERROR("the squeeze count be be positive");
+  
   if (verbose)
     {
       fprintf(stderr,        "rate: %li\n", gspec->bitrate);
@@ -175,9 +181,12 @@ int print_checksum(const char* restrict filename, libkeccak_generalised_spec_t* 
 	}
     }
   
-  free(hashsum);
-  free(hexsum);
-  
   return 0;
 }
 
+
+void cleanup(void)
+{
+  free(hashsum), hashsum = NULL;
+  free(hexsum), hexsum = NULL;
+}
