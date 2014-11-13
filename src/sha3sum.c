@@ -16,27 +16,3 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import java.io.*;
-import java.util.*;
-
-
-/**
- * SHA-3/Keccak checksum calculator with 256 bit output
- * 
- * @author  Mattias Andrée  <a href="mailto:maandree@member.fsf.org">maandree@member.fsf.org</a>
- */
-public class sha3_256sum
-{
-    /**
-     * This is the main entry point of the program
-     * 
-     * @param   args         Command line arguments
-     * @throws  IOException  On I/O error (such as broken pipes)
-     */
-    public static void main(String[] args) throws IOException
-    {
-	sha3sum.run("sha3-256sum", args);
-    }
-}
-
