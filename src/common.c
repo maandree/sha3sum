@@ -41,8 +41,20 @@
   (fprintf(stderr, "%s: %s.\n", execname, string), 1)
 
 
+#define ADD(arg, desc, ...)  \
+  (arg ? args_add_option(args_new_argumented(NULL, arg, 0, __VA_ARGS__, NULL), desc)  \
+       : args_add_option(args_new_argumentless(NULL, 0, __VA_ARGS__, NULL), desc))
 
+
+
+/**
+ * Storage for binary hash
+ */
 static char* restrict hashsum = NULL;
+
+/**
+ * Storage for hexadecimal hash
+ */
 static char* restrict hexsum = NULL;
 
 
@@ -172,7 +184,7 @@ int print_checksum(const char* restrict filename, libkeccak_generalised_spec_t* 
       size_t ptr = 0;
       ssize_t wrote;
       fflush(stdout);
-      for (;;)
+      while (length - ptr)
 	{
 	  wrote = write(STDOUT_FILENO, hashsum, length - ptr);
 	  if (wrote <= 0)
@@ -185,8 +197,67 @@ int print_checksum(const char* restrict filename, libkeccak_generalised_spec_t* 
 }
 
 
-void cleanup(void)
+/**
+ * Cleanup allocations
+ */
+static inline void cleanup(void)
 {
   free(hashsum), hashsum = NULL;
   free(hexsum), hexsum = NULL;
 }
+
+
+/**
+ * Parse the command line and calculate the hashes of the selected files
+ * 
+ * @param   argc    The first argument from `main`
+ * @param   argv    The second argument from `main`
+ * @param   spec    The default algorithm parameters
+ * @param   suffix  Message suffix
+ * @return          An appropriate exit value
+ */
+int run(int argc, char* argv[], libkeccak_generalised_spec_t* restrict spec, const char* restrict suffix)
+{
+  int r, verbose = 0, presentation = REPRESENTATION_UPPER_CASE;
+  long squeezes = 1;
+  size_t i;
+  
+  ADD(NULL,       "Display option summary", "-h", "--help");
+  ADD("RATE",     "Select rate",            "-r", "--bitrate", "--rate");
+  ADD("CAPACITY", "Select capacity",        "-c", "--capacity");
+  ADD("SIZE",     "Select output size",     "-n", "-o", "--output-size", "--output");
+  ADD("SIZE",     "Select state size",      "-s", "-b", "--state-size", "--state");
+  ADD("SIZE",     "Select word size",       "-w", "--word-size", "--word");
+  ADD("COUNT",    "Select squeeze count",   "-z", "--squeezes");
+  ADD(NULL,       "Use upper-case output",  "-U", "--upper", "--uppercase", "--upper-case");
+  ADD(NULL,       "Use lower-case output",  "-L", "--lower", "--lowercase", "--lower-case");
+  ADD(NULL,       "Use binary output",      "-B", "--binary");
+  ADD(NULL,       "Be verbose",             "-V", "--verbose");
+  
+  args_parse(argc, argv);
+  
+  /* TODO stricter parsing */
+  if (args_opts_used("-h"))  return args_help(0), 0;
+  if (args_opts_used("-r"))  spec->bitrate    = atol(args_opts_get("-r")[0]);
+  if (args_opts_used("-c"))  spec->capacity   = atol(args_opts_get("-c")[0]);
+  if (args_opts_used("-n"))  spec->output     = atol(args_opts_get("-n")[0]);
+  if (args_opts_used("-s"))  spec->state_size = atol(args_opts_get("-s")[0]);
+  if (args_opts_used("-w"))  spec->word_size  = atol(args_opts_get("-w")[0]);
+  if (args_opts_used("-z"))  squeezes         = atol(args_opts_get("-z")[0]);
+  if (args_opts_used("-U"))  presentation     = REPRESENTATION_UPPER_CASE;
+  if (args_opts_used("-L"))  presentation     = REPRESENTATION_LOWER_CASE;
+  if (args_opts_used("-B"))  presentation     = REPRESENTATION_BINARY;
+  if (args_opts_used("-V"))  verbose          = 1;
+  
+  if (args_files_count == 0)
+    r = print_checksum("-", spec, squeezes, suffix, presentation, verbose, *argv);
+  else
+    for (i = 0; i < args_files_count; i++, verbose = 0)
+      if ((r = print_checksum(args_files[i], spec, squeezes, suffix, presentation, verbose, *argv)))
+	break;
+  
+  args_dispose();
+  cleanup();
+  return r;
+}
+

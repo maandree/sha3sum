@@ -21,6 +21,22 @@
 
 
 #include <libkeccak.h>
+#include <argparser.h>
+
+
+
+/**
+ * Wrapper for `run` that also initialises the command line parser
+ * 
+ * @param  algo    The name of the hashing algorithm, must be a string literal
+ * @param  prog    The name of program, must be a string literal
+ * @param  suffix  The message suffix
+ */
+#define RUN(algo, prog, suffix)					\
+  (args_init(algo " checksum calculator",			\
+	     prog " [options...] [--] [files...]", NULL,	\
+	     NULL, 1, 0, args_standard_abbreviations),		\
+   run(argc, argv, &spec, suffix))
 
 
 
@@ -59,7 +75,16 @@ int print_checksum(const char* restrict filename, libkeccak_generalised_spec_t* 
 		   const char* restrict execname);
 
 
-void cleanup(void);
+/**
+ * Parse the command line and calculate the hashes of the selected files
+ * 
+ * @param   argc    The first argument from `main`
+ * @param   argv    The second argument from `main`
+ * @param   spec    The default algorithm parameters
+ * @param   suffix  Message suffix
+ * @return          An appropriate exit value
+ */
+int run(int argc, char* argv[], libkeccak_generalised_spec_t* restrict spec, const char* restrict suffix);
 
 
 #endif
