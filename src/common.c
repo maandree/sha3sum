@@ -252,7 +252,7 @@ int run(int argc, char* argv[], libkeccak_generalised_spec_t* restrict spec, con
   if (args_files_count == 0)
     r = print_checksum("-", spec, squeezes, suffix, presentation, verbose, *argv);
   else
-    for (i = 0; i < args_files_count; i++, verbose = 0)
+    for (i = 0; i < (size_t)args_files_count; i++, verbose = 0)
       if ((r = print_checksum(args_files[i], spec, squeezes, suffix, presentation, verbose, *argv)))
 	break;
   
