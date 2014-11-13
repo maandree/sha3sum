@@ -1,3 +1,6 @@
 -x
 --hex          Read the input in hexadecimal, rather than binary.
 
+
+use auto-auto-complete
+
