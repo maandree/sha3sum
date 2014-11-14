@@ -47,7 +47,7 @@ shake512sum = SHAKE512
 default: command shell
 
 .PHONY: all
-all: command shell man
+all: command shell doc
 
 
 .PHONY: command
@@ -86,6 +86,9 @@ bin/%.fish: src/completion
 	@mkdir -p bin
 	auto-auto-complete fish --output $@ --source $< command=$*
 
+
+.PHONY: doc
+doc: man
 
 .PHONY: man
 man: $(foreach C,$(CMDS),bin/$(C).1)
