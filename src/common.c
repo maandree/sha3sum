@@ -335,7 +335,7 @@ static int check_checksums(const char* restrict filename, const libkeccak_spec_t
     }
   size = ptr;
   close(fd), fd = -1;
-
+  
   if (ptr == size)
     {
       if (new = realloc(buf, size += 1), new == NULL)
@@ -354,15 +354,19 @@ static int check_checksums(const char* restrict filename, const libkeccak_spec_t
 	  else if (('A' <= c) && (c <= 'F'));
 	  else if ((c == ' ') || (c == '\t'))
 	    hash_end = ptr, stage++;
+	  else if ((c == '\n') || (c == '\f') || (c == '\r'))
+	    hash_end = ptr, stage = 3;
 	  else
 	    {
-	      rc = USER_ERROR("file is malformated");
+	      rc = USER_ERROR("file is malformated"); /* FIXME error at end of file! c is zero! why!? */
 	      goto fail;
 	    }
 	}
       else if (stage == 1)
 	{
-	  if ((c != ' ') && (c != '\t'))
+	  if ((c == '\n') || (c == '\f') || (c == '\r'))
+	    stage = 3;
+	  else if ((c != ' ') && (c != '\t'))
 	    file_start = ptr, stage++;
 	}
       else if (stage == 2)
