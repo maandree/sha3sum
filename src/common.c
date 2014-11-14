@@ -272,7 +272,7 @@ static int check(const libkeccak_spec_t* restrict spec, long squeezes, const cha
   libkeccak_unhex(correct_binary, correct_hash);
   if ((r = memcmp(correct_binary, hashsum, length)))
     bad_found = 1;
-  printf("%s: %s\n", filename, r ? "OK" : "Fail");
+  printf("%s: %s\n", filename, !r ? "OK" : "Fail");
   
   return 0;
 }
