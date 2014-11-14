@@ -60,6 +60,11 @@ static char* restrict hashsum = NULL;
 static char* restrict hexsum = NULL;
 
 /**
+ * Storage for binary version of expected checksum
+ */
+#define correct_binary  hexsum
+
+/**
  * Whether a mismatch has been found or if a file was missing
  */
 static int bad_found = 0;
@@ -194,6 +199,49 @@ static int make_spec(libkeccak_generalised_spec_t* restrict gspec, libkeccak_spe
 
 
 /**
+ * Calculate the checksum of a file and store it in the global variable `hashsum`
+ * 
+ * @param   filename        The file to hash
+ * @param   spec            Hashing parameters
+ * @param   squeezes        The number of squeezes to perform
+ * @param   suffix          The message suffix
+ * @param   hex             Whether to use hexadecimal input rather than binary
+ * @return                  Zero on success, an appropriate exit value on error
+ */
+static int hash(const char* restrict filename, const libkeccak_spec_t* restrict spec,
+		long squeezes, const char* restrict suffix, int hex)
+{
+  libkeccak_state_t state;
+  size_t length;
+  int r, fd;
+  
+  length = (size_t)((spec->output + 7) / 8);
+  
+  if (hashsum == NULL)
+    if (hashsum = malloc(length * sizeof(char)), hashsum == NULL)
+      return perror(execname), 2;
+  
+  if (hexsum == NULL)
+    if (hexsum = malloc((length * 2 + 1) * sizeof(char)), hexsum == NULL)
+      return perror(execname), 2;
+  
+  if (fd = open(strcmp(filename, "-") ? filename : STDIN_PATH, O_RDONLY), fd < 0)
+    return r = (errno != ENOENT), perror(execname), r + 1;
+  
+  if ((hex == 0 ? libkeccak_generalised_sum_fd : generalised_sum_fd_hex)
+      (fd, &state, spec, suffix, squeezes > 1 ? NULL : hashsum))
+    return perror(execname), close(fd), libkeccak_state_fast_destroy(&state), 2;
+  close(fd);
+  
+  if (squeezes > 2)  libkeccak_fast_squeeze(&state, squeezes - 2);
+  if (squeezes > 1)  libkeccak_squeeze(&state, hashsum);
+  libkeccak_state_fast_destroy(&state);
+  
+  return 0;
+}
+
+
+/**
  * Check that file has a reported checksum, `bad_found` will be
  * updated if the file is missing or incorrect
  * 
@@ -208,7 +256,25 @@ static int make_spec(libkeccak_generalised_spec_t* restrict gspec, libkeccak_spe
 static int check(const libkeccak_spec_t* restrict spec, long squeezes, const char* restrict suffix,
 		 int hex, const char* restrict filename, const char* restrict correct_hash)
 {
-  return 0; /* TODO */
+  size_t length = (size_t)((spec->output + 7) / 8);
+  int r;
+  
+  if (access(filename, F_OK))
+    {
+      bad_found = 1;
+      printf("%s: %s\n", filename, "Missing");
+      return 0;
+    }
+  
+  if ((r = hash(filename, spec, squeezes, suffix, hex)))
+    return r;
+  
+  libkeccak_unhex(correct_binary, correct_hash);
+  if ((r = memcmp(correct_binary, hashsum, length)))
+    bad_found = 1;
+  printf("%s: %s\n", filename, r ? "OK" : "Fail");
+  
+  return 0;
 }
 
 
@@ -376,31 +442,11 @@ static int check_checksums(const char* restrict filename, const libkeccak_spec_t
 static int print_checksum(const char* restrict filename, const libkeccak_spec_t* restrict spec,
 			  long squeezes, const char* restrict suffix, int representation, int hex)
 {
-  libkeccak_state_t state;
-  int r, fd;
-  size_t length;
+  size_t length = (size_t)((spec->output + 7) / 8);
+  int r;
   
-  length = (size_t)((spec->output + 7) / 8);
-  
-  if (hashsum == NULL)
-    if (hashsum = malloc(length * sizeof(char)), hashsum == NULL)
-      return perror(execname), 2;
-  
-  if ((hexsum == NULL) && (representation != REPRESENTATION_BINARY))
-    if (hexsum = malloc((length * 2 + 1) * sizeof(char)), hexsum == NULL)
-      return perror(execname), 2;
-  
-  if (fd = open(strcmp(filename, "-") ? filename : STDIN_PATH, O_RDONLY), fd < 0)
-    return r = (errno != ENOENT), perror(execname), r + 1;
-  
-  if ((hex == 0 ? libkeccak_generalised_sum_fd : generalised_sum_fd_hex)
-      (fd, &state, spec, suffix, squeezes > 1 ? NULL : hashsum))
-    return perror(execname), close(fd), libkeccak_state_fast_destroy(&state), 2;
-  close(fd);
-  
-  if (squeezes > 2)  libkeccak_fast_squeeze(&state, squeezes - 2);
-  if (squeezes > 1)  libkeccak_squeeze(&state, hashsum);
-  libkeccak_state_fast_destroy(&state);
+  if ((r = hash(filename, spec, squeezes, suffix, hex)))
+    return r;
   
   if (representation == REPRESENTATION_UPPER_CASE)
     {
