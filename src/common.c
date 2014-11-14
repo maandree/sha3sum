@@ -294,7 +294,6 @@ int run(int argc, char* argv[], libkeccak_generalised_spec_t* restrict spec, con
   
   args_parse(argc, argv);
   
-  /* TODO stricter parsing */
   if (args_opts_used("-h"))  return args_help(0), 0;
   if (args_opts_used("-R"))  spec->bitrate    = atol(args_opts_get("-R")[0]);
   if (args_opts_used("-C"))  spec->capacity   = atol(args_opts_get("-C")[0]);
