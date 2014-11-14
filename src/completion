@@ -31,7 +31,7 @@
   (multiple argumented
     ((options -R --bitrate --rate)          (complete --rate)         (arg RATE)     (files -0) (desc 'Select rate'))
     ((options -C --capacity)                (complete --capacity)     (arg CAPACITY) (files -0) (desc 'Select capacity'))
-    ((options -N -O --output-size --output) (complete  --output-size) (arg SIZE)     (files -0) (desc 'Select output size'))
+    ((options -N -O --output-size --output) (complete --output-size)  (arg SIZE)     (files -0) (desc 'Select output size'))
     ((options -S -B --state-size --state)   (complete --state-size)   (arg SIZE)     (files -0) (desc 'Select state size'))
     ((options -W --word-size --word)        (complete --word-size)    (arg SIZE)     (files -0) (desc 'Select word size'))
     ((options -Z --squeezes)                (complete --squeezes)     (arg COUNT)    (files -0) (desc 'Select squeeze count'))
