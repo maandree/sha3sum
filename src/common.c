@@ -480,6 +480,9 @@ int run(int argc, char* argv[], libkeccak_generalised_spec_t* restrict gspec, co
   ADD(NULL,       "Use hexadecimal input",  "-x", "--hex", "--hex-input");
   ADD(NULL,       "Check checksums",        "-c", "--check");
   ADD(NULL,       "Be verbose",             "-v", "--verbose");
+  /* --check has been added because the sha1sum, sha256sum &c have it,
+   * but I ignore the other crap, mostly because not all implemention
+   * have them and binary vs text mode is stupid. */
   
   args_parse(argc, argv);
   
