@@ -102,7 +102,7 @@ static int generalised_sum_fd_hex(int fd, libkeccak_state_t* restrict state,
 	{
 	  if (c = chunk[r_ptr++], c <= ' ')
 	    continue;
-	  buf = (buf << 4) | ((c & 15) + (c > '9' ? 0 : 0));
+	  buf = (buf << 4) | ((c & 15) + (c > '9' ? 9 : 0));
 	  if ((even ^= 1))
 	    chunk[w_ptr++] = buf;
 	}
