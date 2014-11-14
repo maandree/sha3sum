@@ -263,16 +263,9 @@ static int check_checksums(const char* restrict filename, const libkeccak_spec_t
 	}
       
       got = read(fd, buf + ptr, blksize);
-      if (got < 0)
-	{
-	  if (errno == EINTR)
-	    continue;
-	  goto pfail;
-	}
-      else if (got == 0)
-	break;
-      else
-	ptr += (size_t)got;
+      if      (got < 0)   goto pfail;
+      else if (got == 0)  break;
+      else                ptr += (size_t)got;
     }
   size = ptr;
   close(fd), fd = -1;
