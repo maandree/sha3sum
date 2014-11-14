@@ -69,13 +69,14 @@
  * @param   suffix          The message suffix
  * @param   representation  Either of `REPRESENTATION_BINARY`, `REPRESENTATION_UPPER_CASE`
  *                          and `REPRESENTATION_LOWER_CASE`
+ * @param   hex             Whether to use hexadecimal input rather than binary
  * @param   verbose         Whether to print the hashing parameters
  * @param   execname        `argv[0]` from `main`
  * @return                  Zero on succes, an appropriate exit value on error
  */
 int print_checksum(const char* restrict filename, libkeccak_generalised_spec_t* restrict gspec,
-		   long squeezes, const char* restrict suffix, int representation, int verbose,
-		   const char* restrict execname);
+		   long squeezes, const char* restrict suffix, int representation, int hex,
+		   int verbose, const char* restrict execname);
 
 
 /**
