@@ -29,9 +29,15 @@ CMDS = keccak-224sum keccak-256sum keccak-384sum keccak-512sum keccaksum  \
 
 
 
-.PHONY: all
-all: $(foreach C,$(CMDS),bin/$(C))
+.PHONY: default
+default: command shell
 
+.PHONY: all
+all: command shell
+
+
+.PHONY: command
+commands: $(foreach C,$(CMDS),bin/$(C))
 
 bin/%: obj/%.o obj/common.o
 	@mkdir -p bin
@@ -40,6 +46,32 @@ bin/%: obj/%.o obj/common.o
 obj/%.o: src/%.c src/*.h
 	@mkdir -p obj
 	$(CC) $(FLAGS) $(COPTIMISE) -c -o $@ $< $(CFLAGS) $(CPPFLAGS)
+
+
+.PHONY: shell
+shell: bash zsh fish
+
+.PHONY: bash
+bash: $(foreach C,$(CMDS),bin/$(C).bash)
+
+.PHONY: zsh
+zsh: $(foreach C,$(CMDS),bin/$(C).zsh)
+
+.PHONY: fish
+fish: $(foreach C,$(CMDS),bin/$(C).fish)
+
+bin/%.bash: src/completion
+	@mkdir -p bin
+	auto-auto-complete bash --output $@ --source $< command=$*
+
+bin/%.zsh: src/completion
+	@mkdir -p bin
+	auto-auto-complete zsh --output $@ --source $< command=$*
+
+bin/%.fish: src/completion
+	@mkdir -p bin
+	auto-auto-complete fish --output $@ --source $< command=$*
+
 
 
 .PHONY: clean

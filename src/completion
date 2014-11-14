@@ -1,0 +1,39 @@
+; sha3sum – SHA-3 (Keccak) checksum calculator
+;
+; Copyright © 2013, 2014  Mattias Andrée (maandree@member.fsf.org)
+;
+; This program is free software: you can redistribute it and/or modify
+; it under the terms of the GNU Affero General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; This program is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU Affero General Public License for more details.
+;
+; You should have received a copy of the GNU Affero General Public License
+; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+((value command)
+  
+  (multiple unargumented
+    ((options -h --help)                           (complete --help)       (desc 'Display option summary'))
+    ((options -U --upper --uppercase --upper-case) (complete --upper-case) (desc 'Use upper-case output'))
+    ((options -L --lower --lowercase --lower-case) (complete --lower-case) (desc 'Use lower-case output'))
+    ((options -B --binary)                         (complete --binary)     (desc 'Use binary output'))
+    ((options -X --hex --hex-input)                (complete --hex-input)  (desc 'Use hexadecimal input'))
+    ((options -V --verbose)                        (complete --verbose)    (desc 'Be verbose'))
+  )
+  
+  (multiple argumented
+    ((options -r --bitrate --rate)          (complete --rate)         (arg RATE)     (files -0) (desc 'Select rate'))
+    ((options -c --capacity)                (complete --capacity)     (arg CAPACITY) (files -0) (desc 'Select capacity'))
+    ((options -n -o --output-size --output) (complete  --output-size) (arg SIZE)     (files -0) (desc 'Select output size'))
+    ((options -s -b --state-size --state)   (complete --state-size)   (arg SIZE)     (files -0) (desc 'Select state size'))
+    ((options -w --word-size --word)        (complete --word-size)    (arg SIZE)     (files -0) (desc 'Select word size'))
+    ((options -z --squeezes)                (complete --squeezes)     (arg COUNT)    (files -0) (desc 'Select squeeze count'))
+  )
+)
+
