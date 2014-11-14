@@ -549,7 +549,7 @@ int run(int argc, char* argv[], libkeccak_generalised_spec_t* restrict gspec, co
   
   if (squeezes <= 0)
     {
-      r = USER_ERROR("the squeeze count be be positive");
+      r = USER_ERROR("the squeeze count most be positive");
       goto done;
     }
   
