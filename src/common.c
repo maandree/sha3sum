@@ -561,6 +561,7 @@ int run(int argc, char* argv[], libkeccak_generalised_spec_t* restrict gspec, co
       fprintf(stderr,  "state size: %li\n", gspec->state_size);
       fprintf(stderr,   "word size: %li\n", gspec->word_size);
       fprintf(stderr,    "squeezes: %li\n", squeezes);
+      fprintf(stderr,      "suffix: %s\n",  suffix ? suffix : "");
     }
   
   if (args_files_count == 0)
