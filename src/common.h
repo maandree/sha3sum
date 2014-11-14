@@ -61,34 +61,15 @@
 
 
 /**
- * Print the checksum of a file
- * 
- * @param   filename        The file to hash
- * @param   gspec           Hashing parameters
- * @param   squeezes        The  number of squeezes to perform
- * @param   suffix          The message suffix
- * @param   representation  Either of `REPRESENTATION_BINARY`, `REPRESENTATION_UPPER_CASE`
- *                          and `REPRESENTATION_LOWER_CASE`
- * @param   hex             Whether to use hexadecimal input rather than binary
- * @param   verbose         Whether to print the hashing parameters
- * @param   execname        `argv[0]` from `main`
- * @return                  Zero on succes, an appropriate exit value on error
- */
-int print_checksum(const char* restrict filename, libkeccak_generalised_spec_t* restrict gspec,
-		   long squeezes, const char* restrict suffix, int representation, int hex,
-		   int verbose, const char* restrict execname);
-
-
-/**
  * Parse the command line and calculate the hashes of the selected files
  * 
  * @param   argc    The first argument from `main`
  * @param   argv    The second argument from `main`
- * @param   spec    The default algorithm parameters
+ * @param   gspec   The default algorithm parameters
  * @param   suffix  Message suffix
  * @return          An appropriate exit value
  */
-int run(int argc, char* argv[], libkeccak_generalised_spec_t* restrict spec, const char* restrict suffix);
+int run(int argc, char* argv[], libkeccak_generalised_spec_t* restrict gspec, const char* restrict suffix);
 
 
 #endif

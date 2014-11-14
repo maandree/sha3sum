@@ -59,6 +59,16 @@ static char* restrict hashsum = NULL;
  */
 static char* restrict hexsum = NULL;
 
+/**
+ * Whether a mismatch has been found or if a file was missing
+ */
+static int bad_found = 0;
+
+/**
+ * `argv[0]` from `main`
+ */
+static char* execname;
+
 
 
 /**
@@ -115,29 +125,17 @@ static int generalised_sum_fd_hex(int fd, libkeccak_state_t* restrict state,
 
 
 /**
- * Print the checksum of a file
+ * Convert `libkeccak_generalised_spec_t` to `libkeccak_spec_t` and check for errors
  * 
- * @param   filename        The file to hash
- * @param   gspec           Hashing parameters
- * @param   squeezes        The number of squeezes to perform
- * @param   suffix          The message suffix
- * @param   representation  Either of `REPRESENTATION_BINARY`, `REPRESENTATION_UPPER_CASE`
- *                          and `REPRESENTATION_LOWER_CASE`
- * @param   hex             Whether to use hexadecimal input rather than binary
- * @param   verbose         Whether to print the hashing parameters
- * @param   execname        `argv[0]` from `main`
- * @return                  Zero on succes, an appropriate exit value on error
+ * @param   gspec  See `libkeccak_degeneralise_spec` 
+ * @param   spec   See `libkeccak_degeneralise_spec` 
+ * @return         Zero on success, an appropriate exit value on error
  */
-int print_checksum(const char* restrict filename, libkeccak_generalised_spec_t* restrict gspec,
-		   long squeezes, const char* restrict suffix, int representation, int hex,
-		   int verbose, const char* restrict execname)
+static int make_spec(libkeccak_generalised_spec_t* restrict gspec, libkeccak_spec_t* restrict spec)
 {
-  libkeccak_spec_t spec;
-  libkeccak_state_t state;
-  int r, fd;
-  size_t length;
+  int r;
   
-  if (r = libkeccak_degeneralise_spec(gspec, &spec), r)
+  if (r = libkeccak_degeneralise_spec(gspec, spec), r)
     switch (r)
       {	
       case LIBKECCAK_GENERALISED_SPEC_ERROR_STATE_NONPOSITIVE:
@@ -166,7 +164,7 @@ int print_checksum(const char* restrict filename, libkeccak_generalised_spec_t* 
 	return USER_ERROR("unknown error in algorithm parameters");
     }
   
-  if (r = libkeccak_spec_check(&spec), r)
+  if (r = libkeccak_spec_check(spec), r)
     switch (r)
       {
       case LIBKECCAK_SPEC_ERROR_BITRATE_NONPOSITIVE:
@@ -191,20 +189,205 @@ int print_checksum(const char* restrict filename, libkeccak_generalised_spec_t* 
 	return USER_ERROR("unknown error in algorithm parameters");
       }
   
-  if (squeezes <= 0)
-    return USER_ERROR("the squeeze count be be positive");
+  return 0;
+}
+
+
+/**
+ * Check that file has a reported checksum, `bad_found` will be
+ * updated if the file is missing or incorrect
+ * 
+ * @param   spec          Hashing parameters
+ * @param   squeezes      The number of squeezes to perform
+ * @param   suffix        The message suffix
+ * @param   hex           Whether to use hexadecimal input rather than binary
+ * @param   filename      The file to check
+ * @param   correct_hash  The expected checksum (any form of hexadecimal)
+ * @return                Zero on success, an appropriate exit value on error
+ */
+static int check(const libkeccak_spec_t* restrict spec, long squeezes, const char* restrict suffix,
+		 int hex, const char* restrict filename, const char* restrict correct_hash)
+{
+  return 0; /* TODO */
+}
+
+
+/**
+ * Check checksums from a file
+ * 
+ * @param   filename        The file to hash
+ * @param   spec            Hashing parameters
+ * @param   squeezes        The number of squeezes to perform
+ * @param   suffix          The message suffix
+ * @param   representation  (unused)
+ * @param   hex             Whether to use hexadecimal input rather than binary
+ * @return                  Zero on success, an appropriate exit value on error
+ */
+static int check_checksums(const char* restrict filename, const libkeccak_spec_t* restrict spec,
+			   long squeezes, const char* restrict suffix, int representation, int hex)
+{
+  struct stat attr;
+  size_t blksize = 4096;
+  size_t size = 4096;
+  size_t ptr = 0;
+  ssize_t got;
+  char* buf = NULL;
+  char* new;
+  int fd = -1, rc = 2, stage, r;
+  size_t hash_start = 0, hash_end = 0;
+  size_t file_start = 0, file_end = 0;
+  char* hash;
+  char* file;
+  size_t hash_n;
   
-  if (verbose)
+  if (fd = open(strcmp(filename, "-") ? filename : STDIN_PATH, O_RDONLY), fd < 0)
+    goto pfail;
+  
+  if (fstat(fd, &attr) == 0)
     {
-      fprintf(stderr,        "rate: %li\n", gspec->bitrate);
-      fprintf(stderr,    "capacity: %li\n", gspec->capacity);
-      fprintf(stderr, "output size: %li\n", gspec->output);
-      fprintf(stderr,  "state size: %li\n", gspec->state_size);
-      fprintf(stderr,   "word size: %li\n", gspec->word_size);
-      fprintf(stderr,    "squeezes: %li\n", squeezes);
+      if (attr.st_blksize > 0)  blksize = (size_t)(attr.st_blksize);
+      if (attr.st_size    > 0)  size    = (size_t)(attr.st_size);
     }
   
-  length = (size_t)((spec.output + 7) / 8);
+  size = size > blksize ? size : blksize;
+  if (buf = malloc(size), buf == NULL)
+    goto pfail;
+  
+  for (;;)
+    {
+      if (ptr + blksize < size)
+	{
+	  if (new = realloc(buf, size <<= 1), new == NULL)
+	    goto pfail;
+	  buf = new;
+	}
+      
+      got = read(fd, buf + ptr, blksize);
+      if (got < 0)
+	{
+	  if (errno == EINTR)
+	    continue;
+	  goto pfail;
+	}
+      else if (got == 0)
+	break;
+      else
+	ptr += (size_t)got;
+    }
+  size = ptr;
+  close(fd), fd = -1;
+
+  if (ptr == size)
+    {
+      if (new = realloc(buf, size += 1), new == NULL)
+	goto pfail;
+      buf = new;
+    }
+  buf[size++] = '\n';
+  
+  for (ptr = 0, stage = 0; ptr < size; ptr++)
+    {
+      char c = buf[ptr];
+      if (stage == 0)
+	{
+	  if      (('0' <= c) && (c <= '9'));
+	  else if (('a' <= c) && (c <= 'f'));
+	  else if (('A' <= c) && (c <= 'F'));
+	  else if ((c == ' ') || (c == '\t'))
+	    hash_end = ptr, stage++;
+	  else
+	    {
+	      rc = USER_ERROR("file is malformated");
+	      goto fail;
+	    }
+	}
+      else if (stage == 1)
+	{
+	  if ((c != ' ') && (c != '\t'))
+	    file_start = ptr, stage++;
+	}
+      else if (stage == 2)
+	{
+	  if ((c == '\n') || (c == '\f') || (c == '\r'))
+	    file_end = ptr, stage++;
+	}
+      
+      if (stage == 3)
+	{
+	  if ((hash_start == hash_end) != (file_start == file_end))
+	    {
+	      rc = USER_ERROR("file is malformated");
+	      goto fail;
+	    }
+	  if (hash_start != hash_end)
+	    {
+	      hash = buf + hash_start;
+	      file = buf + file_start;
+	      hash_n = hash_end - hash_start;
+	      buf[hash_end] = '\0';
+	      buf[file_end] = '\0';
+	      if (hash_n % 2)
+		{
+		  rc = USER_ERROR("file is malformated");
+		  goto fail;
+		}
+	      if (hash_n / 2 != (size_t)((spec->output + 7) / 8))
+		{
+		  rc = USER_ERROR("algorithm parameter mismatch");
+		  goto fail;
+		}
+	      if ((r = check(spec, squeezes, suffix, hex, file, hash)))
+		{
+		  rc = r;
+		  goto fail;
+		}
+	    }
+	  stage = 0;
+	  hash_start = hash_end = file_start = file_end = ptr + 1;
+	}
+    }
+  
+  if (stage)
+    {
+      rc = USER_ERROR("file is malformated");
+      goto fail;
+    }
+  
+  free(buf);
+  return 0;
+  
+ pfail:
+  perror(execname);
+ fail:
+  free(buf);
+  if (fd >= 0)
+    close(fd);
+  return rc;
+  
+  (void) representation;
+}
+
+
+/**
+ * Print the checksum of a file
+ * 
+ * @param   filename        The file to hash
+ * @param   spec            Hashing parameters
+ * @param   squeezes        The number of squeezes to perform
+ * @param   suffix          The message suffix
+ * @param   representation  Either of `REPRESENTATION_BINARY`, `REPRESENTATION_UPPER_CASE`
+ *                          and `REPRESENTATION_LOWER_CASE`
+ * @param   hex             Whether to use hexadecimal input rather than binary
+ * @return                  Zero on success, an appropriate exit value on error
+ */
+static int print_checksum(const char* restrict filename, const libkeccak_spec_t* restrict spec,
+			  long squeezes, const char* restrict suffix, int representation, int hex)
+{
+  libkeccak_state_t state;
+  int r, fd;
+  size_t length;
+  
+  length = (size_t)((spec->output + 7) / 8);
   
   if (hashsum == NULL)
     if (hashsum = malloc(length * sizeof(char)), hashsum == NULL)
@@ -218,7 +401,7 @@ int print_checksum(const char* restrict filename, libkeccak_generalised_spec_t* 
     return r = (errno != ENOENT), perror(execname), r + 1;
   
   if ((hex == 0 ? libkeccak_generalised_sum_fd : generalised_sum_fd_hex)
-      (fd, &state, &spec, suffix, squeezes > 1 ? NULL : hashsum))
+      (fd, &state, spec, suffix, squeezes > 1 ? NULL : hashsum))
     return perror(execname), close(fd), libkeccak_state_fast_destroy(&state), 2;
   close(fd);
   
@@ -269,15 +452,20 @@ static inline void cleanup(void)
  * 
  * @param   argc    The first argument from `main`
  * @param   argv    The second argument from `main`
- * @param   spec    The default algorithm parameters
+ * @param   gspec   The default algorithm parameters
  * @param   suffix  Message suffix
  * @return          An appropriate exit value
  */
-int run(int argc, char* argv[], libkeccak_generalised_spec_t* restrict spec, const char* restrict suffix)
+int run(int argc, char* argv[], libkeccak_generalised_spec_t* restrict gspec, const char* restrict suffix)
 {
-  int r, verbose = 0, presentation = REPRESENTATION_UPPER_CASE, hex = 0;
+  int r, verbose = 0, presentation = REPRESENTATION_UPPER_CASE, hex = 0, check = 0;
   long squeezes = 1;
   size_t i;
+  libkeccak_spec_t spec;
+  int (*fun)(const char* restrict filename, const libkeccak_spec_t* restrict spec,
+	     long squeezes, const char* restrict suffix, int representation, int hex);
+  
+  execname = *argv;
   
   ADD(NULL,       "Display option summary", "-h", "--help");
   ADD("RATE",     "Select rate",            "-R", "--bitrate", "--rate");
@@ -290,32 +478,56 @@ int run(int argc, char* argv[], libkeccak_generalised_spec_t* restrict spec, con
   ADD(NULL,       "Use lower-case output",  "-l", "--lower", "--lowercase", "--lower-case");
   ADD(NULL,       "Use binary output",      "-b", "--binary");
   ADD(NULL,       "Use hexadecimal input",  "-x", "--hex", "--hex-input");
+  ADD(NULL,       "Check checksums",        "-c", "--check");
   ADD(NULL,       "Be verbose",             "-v", "--verbose");
   
   args_parse(argc, argv);
   
   if (args_opts_used("-h"))  return args_help(0), 0;
-  if (args_opts_used("-R"))  spec->bitrate    = atol(args_opts_get("-R")[0]);
-  if (args_opts_used("-C"))  spec->capacity   = atol(args_opts_get("-C")[0]);
-  if (args_opts_used("-N"))  spec->output     = atol(args_opts_get("-N")[0]);
-  if (args_opts_used("-S"))  spec->state_size = atol(args_opts_get("-S")[0]);
-  if (args_opts_used("-W"))  spec->word_size  = atol(args_opts_get("-W")[0]);
-  if (args_opts_used("-Z"))  squeezes         = atol(args_opts_get("-Z")[0]);
-  if (args_opts_used("-u"))  presentation     = REPRESENTATION_UPPER_CASE;
-  if (args_opts_used("-l"))  presentation     = REPRESENTATION_LOWER_CASE;
-  if (args_opts_used("-b"))  presentation     = REPRESENTATION_BINARY;
-  if (args_opts_used("-x"))  hex              = 1;
-  if (args_opts_used("-v"))  verbose          = 1;
+  if (args_opts_used("-R"))  gspec->bitrate    = atol(args_opts_get("-R")[0]);
+  if (args_opts_used("-C"))  gspec->capacity   = atol(args_opts_get("-C")[0]);
+  if (args_opts_used("-N"))  gspec->output     = atol(args_opts_get("-N")[0]);
+  if (args_opts_used("-S"))  gspec->state_size = atol(args_opts_get("-S")[0]);
+  if (args_opts_used("-W"))  gspec->word_size  = atol(args_opts_get("-W")[0]);
+  if (args_opts_used("-Z"))  squeezes          = atol(args_opts_get("-Z")[0]);
+  if (args_opts_used("-u"))  presentation      = REPRESENTATION_UPPER_CASE;
+  if (args_opts_used("-l"))  presentation      = REPRESENTATION_LOWER_CASE;
+  if (args_opts_used("-b"))  presentation      = REPRESENTATION_BINARY;
+  if (args_opts_used("-x"))  hex               = 1;
+  if (args_opts_used("-c"))  check             = 1;
+  if (args_opts_used("-v"))  verbose           = 1;
+  
+  fun = check ? check_checksums : print_checksum;
+
+  if ((r = make_spec(gspec, &spec)))
+      goto done;
+  
+  if (squeezes <= 0)
+    {
+      r = USER_ERROR("the squeeze count be be positive");
+      goto done;
+    }
+  
+  if (verbose)
+    {
+      fprintf(stderr,        "rate: %li\n", gspec->bitrate);
+      fprintf(stderr,    "capacity: %li\n", gspec->capacity);
+      fprintf(stderr, "output size: %li\n", gspec->output);
+      fprintf(stderr,  "state size: %li\n", gspec->state_size);
+      fprintf(stderr,   "word size: %li\n", gspec->word_size);
+      fprintf(stderr,    "squeezes: %li\n", squeezes);
+    }
   
   if (args_files_count == 0)
-    r = print_checksum("-", spec, squeezes, suffix, presentation, hex, verbose, *argv);
+    r = fun("-", &spec, squeezes, suffix, presentation, hex);
   else
-    for (i = 0; i < (size_t)args_files_count; i++, verbose = 0)
-      if ((r = print_checksum(args_files[i], spec, squeezes, suffix, presentation, hex, verbose, *argv)))
+    for (i = 0; i < (size_t)args_files_count; i++)
+      if ((r = fun(args_files[i], &spec, squeezes, suffix, presentation, hex)))
 	break;
   
+ done:
   args_dispose();
   cleanup();
-  return r;
+  return r ? r : bad_found;
 }
 

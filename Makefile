@@ -37,7 +37,7 @@ all: command shell
 
 
 .PHONY: command
-commands: $(foreach C,$(CMDS),bin/$(C))
+command: $(foreach C,$(CMDS),bin/$(C))
 
 bin/%: obj/%.o obj/common.o
 	@mkdir -p bin

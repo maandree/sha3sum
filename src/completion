@@ -24,6 +24,7 @@
     ((options -l --lower --lowercase --lower-case) (complete --lower-case) (desc 'Use lower-case output'))
     ((options -b --binary)                         (complete --binary)     (desc 'Use binary output'))
     ((options -x --hex --hex-input)                (complete --hex-input)  (desc 'Use hexadecimal input'))
+    ((options -c --check)                          (complete --check)      (desc 'Check checksums'))
     ((options -v --verbose)                        (complete --verbose)    (desc 'Be verbose'))
   )
   
