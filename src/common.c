@@ -280,33 +280,33 @@ int run(int argc, char* argv[], libkeccak_generalised_spec_t* restrict spec, con
   size_t i;
   
   ADD(NULL,       "Display option summary", "-h", "--help");
-  ADD("RATE",     "Select rate",            "-r", "--bitrate", "--rate");
-  ADD("CAPACITY", "Select capacity",        "-c", "--capacity");
-  ADD("SIZE",     "Select output size",     "-n", "-o", "--output-size", "--output");
-  ADD("SIZE",     "Select state size",      "-s", "-b", "--state-size", "--state");
-  ADD("SIZE",     "Select word size",       "-w", "--word-size", "--word");
-  ADD("COUNT",    "Select squeeze count",   "-z", "--squeezes");
-  ADD(NULL,       "Use upper-case output",  "-U", "--upper", "--uppercase", "--upper-case");
-  ADD(NULL,       "Use lower-case output",  "-L", "--lower", "--lowercase", "--lower-case");
-  ADD(NULL,       "Use binary output",      "-B", "--binary");
-  ADD(NULL,       "Use hexadecimal input",  "-X", "--hex", "--hex-input");
-  ADD(NULL,       "Be verbose",             "-V", "--verbose");
+  ADD("RATE",     "Select rate",            "-R", "--bitrate", "--rate");
+  ADD("CAPACITY", "Select capacity",        "-C", "--capacity");
+  ADD("SIZE",     "Select output size",     "-N", "-O", "--output-size", "--output");
+  ADD("SIZE",     "Select state size",      "-S", "-B", "--state-size", "--state");
+  ADD("SIZE",     "Select word size",       "-W", "--word-size", "--word");
+  ADD("COUNT",    "Select squeeze count",   "-Z", "--squeezes");
+  ADD(NULL,       "Use upper-case output",  "-u", "--upper", "--uppercase", "--upper-case");
+  ADD(NULL,       "Use lower-case output",  "-l", "--lower", "--lowercase", "--lower-case");
+  ADD(NULL,       "Use binary output",      "-b", "--binary");
+  ADD(NULL,       "Use hexadecimal input",  "-x", "--hex", "--hex-input");
+  ADD(NULL,       "Be verbose",             "-v", "--verbose");
   
   args_parse(argc, argv);
   
   /* TODO stricter parsing */
   if (args_opts_used("-h"))  return args_help(0), 0;
-  if (args_opts_used("-r"))  spec->bitrate    = atol(args_opts_get("-r")[0]);
-  if (args_opts_used("-c"))  spec->capacity   = atol(args_opts_get("-c")[0]);
-  if (args_opts_used("-n"))  spec->output     = atol(args_opts_get("-n")[0]);
-  if (args_opts_used("-s"))  spec->state_size = atol(args_opts_get("-s")[0]);
-  if (args_opts_used("-w"))  spec->word_size  = atol(args_opts_get("-w")[0]);
-  if (args_opts_used("-z"))  squeezes         = atol(args_opts_get("-z")[0]);
-  if (args_opts_used("-U"))  presentation     = REPRESENTATION_UPPER_CASE;
-  if (args_opts_used("-L"))  presentation     = REPRESENTATION_LOWER_CASE;
-  if (args_opts_used("-B"))  presentation     = REPRESENTATION_BINARY;
-  if (args_opts_used("-X"))  hex              = 1;
-  if (args_opts_used("-V"))  verbose          = 1;
+  if (args_opts_used("-R"))  spec->bitrate    = atol(args_opts_get("-R")[0]);
+  if (args_opts_used("-C"))  spec->capacity   = atol(args_opts_get("-C")[0]);
+  if (args_opts_used("-N"))  spec->output     = atol(args_opts_get("-N")[0]);
+  if (args_opts_used("-S"))  spec->state_size = atol(args_opts_get("-S")[0]);
+  if (args_opts_used("-W"))  spec->word_size  = atol(args_opts_get("-W")[0]);
+  if (args_opts_used("-Z"))  squeezes         = atol(args_opts_get("-Z")[0]);
+  if (args_opts_used("-u"))  presentation     = REPRESENTATION_UPPER_CASE;
+  if (args_opts_used("-l"))  presentation     = REPRESENTATION_LOWER_CASE;
+  if (args_opts_used("-b"))  presentation     = REPRESENTATION_BINARY;
+  if (args_opts_used("-x"))  hex              = 1;
+  if (args_opts_used("-v"))  verbose          = 1;
   
   if (args_files_count == 0)
     r = print_checksum("-", spec, squeezes, suffix, presentation, hex, verbose, *argv);
