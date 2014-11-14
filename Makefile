@@ -27,13 +27,27 @@ CMDS = keccak-224sum keccak-256sum keccak-384sum keccak-512sum keccaksum  \
        sha3-224sum sha3-256sum sha3-384sum sha3-512sum                    \
        rawshake256sum rawshake512sum shake256sum shake512sum
 
+keccak-224sum = Keccak-224
+keccak-256sum = Keccak-256
+keccak-384sum = Keccak-384
+keccak-512sum = Keccak-512
+keccaksum = Keccak[]
+sha3-224sum = SHA3-224
+sha3-256sum = SHA3-256
+sha3-384sum = SHA3-384
+sha3-512sum = SHA3-512
+rawshake256sum = RawSHAKE256
+rawshake512sum = RawSHAKE512
+shake256sum = SHAKE256
+shake512sum = SHAKE512
+
 
 
 .PHONY: default
 default: command shell
 
 .PHONY: all
-all: command shell
+all: command shell man
 
 
 .PHONY: command
@@ -71,6 +85,14 @@ bin/%.zsh: src/completion
 bin/%.fish: src/completion
 	@mkdir -p bin
 	auto-auto-complete fish --output $@ --source $< command=$*
+
+
+.PHONY: man
+man: $(foreach C,$(CMDS),bin/$(C).1)
+
+bin/%.1: doc/xsum.texman
+	@mkdir -p bin
+	cat $< | sed -e 's/xsum/$*/g' -e 's/XSUM/$($*)/g' | texman > $@
 
 
 

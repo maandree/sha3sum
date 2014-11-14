@@ -1,0 +1,80 @@
+@c -*- texinfo -*-
+@texman{xsum}{1}{November 14 2014}
+
+@section Name
+xsum - compute and check XSUM message digests
+
+@section Synopsis
+@b{xsum} [option...] [--] [file...]
+
+@section Description
+Print or check XSUM checksums. If no file
+or when the file is -, read standard input.
+
+@item @b{-h}, @b{--help}
+Display option summary.
+
+@item @b{-u}, @b{--upper}, @b{--uppercase}, @b{--upper-case}
+Output checksums in upper-case hexadecimal representation. (default)
+
+@item @b{-l}, @b{--lower}, @b{--lowercase}, @b{--lower-case}
+Output checksums in lower-case hexadecimal representation.
+
+@item @b{-b}, @b{--binary}
+Output checksums in binary representation. This suppresses
+the filenames and checksum delimiters. Only the checksums
+are printed.
+
+@item @b{-x}, @b{--hex}, @b{--hex-input}
+Convert input files from hexadecimal for to binary form
+before calculating the checksums.
+
+@item @b{-c}, @b{--check}
+Read XSUM sums from the file and check them against
+the files on your systems. The input files files
+should be formated as the output of this program, or
+similarly. This is not going to work if any of the
+filenames in the input files starts with a regular
+blank space or horizontal tab space, or if they
+contain a line feed, carriage return or form feed.
+
+@item @b{-v}, @b{--verbose}
+Print the hashing parameters.
+
+@item The following options change the hashing parameters:
+
+@item @b{-R}, @b{--bitrate}, @b{--rate} RATE
+Change the rate.
+
+@item @b{-C}, @b{--capacity} CAPACITY
+Change the capacity.
+
+@item @b{-N}, @b{-O}, @b{--output-size}, @b{--output} SIZE
+Change the output size.
+
+@item @b{-S}, @b{-B}, @b{--state-size}, @b{--state} SIZE
+Change the state size.
+
+@item @b{-W}, @b{--word-size}, @b{--word} SIZE
+Change the word size.
+
+@item @b{-Z}, @b{--squeezes} COUNT
+Change the number of squeezes that is performed.
+
+
+@section Author
+
+Written by Mattias Andrée.
+
+
+@section Note
+
+All commands in the sha3sum package allow changing
+the hashing parameters. However it is only intended
+to be used with @b{keccaksum}, or if you know what you
+are doing; apart from @b{--output} which is intended
+to @emph{always} be used with @b{shake256sum},
+@b{shake512sum}, @b{rawshake256sum} and @b{rawshake512sum}.
+
+@bye
+

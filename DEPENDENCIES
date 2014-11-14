@@ -3,4 +3,8 @@ https://github.com/maandree/argparser
 https://github.com/maandree/auto-auto-complete (make)
 https://github.com/maandree/texman/blob/master/texman.texman (make)
 libc
+make (make)
+coreutil (make)
+gcc (make)
+sed (make)
 
