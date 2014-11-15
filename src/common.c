@@ -142,59 +142,43 @@ static int make_spec(libkeccak_generalised_spec_t* restrict gspec, libkeccak_spe
 {
   int r;
   
+#define TEST(CASE, STR)  case LIBKECCAK_GENERALISED_SPEC_ERROR_##CASE:  return USER_ERROR(STR)
   if (r = libkeccak_degeneralise_spec(gspec, spec), r)
     switch (r)
-      {	
-      case LIBKECCAK_GENERALISED_SPEC_ERROR_STATE_NONPOSITIVE:
-	return USER_ERROR("the state size must be positive");
-      case LIBKECCAK_GENERALISED_SPEC_ERROR_STATE_TOO_LARGE:
-	return USER_ERROR("the state size is too large, may not exceed 1600");
-      case LIBKECCAK_GENERALISED_SPEC_ERROR_STATE_MOD_25:
-	return USER_ERROR("the state size must be a multiple of 25");
-      case LIBKECCAK_GENERALISED_SPEC_ERROR_WORD_NONPOSITIVE:
-	return USER_ERROR("the word size must be positive");
-      case LIBKECCAK_GENERALISED_SPEC_ERROR_WORD_TOO_LARGE:
-	return USER_ERROR("the word size is too large, may not exceed 64");
-      case LIBKECCAK_GENERALISED_SPEC_ERROR_STATE_WORD_INCOHERENCY:
-	return USER_ERROR("the state size must be exactly 25 times the word size");
-      case LIBKECCAK_GENERALISED_SPEC_ERROR_CAPACITY_NONPOSITIVE:
-	return USER_ERROR("the capacity must be positive");
-      case LIBKECCAK_GENERALISED_SPEC_ERROR_CAPACITY_MOD_8:
-	return USER_ERROR("the capacity must be a multiple of 8");
-      case LIBKECCAK_GENERALISED_SPEC_ERROR_BITRATE_NONPOSITIVE:
-	return USER_ERROR("the rate must be positive");
-      case LIBKECCAK_GENERALISED_SPEC_ERROR_BITRATE_MOD_8:
-	return USER_ERROR("the rate must be a multiple of 8");
-      case LIBKECCAK_GENERALISED_SPEC_ERROR_OUTPUT_NONPOSITIVE:
-	return USER_ERROR("the output size must be positive");
+      {
+	TEST (STATE_NONPOSITIVE,      "the state size must be positive");
+	TEST (STATE_TOO_LARGE,        "the state size is too large, may not exceed 1600");
+	TEST (STATE_MOD_25,           "the state size must be a multiple of 25");
+	TEST (WORD_NONPOSITIVE,       "the word size must be positive");
+	TEST (WORD_TOO_LARGE,         "the word size is too large, may not exceed 64");
+	TEST (STATE_WORD_INCOHERENCY, "the state size must be exactly 25 times the word size");
+	TEST (CAPACITY_NONPOSITIVE,   "the capacity must be positive");
+	TEST (CAPACITY_MOD_8,         "the capacity must be a multiple of 8");
+	TEST (BITRATE_NONPOSITIVE,    "the rate must be positive");
+	TEST (BITRATE_MOD_8,          "the rate must be a multiple of 8");
+	TEST (OUTPUT_NONPOSITIVE,     "the output size must be positive");
       default:
 	return USER_ERROR("unknown error in algorithm parameters");
     }
+#undef TEST
   
+#define TEST(CASE, STR)  case LIBKECCAK_SPEC_ERROR_##CASE:  return USER_ERROR(STR)
   if (r = libkeccak_spec_check(spec), r)
     switch (r)
       {
-      case LIBKECCAK_SPEC_ERROR_BITRATE_NONPOSITIVE:
-	return USER_ERROR("the rate size must be positive");
-      case LIBKECCAK_SPEC_ERROR_BITRATE_MOD_8:
-	return USER_ERROR("the rate must be a multiple of 8");
-      case LIBKECCAK_SPEC_ERROR_CAPACITY_NONPOSITIVE:
-	return USER_ERROR("the capacity must be positive");
-      case LIBKECCAK_SPEC_ERROR_CAPACITY_MOD_8:
-	return USER_ERROR("the capacity must be a multiple of 8");
-      case LIBKECCAK_SPEC_ERROR_OUTPUT_NONPOSITIVE:
-	return USER_ERROR("the output size must be positive");
-      case LIBKECCAK_SPEC_ERROR_STATE_TOO_LARGE:
-	return USER_ERROR("the state size is too large, may not exceed 1600");
-      case LIBKECCAK_SPEC_ERROR_STATE_MOD_25:
-	return USER_ERROR("the state size must be a multiple of 25");
-      case LIBKECCAK_SPEC_ERROR_WORD_NON_2_POTENT:
-	return USER_ERROR("the word size must be a power of 2");
-      case LIBKECCAK_SPEC_ERROR_WORD_MOD_8:
-	return USER_ERROR("the word size must be a multiple of 8");
+      TEST (BITRATE_NONPOSITIVE,  "the rate size must be positive");
+      TEST (BITRATE_MOD_8,        "the rate must be a multiple of 8");
+      TEST (CAPACITY_NONPOSITIVE, "the capacity must be positive");
+      TEST (CAPACITY_MOD_8,       "the capacity must be a multiple of 8");
+      TEST (OUTPUT_NONPOSITIVE,   "the output size must be positive");
+      TEST (STATE_TOO_LARGE,      "the state size is too large, may not exceed 1600");
+      TEST (STATE_MOD_25,         "the state size must be a multiple of 25");
+      TEST (WORD_NON_2_POTENT,    "the word size must be a power of 2");
+      TEST (WORD_MOD_8,           "the word size must be a multiple of 8");
       default:
 	return USER_ERROR("unknown error in algorithm parameters");
       }
+#undef TEST
   
   return 0;
 }
