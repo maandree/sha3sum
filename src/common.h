@@ -24,7 +24,8 @@
 #include <argparser.h>
 
 
-#define libkeccak_spec_keccak libkeccak_spec_sha3
+#define libkeccak_spec_keccak    libkeccak_spec_sha3
+#define LIBKECCAK_KECCAK_SUFFIX  ""
 
 
 

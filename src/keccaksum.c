@@ -24,6 +24,6 @@ int main(int argc, char* argv[])
 {
   libkeccak_generalised_spec_t spec;
   libkeccak_generalised_spec_initialise(&spec);
-  return RUN("Keccak", "keccaksum", "");
+  return RUN("Keccak", "keccaksum", LIBKECCAK_KECCAK_SUFFIX);
 }
 
