@@ -530,7 +530,7 @@ int run(int argc, char* argv[], libkeccak_generalised_spec_t* restrict gspec, co
   
   args_parse(argc, argv);
   
-  if (args_opts_used("-h"))  return args_help(0), 0;
+  if (args_opts_used("-h"))  return args_help(0), args_dispose(), 0;
   if (args_opts_used("-R"))  gspec->bitrate    = atol(LAST("-R"));
   if (args_opts_used("-C"))  gspec->capacity   = atol(LAST("-C"));
   if (args_opts_used("-N"))  gspec->output     = atol(LAST("-N"));
