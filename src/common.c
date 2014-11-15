@@ -39,13 +39,15 @@
 
 
 
-#define USER_ERROR(string)  \
+#define USER_ERROR(string) 				\
   (fprintf(stderr, "%s: %s.\n", execname, string), 1)
 
-
-#define ADD(arg, desc, ...)  \
-  (arg ? args_add_option(args_new_argumented(NULL, arg, 0, __VA_ARGS__, NULL), desc)  \
+#define ADD(arg, desc, ...)								\
+  (arg ? args_add_option(args_new_argumented(NULL, arg, 0, __VA_ARGS__, NULL), desc)	\
        : args_add_option(args_new_argumentless(NULL, 0, __VA_ARGS__, NULL), desc))
+
+#define LAST(arg)					\
+  (args_opts_get(arg)[args_opts_get_count(arg) - 1])
 
 
 
@@ -529,12 +531,12 @@ int run(int argc, char* argv[], libkeccak_generalised_spec_t* restrict gspec, co
   args_parse(argc, argv);
   
   if (args_opts_used("-h"))  return args_help(0), 0;
-  if (args_opts_used("-R"))  gspec->bitrate    = atol(args_opts_get("-R")[0]);
-  if (args_opts_used("-C"))  gspec->capacity   = atol(args_opts_get("-C")[0]);
-  if (args_opts_used("-N"))  gspec->output     = atol(args_opts_get("-N")[0]);
-  if (args_opts_used("-S"))  gspec->state_size = atol(args_opts_get("-S")[0]);
-  if (args_opts_used("-W"))  gspec->word_size  = atol(args_opts_get("-W")[0]);
-  if (args_opts_used("-Z"))  squeezes          = atol(args_opts_get("-Z")[0]);
+  if (args_opts_used("-R"))  gspec->bitrate    = atol(LAST("-R"));
+  if (args_opts_used("-C"))  gspec->capacity   = atol(LAST("-C"));
+  if (args_opts_used("-N"))  gspec->output     = atol(LAST("-N"));
+  if (args_opts_used("-S"))  gspec->state_size = atol(LAST("-S"));
+  if (args_opts_used("-W"))  gspec->word_size  = atol(LAST("-W"));
+  if (args_opts_used("-Z"))  squeezes          = atol(LAST("-Z"));
   if (args_opts_used("-u"))  presentation      = REPRESENTATION_UPPER_CASE;
   if (args_opts_used("-l"))  presentation      = REPRESENTATION_LOWER_CASE;
   if (args_opts_used("-b"))  presentation      = REPRESENTATION_BINARY;
