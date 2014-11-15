@@ -545,7 +545,7 @@ int run(int argc, char* argv[], libkeccak_generalised_spec_t* restrict gspec, co
   if (args_opts_used("-v"))  verbose           = 1;
   
   fun = check ? check_checksums : print_checksum;
-
+  
   if ((r = make_spec(gspec, &spec)))
       goto done;
   
