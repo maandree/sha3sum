@@ -11,8 +11,10 @@ BUILD DEPENDENCIES:
 	argparser
 	libc
 	auto-auto-complete	(opt-out, for shell tab-completion)
-	texman			(opt-out, for man pages)
-	sed			(opt-out, for man pages)
+	texman			(opt-in, for man pages)
+	sed			(opt-in, for man pages)
+	texinfo			(opt-out, for info, pdf, dvi and ps manuals)
+	texlive-core		(opt-in, for pdf, dvi and ps manuals)
 	gcc
 	make
 	coreutils

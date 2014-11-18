@@ -44,7 +44,7 @@ shake512sum = SHAKE512
 
 
 .PHONY: default
-default: command shell
+default: command shell info
 
 .PHONY: all
 all: command shell doc
@@ -88,7 +88,7 @@ bin/%.fish: src/completion
 
 
 .PHONY: doc
-doc: man
+doc: man info pdf dvi ps
 
 .PHONY: man
 man: $(foreach C,$(CMDS),bin/$(C).1)
@@ -96,6 +96,35 @@ man: $(foreach C,$(CMDS),bin/$(C).1)
 bin/%.1: doc/xsum.texman
 	@mkdir -p bin
 	cat $< | sed -e 's/xsum/$*/g' -e 's/XSUM/$($*)/g' | texman > $@
+
+
+.PHONY: info
+info: bin/sha3sum.info
+bin/%.info: doc/%.texinfo doc/fdl.texinfo
+	@mkdir -p obj bin
+	cd obj ; makeinfo ../$<
+	mv obj/$*.info bin/$*.info
+
+.PHONY: pdf
+pdf: bin/sha3sum.pdf
+bin/%.pdf: doc/%.texinfo doc/fdl.texinfo
+	@mkdir -p obj bin
+	cd obj ; yes X | texi2pdf ../$<
+	mv obj/$*.pdf bin/$*.pdf
+
+.PHONY: dvi
+dvi: bin/sha3sum.dvi
+bin/%.dvi: doc/%.texinfo doc/fdl.texinfo
+	@mkdir -p obj bin
+	cd obj ; yes X | $(TEXI2DVI) ../$<
+	mv obj/$*.dvi bin/$*.dvi
+
+.PHONY: ps
+ps: bin/sha3sum.ps
+bin/%.ps: doc/%.texinfo doc/fdl.texinfo
+	@mkdir -p obj bin
+	cd obj ; yes X | texi2pdf --ps ../$<
+	mv obj/$*.ps bin/$*.ps
 
 
 
