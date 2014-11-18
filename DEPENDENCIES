@@ -1,10 +1,27 @@
-https://github.com/maandree/libkeccak
-https://github.com/maandree/argparser
-https://github.com/maandree/auto-auto-complete (make)
-https://github.com/maandree/texman (make)
-libc
-make (make)
-coreutil (make)
-gcc (make)
-sed (make)
+RUNTIME DEPENDENCIES:
+
+	libkeccak
+	argparser
+	libc
+
+
+BUILD DEPENDENCIES:
+
+	libkeccak
+	argparser
+	libc
+	auto-auto-complete	(opt-out, for shell tab-completion)
+	texman			(opt-out, for man pages)
+	sed			(opt-out, for man pages)
+	gcc
+	make
+	coreutils
+
+
+DEPENDENCY SOURCES:
+
+	libkeccak		https://github.com/maandree/libkeccak
+	argparser		https://github.com/maandree/argparser
+	auto-auto-complete	https://github.com/maandree/auto-auto-complete
+	texman			https://github.com/maandree/texman
 
