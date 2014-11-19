@@ -295,8 +295,8 @@ install-shake-man: $(foreach C,$(SHAKE_CMDS),install-$(C)-man)
 
 .PHONY: install-%sum-man
 install-%sum-man: bin/%sum.1
-	install -dm755 -- "$(DESTDIR)$(MANDIR)"
-	install -m644 -- $< "$(DESTDIR)$(MANDIR)/$*sum.1"
+	install -dm755 -- "$(DESTDIR)$(MANDIR)/man1"
+	install -m644 -- $< "$(DESTDIR)$(MANDIR)/man1/$*sum.1"
 
 .PHONY: install-info
 install-info: bin/sha3sum.info
@@ -329,7 +329,7 @@ uninstall:
 	-rm -- $(foreach C,$(CMDS),"$(DESTDIR)$(DATADIR)/bash-completion/completions/$(C)")
 	-rm -- $(foreach C,$(CMDS),"$(DESTDIR)$(DATADIR)/fish/completions/$(C).fish")
 	-rm -- $(foreach C,$(CMDS),"$(DESTDIR)$(DATADIR)/zsh/site-functions/_$(C)")
-	-rm -- $(foreach C,$(CMDS),"$(DESTDIR)$(MANDIR)/$(C).1")
+	-rm -- $(foreach C,$(CMDS),"$(DESTDIR)$(MANDIR)/man1/$(C).1")
 	-rm -- "$(DESTDIR)$(INFODIR)/$(PKGNAME).info"
 	-rm -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME).pdf"
 	-rm -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME).dvi"
