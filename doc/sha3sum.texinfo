@@ -130,7 +130,7 @@ Calculates SHAKE-512 checksums.
 @end table
 
 The @command{sha3sum} utilities recognises the
-following options, and takes takes any number
+following options, and takes any number
 of files.
 
 @table @option
