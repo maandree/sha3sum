@@ -80,3 +80,13 @@ between them and the other are quite small;
 and of course the other hashing utilities from
 other packages using other algorithm-families.
 
+---------------------------------------------------------------------
+
+The implementation of the algorithms is done
+in libkeccak (https://github.com/maandree/libkeccak),
+so to verify that this program is correct,
+verify libkeccak using its test suite
+(https://github.com/maandree/libkeccak/blob/master/src/test.c)
+and check that some of hashes are returned identically
+by sha3sum.
+
