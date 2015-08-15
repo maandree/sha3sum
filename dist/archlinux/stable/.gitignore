@@ -1,0 +1,6 @@
+*
+!/.git*
+*~
+!/PKGBUILD
+!/sha3sum.install
+
