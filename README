@@ -1,88 +1,125 @@
-Checksum utility for Keccak and its close
-derivatives SHA-3, SHAKE and RawSHAKE.
+NAME
+	sha3sum - Keccak, SHA-3, SHAKE, and RawSHAKE checksum utilities
 
----------------------------------------------------------------------
+SYNOPSIS
+	keccaksum      [OPTION]... [--] [FILE]...
+	keccak-224sum  [OPTION]... [--] [FILE]...
+	keccak-256sum  [OPTION]... [--] [FILE]...
+	keccak-384sum  [OPTION]... [--] [FILE]...
+	keccak-512sum  [OPTION]... [--] [FILE]...
+	sha3-224sum    [OPTION]... [--] [FILE]...
+	sha3-256sum    [OPTION]... [--] [FILE]...
+	sha3-384sum    [OPTION]... [--] [FILE]...
+	sha3-512sum    [OPTION]... [--] [FILE]...
+	shake256sum    [OPTION]... [--] [FILE]...
+	shake512sum    [OPTION]... [--] [FILE]...
+	rawshake256sum [OPTION]... [--] [FILE]...
+	rawshake512sum [OPTION]... [--] [FILE]...
 
-Performance benchmark on a 1 GiB file (yes,
-that is quite large) with /dev/urandom data:
+DESCRIPTION
+	Fully configurable byte-orientated checksum utilities
+	for Keccak and its close derivatives SHA-3, SHAKE and
+	RawSHAKE.
 
-$ keccak-224sum
-real	0m9.550s
-user	0m9.223s
-sys	0m0.320s
+	This utilities can generate checksums or verify the
+	checksums of files.
 
-$ keccak-256sum
-real	0m9.841s
-user	0m9.560s
-sys	0m0.260s
+	The implementation of the algorithms is done
+	in libkeccak(7) <https://github.com/maandree/libkeccak>.
+	To verify that this program is correct, verify
+	libkeccak(7) using its test suite and check that some
+	of hashes are returned identically by sha3sum.
 
-$ keccak-384sum
-real	0m12.902s
-user	0m12.580s
-sys	0m0.313s
+OPTIONS
+	-h, --help
+		Display option summary.
 
-$ keccak-512sum
-real	0m18.084s
-user	0m17.823s
-sys	0m0.243s
+	-R, --rate RATE
+		Select rate.
 
-$ keccaksum
-real	0m10.438s
-user	0m10.140s
-sys	0m0.287s
+	-C, --capacity CAPACITY
+		Select capacity.
 
-$ sha1sum
-real	0m3.421s
-user	0m3.157s
-sys	0m0.253s
+	-N, --output SIZE
+		Select output size.
 
-$ sha224sum
-real	0m8.196s
-user	0m7.910s
-sys	0m0.263s
+	-S, --state SIZE
+		Select state size.
 
-$ sha256sum
-real	0m9.361s
-user	0m9.097s
-sys	0m0.257s
+	-W, --word SIZE
+		Select word size.
 
-$ sha384sum
-real	0m5.450s
-user	0m5.223s
-sys	0m0.220s
+	-Z, --squeezes COUNT
+		Select squeeze count.
 
-$ sha512sum
-real	0m4.507s
-user	0m4.247s
-sys	0m0.257s
+	-u, --upper-case
+		Use upper-case output.
 
-$ md5sum
-real	0m2.987s
-user	0m2.703s
-sys	0m0.283s
+	-l, --lower-case
+		Use lower-case output.
 
-$ md6sum
-real	1m28.873s
-user	1m28.470s
-sys	0m0.360s
+	-b, --binary
+		Use binary output.
 
+	-x, --hex-input
+		Use hexadecimal input.
 
-Note:
-The times are a bit random, and only one run
-has been made. "user" is the most interesting
-data. Additionally, only the pure keccak variants
-have been tested because the difference is
-between them and the other are quite small;
-and of course the other hashing utilities from
-other packages using other algorithm-families.
+	-c, --check
+		Check checksums.
 
----------------------------------------------------------------------
+	-v, --verbose
+		Be verbose.
 
-The implementation of the algorithms is done
-in libkeccak (https://github.com/maandree/libkeccak),
-so to verify that this program is correct,
-verify libkeccak using its test suite
-(https://github.com/maandree/libkeccak/blob/master/src/test.c)
-and check that some of hashes are returned identically
-by sha3sum.
+RATIONALE
+	We probably do not need this, but it is nice to have
+	in case SHA-2 gets compromised.
+
+SEE ALSO
+	libkeccak(7), sum(1), cksum(1), md5sum(1), md6sum(1),
+	sha1sum(1), sha224sum(1), sha256sum(1), sha384sum(1),
+	sha512sum(1)
+
+	Full documentation available locally via: info '(sha3sum)'
+
+PERFORMANCE
+	Performance comparison on a 1 GiB file (yes, that is
+	quite large) with /dev/urandom data:
+
+	$ keccak-224sum		│	$ keccak-256sum
+	real	0m9.550s	│	real	0m9.841s
+	user	0m9.223s	│	user	0m9.560s
+	sys	0m0.320s	│	sys	0m0.260s
+				│
+	$ keccak-384sum		│	$ keccak-512sum
+	real	0m12.902s	│	real	0m18.084s
+	user	0m12.580s	│	user	0m17.823s
+	sys	0m0.313s	│	sys	0m0.243s
+				│
+	$ keccaksum		│	$ sha1sum
+	real	0m10.438s	│	real	0m3.421s
+	user	0m10.140s	│	user	0m3.157s
+	sys	0m0.287s	│	sys	0m0.253s
+				│
+	$ sha224sum		│	$ sha256sum
+	real	0m8.196s	│	real	0m9.361s
+	user	0m7.910s	│	user	0m9.097s
+	sys	0m0.263s	│	sys	0m0.257s
+				│
+	$ sha384sum		│	$ sha512sum
+	real	0m5.450s	│	real	0m4.507s
+	user	0m5.223s	│	user	0m4.247s
+	sys	0m0.220s	│	sys	0m0.257s
+				│
+	$ md5sum		│	$ md6sum
+	real	0m2.987s	│	real	1m28.873s
+	user	0m2.703s	│	user	1m28.470s
+	sys	0m0.283s	│	sys	0m0.360s
+
+	Note: The times are a bit random, and only one run
+	has been made. "user" is the most interesting data.
+	Additionally, only the pure keccak variants have been
+	tested because the difference is between them and the
+	other are quite small; and of course the other hashing
+	utilities from other packages using other
+	algorithm-families.
 
