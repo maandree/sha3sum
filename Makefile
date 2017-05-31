@@ -81,7 +81,7 @@ command: $(foreach C,$(CMDS),bin/$(C))
 
 bin/%: obj/%.o obj/common.o
 	@mkdir -p bin
-	$(CC) $(FLAGS) $(LDOPTIMISE) -lkeccak -largparser -o $@ $^ $(LDFLAGS)
+	$(CC) $(FLAGS) $(LDOPTIMISE) -o $@ $^ $(LDFLAGS) -lkeccak -largparser
 
 obj/%.o: src/%.c src/*.h
 	@mkdir -p obj
