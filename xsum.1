@@ -1,0 +1,88 @@
+.TH XSUM 1 sha3sum
+.SH NAME
+xsum - Compute and check Xsum message digests
+.SH SYNOPSIS
+.B xsum
+[-u | -l | -b | -c]
+[-R
+.IR rate ]
+[-C
+.IR capacity ]
+[(-N | -O)
+.IR output-size ]
+[(-S | -B)
+.IR state-size ]
+[-W
+.IR word-size ]
+[-Z
+.IR squeeze-count ]
+[-vx]
+.RI [ file \ ...]
+.SH DESCRIPTION
+Print or check Xsum checksums. If no file
+or when the file is -, read standard input.
+.TP
+.B -u
+Output checksums in upper-case hexadecimal representation. (default)
+.TP
+.B -l
+Output checksums in lower-case hexadecimal representation.
+.TP
+.B -b
+Output checksums in binary representation. This suppresses
+the filenames and checksum delimiters. Only the checksums
+are printed.
+.TP
+.B -c
+Read Xsum sums from the file and check them against
+the files on your systems. The input files files
+should be formated as the output of this program, or
+similarly. This is not going to work if any of the
+filenames in the input files starts with a regular
+blank space or horizontal tab space, or if they
+contain a line feed, carriage return or form feed.
+.TP
+.B -x
+Convert input files from hexadecimal for to binary form
+before calculating the checksums.
+.TP
+.B -v
+Print the hashing parameters.
+.P
+The following options change the hashing parameters:
+.TP
+.BI -R\  rate
+Change the rate.
+.TP
+.BI -C\  capacity
+Change the capacity.
+.TP
+.BR -N ,\  -O \ \fIoutput-size\fP
+Change the output size.
+.TP
+.BR -S ,\  -B \ \fIstate-size\fP
+Change the state size.
+.TP
+.BI -W\  word-size
+Change the word size.
+.TP
+.BI -Z\  squeeze-count
+Change the number of squeezes that is performed.
+.SH AUTHORS
+Mattias Andrée
+.RI < maandree@kth.se >
+.SH NOTES
+All commands in the sha3sum package allow changing
+the hashing parameters. However it is only intended
+to be used with
+.BR keccaksum (1),
+or if you know what you are doing; apart from
+.B -N
+which is intended to
+.I always
+be used with
+.BR shake256sum (1),
+.BR shake512sum (1),
+.BR rawshake256sum (1),
+and
+.BR rawshake512sum (1).

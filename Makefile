@@ -1,3 +1,5 @@
+.NONPOSIX:
+
 PREFIX = /usr/local
 BINDIR = $(PREFIX)/bin
 DATADIR = $(PREFIX)/share
@@ -7,7 +9,6 @@ INFODIR = $(DATADIR)/info
 LICENSEDIR = $(DATADIR)/licenses
 
 PKGNAME = sha3sum
-
 
 WARN = -Wall -Wextra -pedantic -Wdouble-promotion -Wformat=2 -Winit-self -Wmissing-include-dirs  \
        -Wtrampolines -Wfloat-equal -Wshadow -Wmissing-prototypes -Wmissing-declarations          \
@@ -46,9 +47,25 @@ shake256sum = SHAKE256
 shake512sum = SHAKE512
 
 
+MAN1 =\
+	keccaksum.1\
+	keccak-224sum.1\
+	keccak-256sum.1\
+	keccak-384sum.1\
+	keccak-512sum.1\
+	sha3-224sum.1\
+	sha3-256sum.1\
+	sha3-384sum.1\
+	sha3-512sum.1\
+	rawshake256sum.1\
+	rawshake512sum.1\
+	shake256sum.1\
+	shake512sum.1
+
+
 
 .PHONY: all
-all: command man
+all: command $(MAN1)
 
 
 .PHONY: command
@@ -63,18 +80,12 @@ obj/%.o: src/%.c src/*.h
 	$(CC) $(FLAGS) $(COPTIMISE) -c -o $@ $< $(CFLAGS) $(CPPFLAGS)
 
 
-
-.PHONY: man
-man: $(foreach C,$(CMDS),bin/$(C).1)
-
-bin/%.1: xsum.texman
-	@mkdir -p bin
-	cat $< | sed -e 's/xsum/$*/g' -e 's/XSUM/$($*)/g' | texman > $@
+%.1: xsum.1
+	u=$$(printf '%s\n' $* | tr a-z A-Z); sed -e 's/xsum/$*/g' -e 's/XSUM/'"$$u"'/g' -e 's/Xsum/$($*)/g' < xsum.1 > $@
 
 
 .PHONY: install
-install: install-command install-copyright install-man
-
+install: install-command install-license install-man
 
 .PHONY: install-command
 install-command: install-keccak install-sha3 install-rawshake install-shake
@@ -96,35 +107,15 @@ install-%sum: bin/%sum
 	install -dm755 -- "$(DESTDIR)$(BINDIR)"
 	install -m755 -- $< "$(DESTDIR)$(BINDIR)/$*sum"
 
-
-.PHONY: install-copyright
-install-copyright: install-license
-
 .PHONY: install-license
 install-license:
 	install -dm755 -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)"
 	install -m644 -- LICENSE "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)/LICENSE"
 
-
 .PHONY: install-man
-install-man: install-keccak-man install-sha3-man install-rawshake-man install-shake-man
-
-.PHONY: install-keccak-man
-install-keccak-man: $(foreach C,$(KECCAK_CMDS),install-$(C)-man)
-
-.PHONY: install-sha3-man
-install-sha3-man: $(foreach C,$(SHA3_CMDS),install-$(C)-man)
-
-.PHONY: install-rawshake-man
-install-rawshake-man: $(foreach C,$(RAWSHAKE_CMDS),install-$(C)-man)
-
-.PHONY: install-shake-man
-install-shake-man: $(foreach C,$(SHAKE_CMDS),install-$(C)-man)
-
-.PHONY: install-%sum-man
-install-%sum-man: bin/%sum.1
-	install -dm755 -- "$(DESTDIR)$(MANDIR)/man1"
-	install -m644 -- $< "$(DESTDIR)$(MANDIR)/man1/$*sum.1"
+install-man: $(MAN1)
+	mkdir -p -- "$(DESTDIR)$(MANDIR)/man1"
+	cp -- $(MAN1) "$(DESTDIR)$(MANDIR)/man1/"
 
 
 
@@ -133,9 +124,9 @@ uninstall:
 	-rm -- $(foreach C,$(CMDS),"$(DESTDIR)$(BINDIR)/$(C)")
 	-rm -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)/LICENSE"
 	-rmdir -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)"
-	-rm -- $(foreach C,$(CMDS),"$(DESTDIR)$(MANDIR)/man1/$(C).1")
+	-cd -- "$(DESTDIR)$(MANDIR)/man1" && rm -- $(MAN1)
 
 
 .PHONY: clean
 clean:
-	-rm -r bin obj
+	-rm -r -- bin obj $(MAN1)
