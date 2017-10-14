@@ -7,5 +7,5 @@ main(int argc, char *argv[])
 	libkeccak_generalised_spec_t spec;
 	libkeccak_generalised_spec_initialise(&spec);
 	libkeccak_spec_shake((libkeccak_spec_t *)&spec, 256, 256);
-	return RUN("SHAKE", "shake256sum", LIBKECCAK_SHAKE_SUFFIX);
+	return RUN(LIBKECCAK_SHAKE_SUFFIX);
 }

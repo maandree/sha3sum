@@ -20,7 +20,7 @@ BIN =\
 	shake512sum
 
 MAN1 = $(BIN:=.1)
-HDR = common.h
+HDR = arg.h common.h
 
 keccak-224sum = Keccak-224
 keccak-256sum = Keccak-256

@@ -1,5 +1,6 @@
 /* See LICENSE file for copyright and license details. */
 #include "common.h"
+#include "arg.h"
 
 #include <sys/stat.h>
 #include <alloca.h>
@@ -13,24 +14,8 @@
 
 
 
-#ifndef STDIN_PATH
-# ifndef DEVDIR
-#  define DEVDIR "/dev"
-# endif
-# define STDIN_PATH DEVDIR"/stdin"
-#endif
-
-
-
 #define USER_ERROR(string)\
-	(fprintf(stderr, "%s: %s.\n", execname, string), 1)
-
-#define ADD(arg, desc, ...)\
-	(arg ? args_add_option(args_new_argumented(NULL, arg, 0, __VA_ARGS__, NULL), desc)\
-	     : args_add_option(args_new_argumentless(NULL, 0, __VA_ARGS__, NULL), desc))
-
-#define LAST(arg)\
-	(args_opts_get(arg)[args_opts_get_count(arg) - 1])
+	(fprintf(stderr, "%s: %s\n", argv0, string), 1)
 
 
 
@@ -57,8 +42,21 @@ static int bad_found = 0;
 /**
  * `argv[0]` from `main`
  */
-static char *execname;
+char *argv0;
 
+
+
+/**
+ * Print usage information and exit
+ */
+static void
+usage(void)
+{
+	fprintf(stderr, "usage: %s [-u  | -l | -b | -c] [-R rate] [-C capacity] "
+	                "[(-N | -O) output-size] [(-S | -B) state-size] [-W word-size] "
+	                "[-Z squeeze-count] [-vx] [file ...]", argv0);
+	exit(1);
+}
 
 
 /**
@@ -187,17 +185,17 @@ hash(const char *restrict filename, const libkeccak_spec_t *restrict spec,
 	length = (size_t)((spec->output + 7) / 8);
 
 	if (!hashsum && (hashsum = malloc(length * sizeof(char)), !hashsum))
-		return perror(execname), 2;
+		return perror(argv0), 2;
 
 	if (!hexsum && (hexsum = malloc((length * 2 + 1) * sizeof(char)), !hexsum))
-		return perror(execname), 2;
+		return perror(argv0), 2;
 
-	if (fd = open(strcmp(filename, "-") ? filename : STDIN_PATH, O_RDONLY), fd < 0)
-		return r = (errno != ENOENT), perror(execname), r + 1;
+	if (fd = open(strcmp(filename, "-") ? filename : "/dev/stdin", O_RDONLY), fd < 0)
+		return r = (errno != ENOENT), perror(argv0), r + 1;
 
 	if ((hex == 0 ? libkeccak_generalised_sum_fd : generalised_sum_fd_hex)
 	    (fd, &state, spec, suffix, squeezes > 1 ? NULL : hashsum))
-		return perror(execname), close(fd), libkeccak_state_fast_destroy(&state), 2;
+		return perror(argv0), close(fd), libkeccak_state_fast_destroy(&state), 2;
 	close(fd);
 
 	if (squeezes > 2) libkeccak_fast_squeeze(&state, squeezes - 2);
@@ -248,17 +246,17 @@ check(const libkeccak_spec_t *restrict spec, long squeezes, const char *restrict
 /**
  * Check checksums from a file
  * 
- * @param   filename        The file to hash
- * @param   spec            Hashing parameters
- * @param   squeezes        The number of squeezes to perform
- * @param   suffix          The message suffix
- * @param   representation  (unused)
- * @param   hex             Whether to use hexadecimal input rather than binary
- * @return                  Zero on success, an appropriate exit value on error
+ * @param   filename  The file to hash
+ * @param   spec      Hashing parameters
+ * @param   squeezes  The number of squeezes to perform
+ * @param   suffix    The message suffix
+ * @param   style     (unused)
+ * @param   hex       Whether to use hexadecimal input rather than binary
+ * @return            Zero on success, an appropriate exit value on error
  */
 static int
 check_checksums(const char *restrict filename, const libkeccak_spec_t *restrict spec,
-                long squeezes, const char *restrict suffix, int representation, int hex)
+                long squeezes, const char *restrict suffix, enum representation style, int hex)
 {
 	struct stat attr;
 	size_t blksize = 4096;
@@ -275,7 +273,7 @@ check_checksums(const char *restrict filename, const libkeccak_spec_t *restrict 
 	size_t hash_n;
 	char c;
 
-	if (fd = open(strcmp(filename, "-") ? filename : STDIN_PATH, O_RDONLY), fd < 0)
+	if (fd = open(strcmp(filename, "-") ? filename : "/dev/stdin", O_RDONLY), fd < 0)
 		goto pfail;
 
 	if (fstat(fd, &attr) == 0) {
@@ -370,32 +368,31 @@ check_checksums(const char *restrict filename, const libkeccak_spec_t *restrict 
 	return 0;
 
 pfail:
-	perror(execname);
+	perror(argv0);
 fail:
 	free(buf);
 	if (fd >= 0)
 		close(fd);
 	return rc;
 
-	(void) representation;
+	(void) style;
 }
 
 
 /**
  * Print the checksum of a file
  * 
- * @param   filename        The file to hash
- * @param   spec            Hashing parameters
- * @param   squeezes        The number of squeezes to perform
- * @param   suffix          The message suffix
- * @param   representation  Either of `REPRESENTATION_BINARY`, `REPRESENTATION_UPPER_CASE`
- *                          and `REPRESENTATION_LOWER_CASE`
- * @param   hex             Whether to use hexadecimal input rather than binary
- * @return                  Zero on success, an appropriate exit value on error
+ * @param   filename  The file to hash
+ * @param   spec      Hashing parameters
+ * @param   squeezes  The number of squeezes to perform
+ * @param   suffix    The message suffix
+ * @param   style     How the hashes shall be represented
+ * @param   hex       Whether to use hexadecimal input rather than binary
+ * @return            Zero on success, an appropriate exit value on error
  */
 static int
 print_checksum(const char *restrict filename, const libkeccak_spec_t *restrict spec,
-               long squeezes, const char *restrict suffix, int representation, int hex)
+               long squeezes, const char *restrict suffix, enum representation style, int hex)
 {
 	size_t length = (size_t)((spec->output + 7) / 8);
 	int r;
@@ -405,10 +402,10 @@ print_checksum(const char *restrict filename, const libkeccak_spec_t *restrict s
 	if ((r = hash(filename, spec, squeezes, suffix, hex)))
 		return r;
 
-	if (representation == REPRESENTATION_UPPER_CASE) {
+	if (style == REPRESENTATION_UPPER_CASE) {
 		libkeccak_behex_upper(hexsum, hashsum, length);
 		printf("%s  %s\n", hexsum, filename);
-	} else if (representation == REPRESENTATION_LOWER_CASE) {
+	} else if (style == REPRESENTATION_LOWER_CASE) {
 		libkeccak_behex_lower(hexsum, hashsum, length);
 		printf("%s  %s\n", hexsum, filename);
 	} else {
@@ -416,23 +413,12 @@ print_checksum(const char *restrict filename, const libkeccak_spec_t *restrict s
 		while (length - ptr) {
 			wrote = write(STDOUT_FILENO, hashsum, length - ptr);
 			if (wrote <= 0)
-				return perror(execname), 2;
+				return perror(argv0), 2;
 			ptr += (size_t)wrote;
 		}
 	}
 
 	return 0;
-}
-
-
-/**
- * Cleanup allocations
- */
-static inline void
-cleanup(void)
-{
-	free(hashsum), hashsum = NULL;
-	free(hexsum), hexsum = NULL;
 }
 
 
@@ -448,48 +434,62 @@ cleanup(void)
 int
 run(int argc, char *argv[], libkeccak_generalised_spec_t *restrict gspec, const char *restrict suffix)
 {
-	int r, verbose = 0, presentation = REPRESENTATION_UPPER_CASE, hex = 0, check = 0;
-	long squeezes = 1;
-	size_t i;
-	libkeccak_spec_t spec;
+	enum representation style = REPRESENTATION_UPPER_CASE;
+	int verbose = 0;
+	int hex = 0;
+	int check = 0;
+	long int squeezes = 1;
 	int (*fun)(const char *restrict filename, const libkeccak_spec_t *restrict spec,
-	           long squeezes, const char *restrict suffix, int representation, int hex);
+	           long squeezes, const char *restrict suffix, enum representation style, int hex);
+	libkeccak_spec_t spec;
+	int r;
 
-	execname = *argv;
+	ARGBEGIN {
+	case 'R':
+		gspec->bitrate = atol(EARGF(usage()));
+		break;
+	case 'C':
+		gspec->capacity = atol(EARGF(usage()));
+		break;
+	case 'N':
+	case 'O':
+		gspec->output = atol(EARGF(usage()));
+		break;
+	case 'S':
+	case 'B':
+		gspec->state_size = atol(EARGF(usage()));
+		break;
+	case 'W':
+		gspec->word_size = atol(EARGF(usage()));
+		break;
+	case 'Z':
+		squeezes = atol(EARGF(usage()));
+		break;
+	case 'u':
+		style = REPRESENTATION_UPPER_CASE;
+		break;
+	case 'l':
+		style = REPRESENTATION_LOWER_CASE;
+		break;
+	case 'b':
+		style = REPRESENTATION_BINARY;
+		break;
+	case 'c':
+		check = 1;
+		break;
+	case 'x':
+		hex = 1;
+		break;
+	case 'v':
+		verbose = 1;
+		break;
+	default:
+		usage();
+	} ARGEND;
+	/* -c has been added because the sha1sum, sha256sum &c have
+	 * it, but I ignore the other crap, mostly because not all
+	 * implemention have them and binary vs text mode is stupid. */
 
-	ADD(NULL,       "Display option summary", "-h", "--help");
-	ADD("RATE",     "Select rate",            "-R", "--bitrate", "--rate");
-	ADD("CAPACITY", "Select capacity",        "-C", "--capacity");
-	ADD("SIZE",     "Select output size",     "-N", "-O", "--output-size", "--output");
-	ADD("SIZE",     "Select state size",      "-S", "-B", "--state-size", "--state");
-	ADD("SIZE",     "Select word size",       "-W", "--word-size", "--word");
-	ADD("COUNT",    "Select squeeze count",   "-Z", "--squeezes");
-	ADD(NULL,       "Use upper-case output",  "-u", "--upper", "--uppercase", "--upper-case");
-	ADD(NULL,       "Use lower-case output",  "-l", "--lower", "--lowercase", "--lower-case");
-	ADD(NULL,       "Use binary output",      "-b", "--binary");
-	ADD(NULL,       "Use hexadecimal input",  "-x", "--hex", "--hex-input");
-	ADD(NULL,       "Check checksums",        "-c", "--check");
-	ADD(NULL,       "Be verbose",             "-v", "--verbose");
-	/* --check has been added because the sha1sum, sha256sum &c have it,
-	 * but I ignore the other crap, mostly because not all implemention
-	 * have them and binary vs text mode is stupid. */
-
-	args_parse(argc, argv);
-
-	if (args_opts_used("-h")) return args_help(0), args_dispose(), 0;
-	if (args_opts_used("-R")) gspec->bitrate    = atol(LAST("-R"));
-	if (args_opts_used("-C")) gspec->capacity   = atol(LAST("-C"));
-	if (args_opts_used("-N")) gspec->output     = atol(LAST("-N"));
-	if (args_opts_used("-S")) gspec->state_size = atol(LAST("-S"));
-	if (args_opts_used("-W")) gspec->word_size  = atol(LAST("-W"));
-	if (args_opts_used("-Z")) squeezes          = atol(LAST("-Z"));
-	if (args_opts_used("-u")) presentation      = REPRESENTATION_UPPER_CASE;
-	if (args_opts_used("-l")) presentation      = REPRESENTATION_LOWER_CASE;
-	if (args_opts_used("-b")) presentation      = REPRESENTATION_BINARY;
-	if (args_opts_used("-x")) hex               = 1;
-	if (args_opts_used("-c")) check             = 1;
-	if (args_opts_used("-v")) verbose           = 1;
-  
 	fun = check ? check_checksums : print_checksum;
 
 	if ((r = make_spec(gspec, &spec)))
@@ -510,17 +510,14 @@ run(int argc, char *argv[], libkeccak_generalised_spec_t *restrict gspec, const 
 		fprintf(stderr,      "suffix: %s\n",  suffix ? suffix : "");
 	}
 
-	if (args_files_count == 0) {
-		r = fun("-", &spec, squeezes, suffix, presentation, hex);
-	} else {
-		for (i = 0; i < (size_t)args_files_count; i++)
-			if ((r = fun(args_files[i], &spec, squeezes, suffix, presentation, hex)))
-				break;
-	}
+	if (!*argv)
+		r = fun("-", &spec, squeezes, suffix, style, hex);
+	for (; *argv; argv++)
+		if ((r = fun(*argv, &spec, squeezes, suffix, style, hex)))
+			break;
 
 done:
-	args_dispose();
-	cleanup();
+	free(hashsum);
+	free(hexsum);
 	return r ? r : bad_found;
 }
-

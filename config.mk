@@ -12,4 +12,4 @@ WARN = -pedantic -Wdouble-promotion -Wformat=2 -Winit-self -Wmissing-include-dir
 
 CFLAGS   = -std=c99 -Wall -Wextra $(WARN) -O3
 CPPFLAGS =
-LDFLAGS  = -s -lkeccak -largparser
+LDFLAGS  = -s -lkeccak
