@@ -122,7 +122,7 @@ make_spec(libkeccak_generalised_spec_t *restrict gspec, libkeccak_spec_t *restri
 {
 	int r;
 
-#define TEST(CASE, STR)  case LIBKECCAK_GENERALISED_SPEC_ERROR_##CASE:  return USER_ERROR(STR)
+#define TEST(CASE, STR) case LIBKECCAK_GENERALISED_SPEC_ERROR_##CASE: return USER_ERROR(STR)
 	if (r = libkeccak_degeneralise_spec(gspec, spec), r) {
 		switch (r) {
 		TEST (STATE_NONPOSITIVE,      "the state size must be positive");
@@ -142,7 +142,7 @@ make_spec(libkeccak_generalised_spec_t *restrict gspec, libkeccak_spec_t *restri
 	}
 #undef TEST
 
-#define TEST(CASE, STR)  case LIBKECCAK_SPEC_ERROR_##CASE:  return USER_ERROR(STR)
+#define TEST(CASE, STR) case LIBKECCAK_SPEC_ERROR_##CASE: return USER_ERROR(STR)
 	if (r = libkeccak_spec_check(spec), r) {
 		switch (r) {
 		TEST (BITRATE_NONPOSITIVE,  "the rate size must be positive");

@@ -49,6 +49,18 @@ all: $(BIN) $(MAN1)
 	u=$$(printf '%s\n' $* | tr a-z A-Z); \
 	sed -e 's/xsum/$*/g' -e 's/XSUM/'"$$u"'/g' -e 's/Xsum/$($*)/g' < xsum.1 > $@
 
+keccak-%sum.c:
+	printf '%s\n' '#include "common.h"' 'KECCAK_MAIN($*)' > $@
+
+sha3-%sum.c:
+	printf '%s\n' '#include "common.h"' 'SHA3_MAIN($*)' > $@
+
+rawshake%sum.c:
+	printf '%s\n' '#include "common.h"' 'RAWSHAKE_MAIN($*)' > $@
+
+shake%sum.c:
+	printf '%s\n' '#include "common.h"' 'SHAKE_MAIN($*)' > $@
+
 install:
 	mkdir -p -- "$(DESTDIR)$(PREFIX)/bin"
 	mkdir -p -- "$(DESTDIR)$(MANPREFIX)/man1"
@@ -64,7 +76,7 @@ uninstall:
 	-rmdir -- "$(DESTDIR)$(PREFIX)/share/licenses/sha3sum"
 
 clean:
-	-rm -r -- $(MAN1) $(BIN)
+	-rm -r -- $(MAN1) $(BIN) keccak-*sum.c sha3-*sum.c rawshake*sum.c shake*sum.c
 
 .SUFFIXES:
 
