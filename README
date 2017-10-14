@@ -2,19 +2,19 @@ NAME
 	sha3sum - Keccak, SHA-3, SHAKE, and RawSHAKE checksum utilities
 
 SYNOPSIS
-	keccaksum      [OPTION]... [--] [FILE]...
-	keccak-224sum  [OPTION]... [--] [FILE]...
-	keccak-256sum  [OPTION]... [--] [FILE]...
-	keccak-384sum  [OPTION]... [--] [FILE]...
-	keccak-512sum  [OPTION]... [--] [FILE]...
-	sha3-224sum    [OPTION]... [--] [FILE]...
-	sha3-256sum    [OPTION]... [--] [FILE]...
-	sha3-384sum    [OPTION]... [--] [FILE]...
-	sha3-512sum    [OPTION]... [--] [FILE]...
-	shake256sum    [OPTION]... [--] [FILE]...
-	shake512sum    [OPTION]... [--] [FILE]...
-	rawshake256sum [OPTION]... [--] [FILE]...
-	rawshake512sum [OPTION]... [--] [FILE]...
+	keccaksum      [option ...] [file ...]
+	keccak-224sum  [option ...] [file ...]
+	keccak-256sum  [option ...] [file ...]
+	keccak-384sum  [option ...] [file ...]
+	keccak-512sum  [option ...] [file ...]
+	sha3-224sum    [option ...] [file ...]
+	sha3-256sum    [option ...] [file ...]
+	sha3-384sum    [option ...] [file ...]
+	sha3-512sum    [option ...] [file ...]
+	shake256sum    [option ...] [file ...]
+	shake512sum    [option ...] [file ...]
+	rawshake256sum [option ...] [file ...]
+	rawshake512sum [option ...] [file ...]
 
 DESCRIPTION
 	Fully configurable byte-orientated checksum utilities
@@ -31,44 +31,42 @@ DESCRIPTION
 	of hashes are returned identically by sha3sum.
 
 OPTIONS
-	-h, --help
-		Display option summary.
 
-	-R, --rate RATE
-		Select rate.
-
-	-C, --capacity CAPACITY
-		Select capacity.
-
-	-N, --output SIZE
-		Select output size.
-
-	-S, --state SIZE
-		Select state size.
-
-	-W, --word SIZE
-		Select word size.
-
-	-Z, --squeezes COUNT
-		Select squeeze count.
-
-	-u, --upper-case
+	-u
 		Use upper-case output.
 
-	-l, --lower-case
+	-l
 		Use lower-case output.
 
-	-b, --binary
+	-b
 		Use binary output.
 
-	-x, --hex-input
-		Use hexadecimal input.
-
-	-c, --check
+	-c
 		Check checksums.
 
-	-v, --verbose
+	-x
+		Use hexadecimal input.
+
+	-v
 		Be verbose.
+
+	-R rate
+		Select rate.
+
+	-C capacity
+		Select capacity.
+
+	-N, -O output-size
+		Select output size.
+
+	-S, -B state-size
+		Select state size.
+
+	-W word-size
+		Select word size.
+
+	-Z squeeze-count
+		Select squeeze count.
 
 RATIONALE
 	We probably do not need this, but it is nice to have
