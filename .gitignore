@@ -1,13 +1,7 @@
-_/
 obj/
 bin/
-\#*\#
-.*
-!.git*
 *~
-*.swo
-*.swp
-*.bak
+*\#*
 *.o
 *.out
 *.so

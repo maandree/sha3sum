@@ -79,8 +79,6 @@ SEE ALSO
 	sha1sum(1), sha224sum(1), sha256sum(1), sha384sum(1),
 	sha512sum(1)
 
-	Full documentation available locally via: info '(sha3sum)'
-
 PERFORMANCE
 	Performance comparison on a 1 GiB file (yes, that is
 	quite large) with /dev/urandom data:

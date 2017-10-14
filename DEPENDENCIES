@@ -1,29 +1,19 @@
 RUNTIME DEPENDENCIES:
 
-	libkeccak
-	argparser
 	libc
+	libkeccak
 
 
 BUILD DEPENDENCIES:
 
-	libkeccak
-	argparser
-	libc
-	auto-auto-complete	(opt-out, for shell tab-completion)
-	texman			(opt-in, for man pages)
-	sed			(opt-in, for man pages)
-	texinfo			(opt-out, for info, pdf, dvi and ps manuals)
-	texlive-core		(opt-in, for pdf, dvi and ps manuals)
-	gcc
-	make
 	coreutils
+	gcc
+	libc
+	libkeccak
+	make
+	sed
 
 
 DEPENDENCY SOURCES:
 
-	libkeccak		https://github.com/maandree/libkeccak
-	argparser		https://github.com/maandree/argparser
-	auto-auto-complete	https://github.com/maandree/auto-auto-complete
-	texman			https://github.com/maandree/texman
-
+	libkeccak	https://github.com/maandree/libkeccak

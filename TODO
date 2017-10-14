@@ -1,2 +1,0 @@
-Try double- or triple-buffer file-reading and hashing and separate it to two threads.
-

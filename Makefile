@@ -1,33 +1,11 @@
-# Copyright © 2013, 2014  Mattias Andrée (maandree@member.fsf.org)
-# 
-# Copying and distribution of this file, with or without modification,
-# are permitted in any medium without royalty provided the copyright
-# notice and this notice are preserved.  This file is offered as-is,
-# without any warranty.
-# 
-# [GNU All Permissive License]
-
-
-# The package path prefix, if you want to install to another root, set DESTDIR to that root
-PREFIX = /usr
-# The command path excluding prefix
-BIN = /bin
-# The resource path excluding prefix
-DATA = /share
-# The command path including prefix
-BINDIR = $(PREFIX)$(BIN)
-# The resource path including prefix
-DATADIR = $(PREFIX)$(DATA)
-# The generic documentation path including prefix
+PREFIX = /usr/local
+BINDIR = $(PREFIX)/bin
+DATADIR = $(PREFIX)/share
 DOCDIR = $(DATADIR)/doc
-# The man page documentation path including prefix
 MANDIR = $(DATADIR)/man
-# The info manual documentation path including prefix
 INFODIR = $(DATADIR)/info
-# The license base path including prefix
 LICENSEDIR = $(DATADIR)/licenses
 
-# The name of the package as it should be installed
 PKGNAME = sha3sum
 
 
@@ -69,11 +47,8 @@ shake512sum = SHAKE512
 
 
 
-.PHONY: default
-default: command shell info
-
 .PHONY: all
-all: command shell doc
+all: command man
 
 
 .PHONY: command
@@ -88,80 +63,17 @@ obj/%.o: src/%.c src/*.h
 	$(CC) $(FLAGS) $(COPTIMISE) -c -o $@ $< $(CFLAGS) $(CPPFLAGS)
 
 
-.PHONY: shell
-shell: bash zsh fish
-
-.PHONY: bash
-bash: $(foreach C,$(CMDS),bin/$(C).bash)
-
-.PHONY: zsh
-zsh: $(foreach C,$(CMDS),bin/$(C).zsh)
-
-.PHONY: fish
-fish: $(foreach C,$(CMDS),bin/$(C).fish)
-
-bin/%.bash: src/completion
-	@mkdir -p bin
-	auto-auto-complete bash --output $@ --source $< command=$*
-
-bin/%.zsh: src/completion
-	@mkdir -p bin
-	auto-auto-complete zsh --output $@ --source $< command=$*
-
-bin/%.fish: src/completion
-	@mkdir -p bin
-	auto-auto-complete fish --output $@ --source $< command=$*
-
-
-.PHONY: doc
-doc: man info pdf dvi ps
 
 .PHONY: man
 man: $(foreach C,$(CMDS),bin/$(C).1)
 
-bin/%.1: doc/xsum.texman
+bin/%.1: xsum.texman
 	@mkdir -p bin
 	cat $< | sed -e 's/xsum/$*/g' -e 's/XSUM/$($*)/g' | texman > $@
 
 
-.PHONY: info
-info: bin/sha3sum.info
-bin/%.info: doc/%.texinfo doc/fdl.texinfo
-	@mkdir -p obj/info bin
-	cd obj/info ; makeinfo ../../$<
-	mv obj/info/$*.info bin/$*.info
-
-.PHONY: pdf
-pdf: bin/sha3sum.pdf
-bin/%.pdf: doc/%.texinfo doc/fdl.texinfo
-	@mkdir -p obj/pdf bin
-	cd obj/pdf/ ; yes X | texi2pdf ../../$<
-	mv obj/pdf/$*.pdf bin/$*.pdf
-
-.PHONY: dvi
-dvi: bin/sha3sum.dvi
-bin/%.dvi: doc/%.texinfo doc/fdl.texinfo
-	@mkdir -p obj/dvi bin
-	cd obj/dvi ; yes X | $(TEXI2DVI) ../../$<
-	mv obj/dvi/$*.dvi bin/$*.dvi
-
-.PHONY: ps
-ps: bin/sha3sum.ps
-bin/%.ps: doc/%.texinfo doc/fdl.texinfo
-	@mkdir -p obj/ps bin
-	cd obj/ps ; yes X | texi2pdf --ps ../../$<
-	mv obj/ps/$*.ps bin/$*.ps
-
-
-
 .PHONY: install
-install: install-base install-shell install-info
-
-.PHONY: install-all
-install-all: install-base install-shell install-doc
-
-.PHONY: install-base
-install-base: install-command install-copyright
+install: install-command install-copyright install-man
 
 
 .PHONY: install-command
@@ -186,97 +98,13 @@ install-%sum: bin/%sum
 
 
 .PHONY: install-copyright
-install-copyright: install-copying install-license
-
-.PHONY: install-copying
-install-copying:
-	install -dm755 -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)"
-	install -m644 -- COPYING "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)/COPYING"
+install-copyright: install-license
 
 .PHONY: install-license
 install-license:
 	install -dm755 -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)"
 	install -m644 -- LICENSE "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)/LICENSE"
 
-
-.PHONY: install-shell
-install-shell: install-bash install-fish install-zsh
-
-.PHONY: install-keccak-shell
-install-keccak-shell: install-keccak-bash install-keccak-fish install-keccak-zsh
-
-.PHONY: install-sha3-shell
-install-sha3-shell: install-sha3-bash install-sha3-fish install-sha3-zsh
-
-.PHONY: install-rawshake-shell
-install-rawshake-shell: install-rawshake-bash install-rawshake-fish install-rawshake-zsh
-
-.PHONY: install-shake-shell
-install-shake-shell: install-shake-bash install-shake-fish install-shake-zsh
-
-.PHONY: install-bash
-install-bash: install-keccak-bash install-sha3-bash install-rawshake-bash install-shake-bash
-
-.PHONY: install-fish
-install-fish: install-keccak-fish install-sha3-fish install-rawshake-fish install-shake-fish
-
-.PHONY: install-zsh
-install-zsh: install-keccak-zsh install-sha3-zsh install-rawshake-zsh install-shake-zsh
-
-.PHONY: install-keccak-bash
-install-keccak-bash: $(foreach C,$(KECCAK_CMDS),install-$(C)-bash)
-
-.PHONY: install-keccak-fish
-install-keccak-fish: $(foreach C,$(KECCAK_CMDS),install-$(C)-fish)
-
-.PHONY: install-keccak-zsh
-install-keccak-zsh: $(foreach C,$(KECCAK_CMDS),install-$(C)-zsh)
-
-.PHONY: install-sha3-bash
-install-sha3-bash: $(foreach C,$(SHA3_CMDS),install-$(C)-bash)
-
-.PHONY: install-sha3-fish
-install-sha3-fish: $(foreach C,$(SHA3_CMDS),install-$(C)-fish)
-
-.PHONY: install-sha3-zsh
-install-sha3-zsh: $(foreach C,$(SHA3_CMDS),install-$(C)-zsh)
-
-.PHONY: install-rawshake-bash
-install-rawshake-bash: $(foreach C,$(RAWSHAKE_CMDS),install-$(C)-bash)
-
-.PHONY: install-rawshake-fish
-install-rawshake-fish: $(foreach C,$(RAWSHAKE_CMDS),install-$(C)-fish)
-
-.PHONY: install-rawshake-zsh
-install-rawshake-zsh: $(foreach C,$(RAWSHAKE_CMDS),install-$(C)-zsh)
-
-.PHONY: install-shake-bash
-install-shake-bash: $(foreach C,$(SHAKE_CMDS),install-$(C)-bash)
-
-.PHONY: install-shake-fish
-install-shake-fish: $(foreach C,$(SHAKE_CMDS),install-$(C)-fish)
-
-.PHONY: install-shake-zsh
-install-shake-zsh: $(foreach C,$(SHAKE_CMDS),install-$(C)-zsh)
-
-.PHONY: install-%sum-bash
-install-%sum-bash: bin/$*sum.bash
-	install -dm755 -- "$(DESTDIR)$(DATADIR)/bash-completion/completions"
-	install -m644 -- $< "$(DESTDIR)$(DATADIR)/bash-completion/completions/$*sum"
-
-.PHONY: install-%sum-fish
-install-%sum-fish: bin/$*sum.fish
-	install -dm755 -- "$(DESTDIR)$(DATADIR)/fish/completions"
-	install -m644 -- $< "$(DESTDIR)$(DATADIR)/fish/completions/$*sum.fish"
-
-.PHONY: install-%sum-zsh
-install-%sum-zsh: bin/$*sum.zsh
-	install -dm755 -- "$(DESTDIR)$(DATADIR)/zsh/site-functions"
-	install -m644 -- $< "$(DESTDIR)$(DATADIR)/zsh/site-functions/_$*sum"
-
-
-.PHONY: install-doc
-install-doc: install-man install-info install-pdf install-dvi install-ps
 
 .PHONY: install-man
 install-man: install-keccak-man install-sha3-man install-rawshake-man install-shake-man
@@ -298,46 +126,16 @@ install-%sum-man: bin/%sum.1
 	install -dm755 -- "$(DESTDIR)$(MANDIR)/man1"
 	install -m644 -- $< "$(DESTDIR)$(MANDIR)/man1/$*sum.1"
 
-.PHONY: install-info
-install-info: bin/sha3sum.info
-	install -dm755 -- "$(DESTDIR)$(INFODIR)"
-	install -m644 -- $< "$(DESTDIR)$(INFODIR)/$(PKGNAME).info"
-
-.PHONY: install-pdf
-install-pdf: bin/sha3sum.pdf
-	install -dm755 -- "$(DESTDIR)$(DOCDIR)"
-	install -m644 -- $< "$(DESTDIR)$(DOCDIR)/$(PKGNAME).pdf"
-
-.PHONY: install-dvi
-install-dvi: bin/sha3sum.dvi
-	install -dm755 -- "$(DESTDIR)$(DOCDIR)"
-	install -m644 -- $< "$(DESTDIR)$(DOCDIR)/$(PKGNAME).dvi"
-
-.PHONY: install-ps
-install-ps: bin/sha3sum.ps
-	install -dm755 -- "$(DESTDIR)$(DOCDIR)"
-	install -m644 -- $< "$(DESTDIR)$(DOCDIR)/$(PKGNAME).ps"
-
 
 
 .PHONY: uninstall
 uninstall:
 	-rm -- $(foreach C,$(CMDS),"$(DESTDIR)$(BINDIR)/$(C)")
-	-rm -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)/COPYING"
 	-rm -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)/LICENSE"
 	-rmdir -- "$(DESTDIR)$(LICENSEDIR)/$(PKGNAME)"
-	-rm -- $(foreach C,$(CMDS),"$(DESTDIR)$(DATADIR)/bash-completion/completions/$(C)")
-	-rm -- $(foreach C,$(CMDS),"$(DESTDIR)$(DATADIR)/fish/completions/$(C).fish")
-	-rm -- $(foreach C,$(CMDS),"$(DESTDIR)$(DATADIR)/zsh/site-functions/_$(C)")
 	-rm -- $(foreach C,$(CMDS),"$(DESTDIR)$(MANDIR)/man1/$(C).1")
-	-rm -- "$(DESTDIR)$(INFODIR)/$(PKGNAME).info"
-	-rm -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME).pdf"
-	-rm -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME).dvi"
-	-rm -- "$(DESTDIR)$(DOCDIR)/$(PKGNAME).ps"
-
 
 
 .PHONY: clean
 clean:
 	-rm -r bin obj
-
