@@ -24,12 +24,6 @@ DESCRIPTION
 	This utilities can generate checksums or verify the
 	checksums of files.
 
-	The implementation of the algorithms is done
-	in libkeccak(7) <https://github.com/maandree/libkeccak>.
-	To verify that this program is correct, verify
-	libkeccak(7) using its test suite and check that some
-	of hashes are returned identically by sha3sum.
-
 OPTIONS
 
 	-u

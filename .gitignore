@@ -9,3 +9,4 @@
 /sha3-*sum.c
 /rawshake*sum.c
 /shake*sum.c
+/.testdir/

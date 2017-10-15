@@ -61,6 +61,9 @@ rawshake%sum.c:
 shake%sum.c:
 	printf '%s\n' '#include "common.h"' 'SHAKE_MAIN($*)' > $@
 
+check:
+	./test
+
 install:
 	mkdir -p -- "$(DESTDIR)$(PREFIX)/bin"
 	mkdir -p -- "$(DESTDIR)$(MANPREFIX)/man1"
@@ -76,8 +79,8 @@ uninstall:
 	-rmdir -- "$(DESTDIR)$(PREFIX)/share/licenses/sha3sum"
 
 clean:
-	-rm -r -- $(MAN1) $(BIN) keccak-*sum.c sha3-*sum.c rawshake*sum.c shake*sum.c
+	-rm -r -- $(MAN1) $(BIN) keccak-*sum.c sha3-*sum.c rawshake*sum.c shake*sum.c .testdir
 
 .SUFFIXES:
 
-.PHONY: all install uninstall clean
+.PHONY: all check install uninstall clean
