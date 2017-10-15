@@ -24,7 +24,7 @@ test "$(printf '' | ./keccak-512sum)" = '0EAB42DE4C3CEB9235FC91ACFFE746B29C29A8C
 
 test "$(printf '' | ./sha3-224sum -u)" = '6B4E03423667DBB73B6E15454F0EB1ABD4597F9A1B078E3F5B5A6BC7  -'
 test "$(printf '' | ./sha3-224sum -l)" = '6b4e03423667dbb73b6e15454f0eb1abd4597f9a1b078e3f5b5a6bc7  -'
-test "$(printf '' | ./sha3-224sum -b)" = "$(printf '\x6B\x4E\x03\x42\x36\x67\xDB\xB7\x3B\x6E\x15\x45\x4F\x0E\xB1\xAB\xD4\x59\x7F\x9A\x1B\x07\x8E\x3F\x5B\x5A\x6B\xC7')"
+test "$(printf '' | ./sha3-224sum -b)" = "$(printf '\153\116\003\102\066\147\333\267\073\156\025\105\117\016\261\253\324\131\177\232\033\007\216\077\133\132\153\307')"
 
 
 test "$(printf '' | ./rawshake256sum -N 128)" = '3A1108D4A90A31B85A10BDCE77F4BFBD  -'

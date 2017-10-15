@@ -73,13 +73,12 @@ install: $(BIN) $(MAN1)
 	cp -- LICENSE "$(DESTDIR)$(PREFIX)/share/licenses/sha3sum/"
 
 uninstall:
-	-cd -- "$(DESTDIR)$(PREFIX)/bin" && rm -- $(BIN)
-	-cd -- "$(DESTDIR)$(MANPREFIX)/man1" && rm -- $(MAN1)
-	-rm -- "$(DESTDIR)$(PREFIX)/share/licenses/sha3sum/LICENSE"
-	-rmdir -- "$(DESTDIR)$(PREFIX)/share/licenses/sha3sum"
+	-cd -- "$(DESTDIR)$(PREFIX)/bin" && rm -f -- $(BIN)
+	-cd -- "$(DESTDIR)$(MANPREFIX)/man1" && rm -f -- $(MAN1)
+	-rm -rf -- "$(DESTDIR)$(PREFIX)/share/licenses/sha3sum"
 
 clean:
-	-rm -r -- $(MAN1) $(BIN) keccak-*sum.c sha3-*sum.c rawshake*sum.c shake*sum.c .testdir
+	-rm -rf -- $(MAN1) $(BIN) keccak-*sum.c sha3-*sum.c rawshake*sum.c shake*sum.c .testdir
 
 .SUFFIXES:
 
