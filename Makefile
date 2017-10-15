@@ -61,7 +61,7 @@ rawshake%sum.c:
 shake%sum.c:
 	printf '%s\n' '#include "common.h"' 'SHAKE_MAIN($*)' > $@
 
-check:
+check: $(BIN)
 	./test
 
 install: $(BIN) $(MAN1)
