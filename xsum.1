@@ -8,9 +8,9 @@ xsum - Compute and check Xsum message digests
 .IR rate ]
 [-C
 .IR capacity ]
-[(-N | -O)
+[-N
 .IR output-size ]
-[(-S | -B)
+[-S
 .IR state-size ]
 [-W
 .IR word-size ]
@@ -68,6 +68,16 @@ Change the word size.
 .TP
 .BI -Z\  squeeze-count
 Change the number of squeezes that is performed.
+.SH EXIT STATUS
+.TP
+0
+Successful completion.
+.TP
+1
+Checksums did not match or a file did not exist.
+.TP
+2
+An error occurrsed.
 .SH AUTHORS
 Mattias Andrée
 .RI < maandree@kth.se >
