@@ -45,9 +45,9 @@ all: $(BIN) $(MAN1)
 %.o: %.c $(HDR)
 	$(CC) -c -o $@ $< $(CFLAGS) $(CPPFLAGS)
 
-%.1: xsum.1
+%.1: xsum.man
 	u=$$(printf '%s\n' $* | tr a-z A-Z); \
-	sed -e 's/xsum/$*/g' -e 's/XSUM/'"$$u"'/g' -e 's/Xsum/$($*)/g' < xsum.1 > $@
+	sed -e 's/xsum/$*/g' -e 's/XSUM/'"$$u"'/g' -e 's/Xsum/$($*)/g' < xsum.man > $@
 
 keccak-%sum.c:
 	printf '%s\n' '#include "common.h"' 'KECCAK_MAIN($*)' > $@
@@ -64,7 +64,7 @@ shake%sum.c:
 check:
 	./test
 
-install:
+install: $(BIN) $(MAN1)
 	mkdir -p -- "$(DESTDIR)$(PREFIX)/bin"
 	mkdir -p -- "$(DESTDIR)$(MANPREFIX)/man1"
 	mkdir -p -- "$(DESTDIR)$(PREFIX)/share/licenses/sha3sum"

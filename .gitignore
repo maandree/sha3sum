@@ -3,7 +3,6 @@
 *.o
 *.su
 *.1
-!/xsum.1
 /*sum
 /keccak-*sum.c
 /sha3-*sum.c
