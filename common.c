@@ -169,15 +169,20 @@ generalised_sum_fd_hex(int fd, libkeccak_state_t *restrict state,
 		r = w = 0;
 		while (r < (size_t)got) {
 			c = chunk[r++];
-			if (c <= ' ')
-				continue;
-			buf = (buf << 4) | ((c & 15) + (c > '9' ? 9 : 0));
-			if ((even ^= 1))
-				chunk[w++] = buf;
+			if (isxdigit(c)) {
+				buf = (buf << 4) | ((c & 15) + (c > '9' ? 9 : 0));
+				if ((even ^= 1))
+					chunk[w++] = buf;
+			} else if (!isspace(c)) {
+				user_error("file is malformated");
+			}
 		}
 		if (libkeccak_fast_update(state, chunk, w) < 0)
 			return -1;
 	}
+
+	if (!even)
+		user_error("file is malformated");
 
 	return libkeccak_fast_digest(state, NULL, 0, 0, suffix, hash);
 }
