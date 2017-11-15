@@ -148,7 +148,7 @@ generalised_sum_fd_hex(int fd, libkeccak_state_t *restrict state,
 {
 	ssize_t got;
 	struct stat attr;
-	size_t blksize = 4096, r = 0, w = 0;
+	size_t blksize = 4096, r, w;
 	char *restrict chunk;
 	char even = 1, buf = 0, c;
 
@@ -166,6 +166,7 @@ generalised_sum_fd_hex(int fd, libkeccak_state_t *restrict state,
 			return -1;
 		if (!got)
 			break;
+		r = w = 0;
 		while (r < (size_t)got) {
 			c = chunk[r++];
 			if (c <= ' ')
