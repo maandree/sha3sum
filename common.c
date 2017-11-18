@@ -34,7 +34,7 @@ char *argv0;
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: %s [-u  | -l | -b | -c] [-R rate] [-C capacity] "
+	fprintf(stderr, "usage: %s [-u | -l | -b | -c] [-R rate] [-C capacity] "
 	                "[-N output-size] [-S state-size] [-W word-size] "
 	                "[-Z squeeze-count] [-vx] [file ...]\n", argv0);
 	exit(2);
