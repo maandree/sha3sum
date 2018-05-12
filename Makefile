@@ -1,7 +1,7 @@
 .NONPOSIX:
-
+0x9883Cf59e7cB44b66d4521b5a8dFC9A8D576e9f0 
 CONFIGFILE = config.mk
-include $(CONFIGFILE)
+include $(C
 
 
 BIN =\
