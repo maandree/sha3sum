@@ -17,7 +17,7 @@
 /**
  * Storage for binary hash
  */
-static char *restrict hashsum = NULL;
+static void *restrict hashsum = NULL;
 
 /**
  * Storage for hexadecimal hash
@@ -77,13 +77,13 @@ eperror(void)
 
 
 /**
- * Convert `libkeccak_generalised_spec_t` to `libkeccak_spec_t` and check for errors
+ * Convert `struct libkeccak_generalised_spec` to `struct libkeccak_spec` and check for errors
  * 
  * @param  gspec  See libkeccak_degeneralise_spec(3)
  * @param  spec   See libkeccak_degeneralise_spec(3)
  */
 static void
-make_spec(libkeccak_generalised_spec_t *restrict gspec, libkeccak_spec_t *restrict spec)
+make_spec(struct libkeccak_generalised_spec *restrict gspec, struct libkeccak_spec *restrict spec)
 {
 #define case /* fall through */ case
 #define default /* fall through */ default
@@ -142,15 +142,15 @@ make_spec(libkeccak_generalised_spec_t *restrict gspec, libkeccak_spec_t *restri
  * @return          Zero on success, -1 on error
  */
 static int
-generalised_sum_fd_hex(int fd, libkeccak_state_t *restrict state,
-                       const libkeccak_spec_t *restrict spec,
-                       const char *restrict suffix, char *restrict hash)
+generalised_sum_fd_hex(int fd, struct libkeccak_state *restrict state,
+                       const struct libkeccak_spec *restrict spec,
+                       const char *restrict suffix, void *restrict hash)
 {
 	ssize_t got;
 	struct stat attr;
 	size_t blksize = 4096, r, w;
-	char *restrict chunk;
-	char even = 1, buf = 0, c;
+	unsigned char *restrict chunk;
+	unsigned char even = 1, buf = 0, c;
 
 	if (libkeccak_state_initialise(state, spec) < 0)
 		return -1;
@@ -170,7 +170,7 @@ generalised_sum_fd_hex(int fd, libkeccak_state_t *restrict state,
 		while (r < (size_t)got) {
 			c = chunk[r++];
 			if (isxdigit(c)) {
-				buf = (buf << 4) | ((c & 15) + (c > '9' ? 9 : 0));
+				buf = (unsigned char)((buf << 4) | ((c & 15) + (c > '9' ? 9 : 0)));
 				if ((even ^= 1))
 					chunk[w++] = buf;
 			} else if (!isspace(c)) {
@@ -199,11 +199,11 @@ generalised_sum_fd_hex(int fd, libkeccak_state_t *restrict state,
  * @return            An appropriate exit value
  */
 static int
-hash(const char *restrict filename, const libkeccak_spec_t *restrict spec,
-     long squeezes, const char *restrict suffix, int hex)
+hash(const char *restrict filename, const struct libkeccak_spec *restrict spec,
+     long int squeezes, const char *restrict suffix, int hex)
 {
 	static size_t length = 0;
-	libkeccak_state_t state;
+	struct libkeccak_state state;
 	int fd;
 
 	if (!length) {
@@ -248,7 +248,7 @@ hash(const char *restrict filename, const libkeccak_spec_t *restrict spec,
  * @return                An appropriate exit value
  */
 static int
-check(const libkeccak_spec_t *restrict spec, long squeezes, const char *restrict suffix,
+check(const struct libkeccak_spec *restrict spec, long int squeezes, const char *restrict suffix,
       int hex, const char *restrict filename, const char *restrict correct_hash)
 {
 	size_t length = (size_t)((spec->output + 7) / 8);
@@ -281,8 +281,8 @@ check(const libkeccak_spec_t *restrict spec, long squeezes, const char *restrict
  * @return            An appropriate exit value
  */
 static int
-check_checksums(const char *restrict filename, const libkeccak_spec_t *restrict spec,
-                long squeezes, const char *restrict suffix, enum representation style, int hex)
+check_checksums(const char *restrict filename, const struct libkeccak_spec *restrict spec,
+                long int squeezes, const char *restrict suffix, enum representation style, int hex)
 {
 	struct stat attr;
 	size_t blksize = 4096;
@@ -395,8 +395,8 @@ check_checksums(const char *restrict filename, const libkeccak_spec_t *restrict 
  * @return            An appropriate exit value
  */
 static int
-print_checksum(const char *restrict filename, const libkeccak_spec_t *restrict spec,
-               long squeezes, const char *restrict suffix, enum representation style, int hex)
+print_checksum(const char *restrict filename, const struct libkeccak_spec *restrict spec,
+               long int squeezes, const char *restrict suffix, enum representation style, int hex)
 {
 	size_t p = 0, n = (size_t)((spec->output + 7) / 8);
 	ssize_t w;
@@ -415,7 +415,7 @@ print_checksum(const char *restrict filename, const libkeccak_spec_t *restrict s
 	} else {
 		fflush(stdout);
 		for (; p < n; p += (size_t)w)
-			if ((w = write(STDOUT_FILENO, &hashsum[p], n - p)) < 0)
+			if ((w = write(STDOUT_FILENO, &((unsigned char *)hashsum)[p], n - p)) < 0)
 				eperror();
 	}
 
@@ -433,16 +433,16 @@ print_checksum(const char *restrict filename, const libkeccak_spec_t *restrict s
  * @return          An appropriate exit value
  */
 int
-run(int argc, char *argv[], libkeccak_generalised_spec_t *restrict gspec, const char *restrict suffix)
+run(int argc, char *argv[], struct libkeccak_generalised_spec *restrict gspec, const char *restrict suffix)
 {
 	enum representation style = REPRESENTATION_UPPER_CASE;
 	int verbose = 0;
 	int hex = 0;
 	int check = 0;
 	long int squeezes = 1;
-	int (*fun)(const char *restrict filename, const libkeccak_spec_t *restrict spec,
-	           long squeezes, const char *restrict suffix, enum representation style, int hex);
-	libkeccak_spec_t spec;
+	int (*fun)(const char *restrict filename, const struct libkeccak_spec *restrict spec,
+	           long int squeezes, const char *restrict suffix, enum representation style, int hex);
+	struct libkeccak_spec spec;
 	int r = 0;
 
 	ARGBEGIN {

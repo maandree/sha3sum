@@ -4,19 +4,19 @@
 
 #define COMMON_MAIN(CONFIGURATION, SUFFIX)\
 	int main(int argc, char *argv[]) {\
-		libkeccak_generalised_spec_t spec;\
+		struct libkeccak_generalised_spec spec;\
 		libkeccak_generalised_spec_initialise(&spec);\
 		CONFIGURATION;\
 		return run(argc, argv, &spec, SUFFIX);\
 	}
 #define KECCAK_MAIN(N)\
-	COMMON_MAIN(libkeccak_spec_sha3((libkeccak_spec_t *)&spec, N), "")
+	COMMON_MAIN(libkeccak_spec_sha3((struct libkeccak_spec *)&spec, N), "")
 #define SHA3_MAIN(N)\
-	COMMON_MAIN(libkeccak_spec_sha3((libkeccak_spec_t *)&spec, N), LIBKECCAK_SHA3_SUFFIX)
+	COMMON_MAIN(libkeccak_spec_sha3((struct libkeccak_spec *)&spec, N), LIBKECCAK_SHA3_SUFFIX)
 #define RAWSHAKE_MAIN(N)\
-	COMMON_MAIN(libkeccak_spec_rawshake((libkeccak_spec_t *)&spec, N, N), LIBKECCAK_RAWSHAKE_SUFFIX)
+	COMMON_MAIN(libkeccak_spec_rawshake((struct libkeccak_spec *)&spec, N, N), LIBKECCAK_RAWSHAKE_SUFFIX)
 #define SHAKE_MAIN(N)\
-	COMMON_MAIN(libkeccak_spec_shake((libkeccak_spec_t *)&spec, N, N), LIBKECCAK_SHAKE_SUFFIX)
+	COMMON_MAIN(libkeccak_spec_shake((struct libkeccak_spec *)&spec, N, N), LIBKECCAK_SHAKE_SUFFIX)
 
 
 /**
@@ -49,4 +49,4 @@ enum representation {
  * @param   suffix  Message suffix
  * @return          An appropriate exit value
  */
-int run(int argc, char *argv[], libkeccak_generalised_spec_t *restrict gspec, const char *restrict suffix);
+int run(int argc, char *argv[], struct libkeccak_generalised_spec *restrict gspec, const char *restrict suffix);
