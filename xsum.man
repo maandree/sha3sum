@@ -77,7 +77,7 @@ Successful completion.
 Checksums did not match or a file did not exist.
 .TP
 2
-An error occurrsed.
+An error occurred.
 .SH AUTHORS
 Mattias Andrée
 .RI < maandree@kth.se >
