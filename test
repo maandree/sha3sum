@@ -133,8 +133,8 @@ printf 'bet'   > .testdir/b
 printf 'gimel' > .testdir/c
 printf 'dalet' > .testdir/d
 
-./sha3-224sum .testdir/a .testdir/b .testdir/c .testdir/d > .testdir/sums-1
-./sha3-224sum .testdir/b .testdir/a .testdir/d .testdir/c > .testdir/sums-2
+./sha3-224sum -u .testdir/a .testdir/b .testdir/c .testdir/d > .testdir/sums-1
+./sha3-224sum -l .testdir/b .testdir/a .testdir/d .testdir/c > .testdir/sums-2
 
 ./sha3-224sum -c .testdir/sums-1
 ./sha3-224sum -c .testdir/sums-2
@@ -158,14 +158,14 @@ test $x = 1
 
 printf 'dalet' > .testdir/d
 
-./sha3-224sum -z .testdir/a .testdir/b .testdir/c .testdir/d > .testdir/sums-1z
-./sha3-224sum -z .testdir/b .testdir/a .testdir/d .testdir/c > .testdir/sums-2z
+./sha3-224sum -zu .testdir/a .testdir/b .testdir/c .testdir/d > .testdir/sums-1z
+./sha3-224sum -lz .testdir/b .testdir/a .testdir/d .testdir/c > .testdir/sums-2z
 
 ./sha3-224sum -cz .testdir/sums-1z
-./sha3-224sum -cz .testdir/sums-2z
+./sha3-224sum -zc .testdir/sums-2z
 
 ./sha3-224sum -cz < .testdir/sums-1z
-./sha3-224sum -cz < .testdir/sums-2z
+./sha3-224sum -zc < .testdir/sums-2z
 
 rm .testdir/d
 set +e
