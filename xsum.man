@@ -4,6 +4,8 @@ xsum - Compute and check Xsum message digests
 .SH SYNOPSIS
 .B xsum
 [-u | -l | -b | -c]
+\# ONLY SHA3: [-a
+\# ONLY SHA3: .IR bits ]
 [-R
 .IR rate ]
 [-C
@@ -44,6 +46,10 @@ contain a line feed, carriage return or form feed,
 unless the
 .B -z
 option is also used.
+\# ONLY SHA3: .TP
+\# ONLY SHA3: .BI -a\  bits
+\# ONLY SHA3: Select version of the SHA3 algorithm. Valid values
+\# ONLY SHA3: are 224 (default), 256, 384, and 512.
 .TP
 .B -v
 Print the hashing parameters.

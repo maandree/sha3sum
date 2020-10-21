@@ -452,10 +452,11 @@ print_checksum(const char *restrict filename, const struct libkeccak_spec *restr
  * @param   argv    The second argument from `main`
  * @param   gspec   The default algorithm parameters
  * @param   suffix  Message suffix
+ * @param   with_a  Whether the -a option should be recognised (but ignored)
  * @return          An appropriate exit value
  */
 int
-run(int argc, char *argv[], struct libkeccak_generalised_spec *restrict gspec, const char *restrict suffix)
+run(int argc, char *argv[], struct libkeccak_generalised_spec *restrict gspec, const char *restrict suffix, int with_a)
 {
 	enum representation style = REPRESENTATION_UPPER_CASE;
 	int verbose = 0, hex = 0, check = 0, nuls = 0;
@@ -465,6 +466,7 @@ run(int argc, char *argv[], struct libkeccak_generalised_spec *restrict gspec, c
 	struct libkeccak_spec spec;
 	int r = 0;
 
+	/* Note: when options are added or removed, also update sha3sum.c */
 	ARGBEGIN {
 	case 'R':
 		gspec->bitrate = atol(EARGF(usage()));
@@ -507,10 +509,15 @@ run(int argc, char *argv[], struct libkeccak_generalised_spec *restrict gspec, c
 	case 'z':
 		nuls = 1;
 		break;
+	case 'a':
+		if (!with_a)
+			usage();
+		(void) EARGF(usage());
+		break;
 	default:
 		usage();
 	} ARGEND;
-	/* -cz has been added because the sha1sum, sha256sum &c have
+	/* -cz has been added because the sha1sum, sha256sum, &c have
 	 * it, but I ignore the other crap, mostly because not all
 	 * implemention have them and binary vs text mode is stupid. */
 

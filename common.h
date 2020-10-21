@@ -7,7 +7,7 @@
 		struct libkeccak_generalised_spec spec;\
 		libkeccak_generalised_spec_initialise(&spec);\
 		CONFIGURATION;\
-		return run(argc, argv, &spec, SUFFIX);\
+		return run(argc, argv, &spec, SUFFIX, 0);\
 	}
 #define KECCAK_MAIN(N)\
 	COMMON_MAIN(libkeccak_spec_sha3((struct libkeccak_spec *)&spec, N), "")
@@ -47,6 +47,7 @@ enum representation {
  * @param   argv    The second argument from `main`
  * @param   gspec   The default algorithm parameters
  * @param   suffix  Message suffix
+ * @param   with_a  Whether the -a option should be recognised (but ignored)
  * @return          An appropriate exit value
  */
-int run(int argc, char *argv[], struct libkeccak_generalised_spec *restrict gspec, const char *restrict suffix);
+int run(int argc, char *argv[], struct libkeccak_generalised_spec *restrict gspec, const char *restrict suffix, int with_a);
