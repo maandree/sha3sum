@@ -156,7 +156,32 @@ set -e
 test $x = 1
 
 
-## TODO add tests with -z
+printf 'dalet' > .testdir/d
+
+./sha3-224sum -z .testdir/a .testdir/b .testdir/c .testdir/d > .testdir/sums-1z
+./sha3-224sum -z .testdir/b .testdir/a .testdir/d .testdir/c > .testdir/sums-2z
+
+./sha3-224sum -cz .testdir/sums-1z
+./sha3-224sum -cz .testdir/sums-2z
+
+./sha3-224sum -cz < .testdir/sums-1z
+./sha3-224sum -cz < .testdir/sums-2z
+
+rm .testdir/d
+set +e
+./sha3-224sum -cz .testdir/sums-1z
+x=$?
+set -e
+test $x = 1
+printf '' > .testdir/d
+set +e
+./sha3-224sum -cz .testdir/sums-1z
+x=$?
+set -e
+test $x = 1
+
+! test "$(./sha3-224sum < .testdir/sums-1z)" = "$(./sha3-224sum < .testdir/sums-1)"
+test "$(./sha3-224sum < .testdir/sums-1z)" = "$(tr '\n' '\0' < .testdir/sums-1 | ./sha3-224sum)"
 
 
 rm -r .testdir
