@@ -3,6 +3,7 @@
 CONFIGFILE = config.mk
 include $(CONFIGFILE)
 
+LIBEXECDIR = $(PREFIX)/$(LIBEXEC)
 
 BIN =\
 	keccaksum\
@@ -40,12 +41,19 @@ shake512sum = SHAKE512
 
 
 all: $(BIN) $(MAN1)
+mcb: sha3sum-mcb $(MAN1)
+
+sha3sum-mcb.c: commands.h
 
 %: %.o common.o
-	$(CC) -o $@ $^ $(LDFLAGS)
+	$(CC) -o $@ $< common.o $(LDFLAGS)
 
 %.o: %.c $(HDR)
 	$(CC) -c -o $@ $< $(CFLAGS) $(CPPFLAGS)
+
+%.bo: %.c $(HDR)
+	$(CC) -c -o $@ $< $(CFLAGS) $(CPPFLAGS) \
+	-Dmain="main_$$(printf '%s\n' $* | tr - _)(int, char *[]); int main_$$(printf '%s\n' $* | tr - _)"
 
 %.1: xsum.man
 	u=$$(printf '%s\n' $* | tr a-z A-Z); \
@@ -55,6 +63,13 @@ all: $(BIN) $(MAN1)
 	else \
 		sed -i '/^\\# ONLY SHA3: /d' $@; \
 	fi
+
+commands.h: Makefile
+	(printf '%s' '#define LIST_COMMANDS(_)' && printf '\\\n\t_(%s)' $(BIN) && printf '\n') \
+	| sed 's/_(\(.*\))/_("\1", main_\1)/' | sed 's/\(main_.*\)-/\1_/' > $@
+
+sha3sum-mcb: sha3sum-mcb.o common.o $(BIN:=.bo)
+	$(CC) -o $@ sha3sum-mcb.o common.o $(BIN:=.bo) $(LDFLAGS)
 
 keccak-%sum.c:
 	printf '%s\n' '#include "common.h"' 'KECCAK_MAIN($*)' > $@
@@ -79,13 +94,25 @@ install: $(BIN) $(MAN1)
 	cp -- $(MAN1) "$(DESTDIR)$(MANPREFIX)/man1/"
 	cp -- LICENSE "$(DESTDIR)$(PREFIX)/share/licenses/sha3sum/"
 
+install-mcb: sha3sum-mcb $(MAN1)
+	mkdir -p -- "$(DESTDIR)$(PREFIX)/bin"
+	mkdir -p -- "$(DESTDIR)$(LIBEXECDIR)"
+	mkdir -p -- "$(DESTDIR)$(MANPREFIX)/man1"
+	mkdir -p -- "$(DESTDIR)$(PREFIX)/share/licenses/sha3sum"
+	set -e && cd "$(DESTDIR)$(PREFIX)/bin/" && \
+	for f in $(BIN); do ln -sf -- ../$(LIBEXEC)/sha3sum "$$f"; done
+	cp -- sha3sum-mcb "$(DESTDIR)$(LIBEXECDIR)/sha3sum"
+	cp -- $(MAN1) "$(DESTDIR)$(MANPREFIX)/man1/"
+	cp -- LICENSE "$(DESTDIR)$(PREFIX)/share/licenses/sha3sum/"
+
 uninstall:
 	-cd -- "$(DESTDIR)$(PREFIX)/bin" && rm -f -- $(BIN)
 	-cd -- "$(DESTDIR)$(MANPREFIX)/man1" && rm -f -- $(MAN1)
 	-rm -rf -- "$(DESTDIR)$(PREFIX)/share/licenses/sha3sum"
+	-rm -f -- "$(DESTDIR)$(LIBEXECDIR)/sha3sum"
 
 clean:
-	-rm -rf -- $(MAN1) $(BIN) keccak-*sum.c sha3-*sum.c rawshake*sum.c shake*sum.c .testdir
+	-rm -rf -- $(MAN1) $(BIN) *.o *.bo *.su commands.h keccak-*sum.c sha3-*sum.c rawshake*sum.c shake*sum.c .testdir
 
 .SUFFIXES:
 

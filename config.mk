@@ -1,5 +1,6 @@
-PREFIX = /usr/local
+PREFIX    = /usr/local
 MANPREFIX = $(PREFIX)/share/man
+LIBEXEC   = libexec
 
 WARN = -pedantic -Wdouble-promotion -Wformat=2 -Winit-self -Wmissing-include-dirs          \
        -Wtrampolines -Wfloat-equal -Wshadow -Wmissing-prototypes -Wmissing-declarations    \

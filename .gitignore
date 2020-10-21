@@ -1,11 +1,14 @@
 *~
 *\#*
 *.o
+*.bo
 *.su
 *.1
+/commands.h
 /*sum
 /keccak-*sum.c
 /sha3-*sum.c
 /rawshake*sum.c
 /shake*sum.c
+/sha3sum-mcb
 /.testdir/
