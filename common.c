@@ -36,7 +36,7 @@ usage(void)
 {
 	fprintf(stderr, "usage: %s [-u | -l | -b | -c] [-R rate] [-C capacity] "
 	                "[-N output-size] [-S state-size] [-W word-size] "
-	                "[-Z squeeze-count] [-vx] [file ...]\n", argv0);
+	                "[-Z squeeze-count] [-vxz] [file ...]\n", argv0);
 	exit(2);
 }
 
@@ -278,11 +278,13 @@ check(const struct libkeccak_spec *restrict spec, long int squeezes, const char 
  * @param   suffix    The message suffix
  * @param   style     (unused)
  * @param   hex       Whether to use hexadecimal input rather than binary
+ * @param   nuls      Whether lines end with NUL instead of LF,
+ *                    and parsing should be less lax
  * @return            An appropriate exit value
  */
 static int
 check_checksums(const char *restrict filename, const struct libkeccak_spec *restrict spec,
-                long int squeezes, const char *restrict suffix, enum representation style, int hex)
+                long int squeezes, const char *restrict suffix, enum representation style, int hex, int nuls)
 {
 	struct stat attr;
 	size_t blksize = 4096;
@@ -329,27 +331,46 @@ check_checksums(const char *restrict filename, const struct libkeccak_spec *rest
 		buf = erealloc(buf, size + 1);
 	size = ptr;
 	close(fd), fd = -1;
-	buf[size++] = '\n';
+	buf[size++] = nuls ? '\0' : '\n';
 
 	for (ptr = 0, stage = 0; ptr < size; ptr++) {
 		c = buf[ptr];
-		if (stage == 0) {
-			if (isxdigit(c))
-				;
-			else if (c == ' ' || c == '\t')
-				hash_end = ptr, stage++;
-			else if (c == '\n' || c == '\f' || c == '\r')
-				hash_end = ptr, stage = 3;
-			else
-				user_error("file is malformated");
-		} else if (stage == 1) {
-			if (c == '\n' || c == '\f' || c == '\r')
-				stage = 3;
-			else if (c != ' ' && c != '\t')
-				file_start = ptr, stage++;
-		} else if (stage == 2) {
-			if (c == '\n' || c == '\f' || c == '\r')
-				file_end = ptr, stage++;
+		if (!nuls) {
+			if (stage == 0) {
+				if (isxdigit(c))
+					;
+				else if (c == ' ' || c == '\t')
+					hash_end = ptr, stage++;
+				else if (c == '\n' || c == '\f' || c == '\r')
+					hash_end = ptr, stage = 3;
+				else
+					user_error("file is malformated");
+			} else if (stage == 1) {
+				if (c == '\n' || c == '\f' || c == '\r')
+					stage = 3;
+				else if (c != ' ' && c != '\t')
+					file_start = ptr, stage++;
+			} else if (stage == 2) {
+				if (c == '\n' || c == '\f' || c == '\r')
+					file_end = ptr, stage++;
+			}
+		} else {
+			if (stage == 0) {
+				if (c == ' ')
+					hash_end = ptr, stage++;
+				else if (c == '\0')
+					hash_end = ptr, stage = 3;
+				else if (!isxdigit(c))
+					user_error("file is malformated");
+			} else if (stage == 1) {
+				if (c == ' ')
+					file_start = ptr + 1, stage++;
+				else
+					user_error("file is malformated");
+			} else if (stage == 2) {
+				if (c == '\0')
+					file_end = ptr, stage++;
+			}
 		}
 
 		if (stage == 3) {
@@ -392,11 +413,12 @@ check_checksums(const char *restrict filename, const struct libkeccak_spec *rest
  * @param   suffix    The message suffix
  * @param   style     How the hashes shall be represented
  * @param   hex       Whether to use hexadecimal input rather than binary
+ * @param   nuls      Whether lines end with NUL instead of LF
  * @return            An appropriate exit value
  */
 static int
 print_checksum(const char *restrict filename, const struct libkeccak_spec *restrict spec,
-               long int squeezes, const char *restrict suffix, enum representation style, int hex)
+               long int squeezes, const char *restrict suffix, enum representation style, int hex, int nuls)
 {
 	size_t p = 0, n = (size_t)((spec->output + 7) / 8);
 	ssize_t w;
@@ -408,10 +430,10 @@ print_checksum(const char *restrict filename, const struct libkeccak_spec *restr
 
 	if (style == REPRESENTATION_UPPER_CASE) {
 		libkeccak_behex_upper(hexsum, hashsum, n);
-		printf("%s  %s\n", hexsum, filename);
+		printf("%s  %s%c", hexsum, filename, nuls ? '\0' : '\n');
 	} else if (style == REPRESENTATION_LOWER_CASE) {
 		libkeccak_behex_lower(hexsum, hashsum, n);
-		printf("%s  %s\n", hexsum, filename);
+		printf("%s  %s%c", hexsum, filename, nuls ? '\0' : '\n');
 	} else {
 		fflush(stdout);
 		for (; p < n; p += (size_t)w)
@@ -436,12 +458,10 @@ int
 run(int argc, char *argv[], struct libkeccak_generalised_spec *restrict gspec, const char *restrict suffix)
 {
 	enum representation style = REPRESENTATION_UPPER_CASE;
-	int verbose = 0;
-	int hex = 0;
-	int check = 0;
+	int verbose = 0, hex = 0, check = 0, nuls = 0;
 	long int squeezes = 1;
 	int (*fun)(const char *restrict filename, const struct libkeccak_spec *restrict spec,
-	           long int squeezes, const char *restrict suffix, enum representation style, int hex);
+	           long int squeezes, const char *restrict suffix, enum representation style, int hex, int nuls);
 	struct libkeccak_spec spec;
 	int r = 0;
 
@@ -478,16 +498,19 @@ run(int argc, char *argv[], struct libkeccak_generalised_spec *restrict gspec, c
 	case 'c':
 		check = 1;
 		break;
+	case 'v':
+		verbose = 1;
+		break;
 	case 'x':
 		hex = 1;
 		break;
-	case 'v':
-		verbose = 1;
+	case 'z':
+		nuls = 1;
 		break;
 	default:
 		usage();
 	} ARGEND;
-	/* -c has been added because the sha1sum, sha256sum &c have
+	/* -cz has been added because the sha1sum, sha256sum &c have
 	 * it, but I ignore the other crap, mostly because not all
 	 * implemention have them and binary vs text mode is stupid. */
 
@@ -508,9 +531,9 @@ run(int argc, char *argv[], struct libkeccak_generalised_spec *restrict gspec, c
 	}
 
 	if (!*argv)
-		r = fun("-", &spec, squeezes, suffix, style, hex);
+		r = fun("-", &spec, squeezes, suffix, style, hex, nuls);
 	for (; *argv; argv++)
-		r |= fun(*argv, &spec, squeezes, suffix, style, hex);
+		r |= fun(*argv, &spec, squeezes, suffix, style, hex, nuls);
 
 	free(hashsum);
 	free(hexsum);

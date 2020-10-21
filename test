@@ -122,4 +122,7 @@ set -e
 test $x = 1
 
 
+## TODO add tests with -z
+
+
 rm -r .testdir

@@ -16,7 +16,7 @@ xsum - Compute and check Xsum message digests
 .IR word-size ]
 [-Z
 .IR squeeze-count ]
-[-vx]
+[-vxz]
 .RI [ file \ ...]
 .SH DESCRIPTION
 Print or check Xsum checksums. If no file
@@ -40,14 +40,24 @@ should be formated as the output of this program, or
 similarly. This is not going to work if any of the
 filenames in the input files starts with a regular
 blank space or horizontal tab space, or if they
-contain a line feed, carriage return or form feed.
+contain a line feed, carriage return or form feed,
+unless the
+.B -z
+option is also used.
+.TP
+.B -v
+Print the hashing parameters.
 .TP
 .B -x
 Convert input files from hexadecimal for to binary form
 before calculating the checksums.
 .TP
-.B -v
-Print the hashing parameters.
+.B -z
+Lines end with NUL instead of LF. If used with
+.BR -c ,
+this applies to read files (not the output), but it will
+also apply more strict parsing and allow any whitespace
+in file names.
 .P
 The following options change the hashing parameters:
 .TP
