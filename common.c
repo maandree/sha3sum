@@ -458,7 +458,7 @@ print_checksum(const char *restrict filename, const struct libkeccak_spec *restr
 int
 run(int argc, char *argv[], struct libkeccak_generalised_spec *restrict gspec, const char *restrict suffix, int with_a)
 {
-	enum representation style = REPRESENTATION_UPPER_CASE;
+	enum representation style = REPRESENTATION_LOWER_CASE;
 	int verbose = 0, hex = 0, check = 0, nuls = 0;
 	long int squeezes = 1;
 	int (*fun)(const char *restrict filename, const struct libkeccak_spec *restrict spec,

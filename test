@@ -10,38 +10,40 @@ fi
 mkdir .testdir
 
 
-test "$(printf '' | ./sha3-224sum)" = '6B4E03423667DBB73B6E15454F0EB1ABD4597F9A1B078E3F5B5A6BC7  -'
-test "$(printf '' | ./sha3-256sum)" = 'A7FFC6F8BF1ED76651C14756A061D662F580FF4DE43B49FA82D80A4B80F8434A  -'
-test "$(printf '' | ./sha3-384sum)" = '0C63A75B845E4F7D01107D852E4C2485C51A50AAAA94FC61995E71BBEE983A2AC3713831264ADB47FB6BD1E058D5F004  -'
-test "$(printf '' | ./sha3-512sum)" = 'A69F73CCA23A9AC5C8B567DC185A756E97C982164FE25859E0D1DCC1475C80A615B2123AF1F5F94C11E3E9402C3AC558F500199D95B6D3E301758586281DCD26  -'
+test "$(printf '' | ./sha3-224sum)" = '6b4e03423667dbb73b6e15454f0eb1abd4597f9a1b078e3f5b5a6bc7  -'
+test "$(printf '' | ./sha3-256sum)" = 'a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a  -'
+test "$(printf '' | ./sha3-384sum)" = '0c63a75b845e4f7d01107d852e4c2485c51a50aaaa94fc61995e71bbee983a2ac3713831264adb47fb6bd1e058d5f004  -'
+test "$(printf '' | ./sha3-512sum)" = 'a69f73cca23a9ac5c8b567dc185a756e97c982164fe25859e0d1dcc1475c80a615b2123af1f5f94c11e3e9402c3ac558f500199d95b6d3e301758586281dcd26  -'
 
 
-test "$(printf '' | ./sha3sum)" = '6B4E03423667DBB73B6E15454F0EB1ABD4597F9A1B078E3F5B5A6BC7  -'
-test "$(printf '' | ./sha3sum -a224)" = '6B4E03423667DBB73B6E15454F0EB1ABD4597F9A1B078E3F5B5A6BC7  -'
-test "$(printf '' | ./sha3sum -a256)" = 'A7FFC6F8BF1ED76651C14756A061D662F580FF4DE43B49FA82D80A4B80F8434A  -'
-test "$(printf '' | ./sha3sum -a 384)" = '0C63A75B845E4F7D01107D852E4C2485C51A50AAAA94FC61995E71BBEE983A2AC3713831264ADB47FB6BD1E058D5F004  -'
-test "$(printf '' | ./sha3sum -a 512)" = 'A69F73CCA23A9AC5C8B567DC185A756E97C982164FE25859E0D1DCC1475C80A615B2123AF1F5F94C11E3E9402C3AC558F500199D95B6D3E301758586281DCD26  -'
+test "$(printf '' | ./sha3sum)" = '6b4e03423667dbb73b6e15454f0eb1abd4597f9a1b078e3f5b5a6bc7  -'
+test "$(printf '' | ./sha3sum -a224)" = '6b4e03423667dbb73b6e15454f0eb1abd4597f9a1b078e3f5b5a6bc7  -'
+test "$(printf '' | ./sha3sum -a256)" = 'a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a  -'
+test "$(printf '' | ./sha3sum -a 384)" = '0c63a75b845e4f7d01107d852e4c2485c51a50aaaa94fc61995e71bbee983a2ac3713831264adb47fb6bd1e058d5f004  -'
+test "$(printf '' | ./sha3sum -a 512)" = 'a69f73cca23a9ac5c8b567dc185a756e97c982164fe25859e0d1dcc1475c80a615b2123af1f5f94c11e3e9402c3ac558f500199d95b6d3e301758586281dcd26  -'
 
 
-test "$(printf '' | ./keccak-224sum)" = 'F71837502BA8E10837BDD8D365ADB85591895602FC552B48B7390ABD  -'
-test "$(printf '' | ./keccak-256sum)" = 'C5D2460186F7233C927E7DB2DCC703C0E500B653CA82273B7BFAD8045D85A470  -'
-test "$(printf '' | ./keccak-384sum)" = '2C23146A63A29ACF99E73B88F8C24EAA7DC60AA771780CCC006AFBFA8FE2479B2DD2B21362337441AC12B515911957FF  -'
-test "$(printf '' | ./keccak-512sum)" = '0EAB42DE4C3CEB9235FC91ACFFE746B29C29A8C366B7C60E4E67C466F36A4304C00FA9CAF9D87976BA469BCBE06713B435F091EF2769FB160CDAB33D3670680E  -'
+test "$(printf '' | ./keccak-224sum)" = 'f71837502ba8e10837bdd8d365adb85591895602fc552b48b7390abd  -'
+test "$(printf '' | ./keccak-256sum)" = 'c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470  -'
+test "$(printf '' | ./keccak-384sum)" = '2c23146a63a29acf99e73b88f8c24eaa7dc60aa771780ccc006afbfa8fe2479b2dd2b21362337441ac12b515911957ff  -'
+test "$(printf '' | ./keccak-512sum)" = '0eab42de4c3ceb9235fc91acffe746b29c29a8c366b7c60e4e67c466f36a4304c00fa9caf9d87976ba469bcbe06713b435f091ef2769fb160cdab33d3670680e  -'
 
 
 test "$(printf '' | ./sha3-224sum -u)" = '6B4E03423667DBB73B6E15454F0EB1ABD4597F9A1B078E3F5B5A6BC7  -'
 test "$(printf '' | ./sha3-224sum -l)" = '6b4e03423667dbb73b6e15454f0eb1abd4597f9a1b078e3f5b5a6bc7  -'
+test "$(printf '' | ./sha3-224sum -ul)" = '6b4e03423667dbb73b6e15454f0eb1abd4597f9a1b078e3f5b5a6bc7  -'
+test "$(printf '' | ./sha3-224sum -lu)" = '6B4E03423667DBB73B6E15454F0EB1ABD4597F9A1B078E3F5B5A6BC7  -'
 test "$(printf '' | ./sha3-224sum -b)" = "$(printf '\153\116\003\102\066\147\333\267\073\156\025\105\117\016\261\253\324\131\177\232\033\007\216\077\133\132\153\307')"
 
 
-test "$(printf '' | ./rawshake256sum -N 128)" = '3A1108D4A90A31B85A10BDCE77F4BFBD  -'
-test "$(printf '' | ./rawshake256sum -N 8)" = '3A  -'
-test "$(printf '' | ./rawshake512sum -N 128)" = '0AE7DAC687C3525D5C2A6C4119EA3968  -'
+test "$(printf '' | ./rawshake256sum -N 128)" = '3a1108d4a90a31b85a10bdce77f4bfbd  -'
+test "$(printf '' | ./rawshake256sum -N 8)" = '3a  -'
+test "$(printf '' | ./rawshake512sum -N 128)" = '0ae7dac687c3525d5c2a6c4119ea3968  -'
 
 
-test "$(printf '' | ./shake256sum -N 128)" = '46B9DD2B0BA88D13233B3FEB743EEB24  -'
+test "$(printf '' | ./shake256sum -N 128)" = '46b9dd2b0ba88d13233b3feb743eeb24  -'
 test "$(printf '' | ./shake256sum -N 8)" = '46  -'
-test "$(printf '' | ./shake512sum -N 128)" = 'AE1B4EEA1EAF5EA633E66045F03FF11B  -'
+test "$(printf '' | ./shake512sum -N 128)" = 'ae1b4eea1eaf5ea633e66045f03ff11b  -'
 
 
 ! test "$(printf '' | ./sha3-224sum)" = "$(printf '\n' | ./sha3-224sum)"
@@ -49,32 +51,32 @@ test "$(printf '' | ./sha3-224sum -)" = "$(printf '' | ./sha3-224sum)"
 ! test "$(printf '' | ./sha3-224sum /dev/null)" = "$(printf '' | ./sha3-224sum)"
 
 
-test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3-224sum)" = '22C8017AC8BCF65F59D1B7E92C9D4C6739D25E34CE5CB608B24FF096  -'
-test "$(printf 'intensifierat sturdiness perl-image-exiftool vingla' | ./sha3-224sum)" = '43808DDE2662143DC4EED5DAC5E98C74B06711829F02A3B121BD74F3  -'
-test "$(printf 'timjan avogadro uppdriven lib32-llvm-amdgpu-snapshot' | ./sha3-224sum)" = 'D32B4AC86065774DEE5EB5CDD2F67B4E86501086D7373884E8B20A36  -'
-test "$(printf "grilo-plugins auditorium tull dissimilarity's" | ./sha3-224sum)" = 'EFBD76D45BFA952485148F8AD46143897F17C27FFDC8EB7287F9353B  -'
-test "$(printf 'royalty tt yellowstone deficiencies' | ./sha3-224sum)" = '6705AA36ECF58F333E0E6364AC1D0B7931D402E13282127CFD6F876C  -'
-test "$(printf "kdegames-kdiamond tunisisk occurrence's outtalad" | ./sha3-224sum)" = '803A0FF09DDA0DF306E483A9F91B20A3DBBF9C2EBB8D0A3B28F3B9E0  -'
-test "$(printf "chevalier slat's spindel representations" | ./sha3-224sum)" = 'A64779ACA943A6AEF1D2E7C9A0F4E997F4DABD1F77112A22121D3ED5  -'
-test "$(printf 'archery lexicographical equine veered' | ./sha3-224sum)" = 'F0A3E0587AF7723F0AA4719059D3F5107115A5B3667CD5209CC4D867  -'
-test "$(printf 'splay washbasin opposing there' | ./sha3-224sum)" = '312E7E3C6403AB1A086155FB9A52B22A3D0D257876AFD2B93FB7272E  -'
-test "$(printf 'faktum desist thundered klen' | ./sha3-224sum)" = '270BA05B764221FF5B5D94ADFB4FDB1F36F07FE7C438904A5F3DF071  -'
+test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3-224sum)" = '22c8017ac8bcf65f59d1b7e92c9d4c6739d25e34ce5cb608b24ff096  -'
+test "$(printf 'intensifierat sturdiness perl-image-exiftool vingla' | ./sha3-224sum)" = '43808dde2662143dc4eed5dac5e98c74b06711829f02a3b121bd74f3  -'
+test "$(printf 'timjan avogadro uppdriven lib32-llvm-amdgpu-snapshot' | ./sha3-224sum)" = 'd32b4ac86065774dee5eb5cdd2f67b4e86501086d7373884e8b20a36  -'
+test "$(printf "grilo-plugins auditorium tull dissimilarity's" | ./sha3-224sum)" = 'efbd76d45bfa952485148f8ad46143897f17c27ffdc8eb7287f9353b  -'
+test "$(printf 'royalty tt yellowstone deficiencies' | ./sha3-224sum)" = '6705aa36ecf58f333e0e6364ac1d0b7931d402e13282127cfd6f876c  -'
+test "$(printf "kdegames-kdiamond tunisisk occurrence's outtalad" | ./sha3-224sum)" = '803a0ff09dda0df306e483a9f91b20a3dbbf9c2ebb8d0a3b28f3b9e0  -'
+test "$(printf "chevalier slat's spindel representations" | ./sha3-224sum)" = 'a64779aca943a6aef1d2e7c9a0f4e997f4dabd1f77112a22121d3ed5  -'
+test "$(printf 'archery lexicographical equine veered' | ./sha3-224sum)" = 'f0a3e0587af7723f0aa4719059d3f5107115a5b3667cd5209cc4d867  -'
+test "$(printf 'splay washbasin opposing there' | ./sha3-224sum)" = '312e7e3c6403ab1a086155fb9a52b22a3d0d257876afd2b93fb7272e  -'
+test "$(printf 'faktum desist thundered klen' | ./sha3-224sum)" = '270ba05b764221ff5b5d94adfb4fdb1f36f07fe7c438904a5f3df071  -'
 
-test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3sum)" = '22C8017AC8BCF65F59D1B7E92C9D4C6739D25E34CE5CB608B24FF096  -'
-test "$(printf 'intensifierat sturdiness perl-image-exiftool vingla' | ./sha3sum)" = '43808DDE2662143DC4EED5DAC5E98C74B06711829F02A3B121BD74F3  -'
-test "$(printf 'timjan avogadro uppdriven lib32-llvm-amdgpu-snapshot' | ./sha3sum)" = 'D32B4AC86065774DEE5EB5CDD2F67B4E86501086D7373884E8B20A36  -'
-test "$(printf "grilo-plugins auditorium tull dissimilarity's" | ./sha3sum)" = 'EFBD76D45BFA952485148F8AD46143897F17C27FFDC8EB7287F9353B  -'
-test "$(printf 'royalty tt yellowstone deficiencies' | ./sha3sum)" = '6705AA36ECF58F333E0E6364AC1D0B7931D402E13282127CFD6F876C  -'
-test "$(printf "kdegames-kdiamond tunisisk occurrence's outtalad" | ./sha3sum)" = '803A0FF09DDA0DF306E483A9F91B20A3DBBF9C2EBB8D0A3B28F3B9E0  -'
-test "$(printf "chevalier slat's spindel representations" | ./sha3sum)" = 'A64779ACA943A6AEF1D2E7C9A0F4E997F4DABD1F77112A22121D3ED5  -'
-test "$(printf 'archery lexicographical equine veered' | ./sha3sum)" = 'F0A3E0587AF7723F0AA4719059D3F5107115A5B3667CD5209CC4D867  -'
-test "$(printf 'splay washbasin opposing there' | ./sha3sum)" = '312E7E3C6403AB1A086155FB9A52B22A3D0D257876AFD2B93FB7272E  -'
-test "$(printf 'faktum desist thundered klen' | ./sha3sum)" = '270BA05B764221FF5B5D94ADFB4FDB1F36F07FE7C438904A5F3DF071  -'
+test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3sum)" = '22c8017ac8bcf65f59d1b7e92c9d4c6739d25e34ce5cb608b24ff096  -'
+test "$(printf 'intensifierat sturdiness perl-image-exiftool vingla' | ./sha3sum)" = '43808dde2662143dc4eed5dac5e98c74b06711829f02a3b121bd74f3  -'
+test "$(printf 'timjan avogadro uppdriven lib32-llvm-amdgpu-snapshot' | ./sha3sum)" = 'd32b4ac86065774dee5eb5cdd2f67b4e86501086d7373884e8b20a36  -'
+test "$(printf "grilo-plugins auditorium tull dissimilarity's" | ./sha3sum)" = 'efbd76d45bfa952485148f8ad46143897f17c27ffdc8eb7287f9353b  -'
+test "$(printf 'royalty tt yellowstone deficiencies' | ./sha3sum)" = '6705aa36ecf58f333e0e6364ac1d0b7931d402e13282127cfd6f876c  -'
+test "$(printf "kdegames-kdiamond tunisisk occurrence's outtalad" | ./sha3sum)" = '803a0ff09dda0df306e483a9f91b20a3dbbf9c2ebb8d0a3b28f3b9e0  -'
+test "$(printf "chevalier slat's spindel representations" | ./sha3sum)" = 'a64779aca943a6aef1d2e7c9a0f4e997f4dabd1f77112a22121d3ed5  -'
+test "$(printf 'archery lexicographical equine veered' | ./sha3sum)" = 'f0a3e0587af7723f0aa4719059d3f5107115a5b3667cd5209cc4d867  -'
+test "$(printf 'splay washbasin opposing there' | ./sha3sum)" = '312e7e3c6403ab1a086155fb9a52b22a3d0d257876afd2b93fb7272e  -'
+test "$(printf 'faktum desist thundered klen' | ./sha3sum)" = '270ba05b764221ff5b5d94adfb4fdb1f36f07fe7c438904a5f3df071  -'
 
 
 printf 'withdrew hypothesis snakebird qmc2' > .testdir/x
-test "$(./sha3-224sum < .testdir/x)" = '22C8017AC8BCF65F59D1B7E92C9D4C6739D25E34CE5CB608B24FF096  -'
-test "$(./sha3-224sum .testdir/x)" = '22C8017AC8BCF65F59D1B7E92C9D4C6739D25E34CE5CB608B24FF096  .testdir/x'
+test "$(./sha3-224sum < .testdir/x)" = '22c8017ac8bcf65f59d1b7e92c9d4c6739d25e34ce5cb608b24ff096  -'
+test "$(./sha3-224sum .testdir/x)" = '22c8017ac8bcf65f59d1b7e92c9d4c6739d25e34ce5cb608b24ff096  .testdir/x'
 
 
 set +e
@@ -85,41 +87,41 @@ test $x = 1
 
 
 printf "capitol's kvistfri broadly raping" > .testdir/x
-test "$(./keccaksum -R 1024 -C 576 -N 256 < .testdir/x)" = '65070CDD6F91C0AADCFC470895A2606C828BCE7CE3FA723418C9013DE9225351  -'
-test "$(./keccaksum -R 512 -C 1088 -N 256 < .testdir/x)" = 'E6F86EBC15B962F73F36F36FC8A84C3AE84B1C1023BFD4C5F1829389135AECC3  -'
-test "$(./keccaksum -R 256 -C 1344 -N 256 < .testdir/x)" = '420B97FC88962C87EC2ADAA8F48D74D9FF4EA7AE7D691F9C33B8713CA1D3D573  -'
-test "$(./keccaksum -R 512 -C  288 -N 256 < .testdir/x)" = '524790AFBE4706D938B6F753E14104F556890E2A415E211B0564D60499DB0333  -'
-test "$(./keccaksum -R 256 -C  544 -N 256 < .testdir/x)" = '04A6B4AD08B3018EEFBA0FB756272D949AC0F71C26F836D31DD13B28B884AA0F  -'
-test "$(./keccaksum -R 256 -C  144 -N 256 < .testdir/x)" = 'D56F547791225E54460E6274ED31E57B7085820C11D65F1F322A16A3352C85ED  -'
-test "$(./keccaksum -R 128 -C  272 -N 256 < .testdir/x)" = 'CEEC066A57B9B31A5A0661DF7BAFEC4183A26D0ED81E50BC958471F84FA347A7  -'
-test "$(./keccaksum -R 128 -C   72 -N 256 < .testdir/x)" = 'B18F679C7105A72A993F70FA5ADB3F17EF7CCFFAFFB4DC0F6FED74AA2F565194  -'
-test "$(./keccaksum -R  64 -C  136 -N 256 < .testdir/x)" = '9B845C1ECC2B1B3A48BA42EF29CCC4B348DA8AB15074A870D8E799CA33C15E4B  -'
+test "$(./keccaksum -R 1024 -C 576 -N 256 < .testdir/x)" = '65070cdd6f91c0aadcfc470895a2606c828bce7ce3fa723418c9013de9225351  -'
+test "$(./keccaksum -R 512 -C 1088 -N 256 < .testdir/x)" = 'e6f86ebc15b962f73f36f36fc8a84c3ae84b1c1023bfd4c5f1829389135aecc3  -'
+test "$(./keccaksum -R 256 -C 1344 -N 256 < .testdir/x)" = '420b97fc88962c87ec2adaa8f48d74d9ff4ea7ae7d691f9c33b8713ca1d3d573  -'
+test "$(./keccaksum -R 512 -C  288 -N 256 < .testdir/x)" = '524790afbe4706d938b6f753e14104f556890e2a415e211b0564d60499db0333  -'
+test "$(./keccaksum -R 256 -C  544 -N 256 < .testdir/x)" = '04a6b4ad08b3018eefba0fb756272d949ac0f71c26f836d31dd13b28b884aa0f  -'
+test "$(./keccaksum -R 256 -C  144 -N 256 < .testdir/x)" = 'd56f547791225e54460e6274ed31e57b7085820c11d65f1f322a16a3352c85ed  -'
+test "$(./keccaksum -R 128 -C  272 -N 256 < .testdir/x)" = 'ceec066a57b9b31a5a0661df7bafec4183a26d0ed81e50bc958471f84fa347a7  -'
+test "$(./keccaksum -R 128 -C   72 -N 256 < .testdir/x)" = 'b18f679c7105a72a993f70fa5adb3f17ef7ccffaffb4dc0f6fed74aa2f565194  -'
+test "$(./keccaksum -R  64 -C  136 -N 256 < .testdir/x)" = '9b845c1ecc2b1b3a48ba42ef29ccc4b348da8ab15074a870d8e799ca33c15e4b  -'
 
 
-test "$(printf '' | ./keccaksum)" = '6753E3380C09E385D0339EB6B050A68F66CFD60A73476E6FD6ADEB72F5EDD7C6F04A5D017A19CBE291935855B4860F69DF04C98AA78B407A9BA9826F7266EF14  -'
-test "$(printf '' | ./keccaksum -R 1024)" = '6753E3380C09E385D0339EB6B050A68F66CFD60A73476E6FD6ADEB72F5EDD7C6F04A5D017A19CBE291935855B4860F69DF04C98AA78B407A9BA9826F7266EF14BA6D3F90C4FE154D27C2858EA6DB8C117411A1BC5C499410C391B298F37BF636B0F5C31DBD6487A7D3D8CF2A97B619697E66D894299B8B4D80E0498538E18544C3A2FA33F0BFB1CFEF8DA7875C4967F3  -'
-test "$(printf '' | ./keccaksum -C 512)" = 'C5D2460186F7233C927E7DB2DCC703C0E500B653CA82273B7BFAD8045D85A4703DBB9A2CD87CA974B9A2B0EC61119BCB5CEDF9C0C411221F6141A25F17C60D82D24680ABBCBFBA815B762B24B751D5B1E85325BA5E6DF23C10725BFE986ACE3BA2D24535A79F7DBABB153BB0D33C0DFA09CEC712EBD7FE3B49A9194E859C82EB  -'
-test "$(printf '' | ./keccaksum -N 100)" = '6753E3380C09E385D0339EB600  -'
-test "$(printf '' | ./keccaksum -S 800)" = '681C4ECFE190D9625B011BAACED04540C73A1FF62DEF9AEE443DEA516387FBC8  -'
+test "$(printf '' | ./keccaksum)" = '6753e3380c09e385d0339eb6b050a68f66cfd60a73476e6fd6adeb72f5edd7c6f04a5d017a19cbe291935855b4860f69df04c98aa78b407a9ba9826f7266ef14  -'
+test "$(printf '' | ./keccaksum -R 1024)" = '6753e3380c09e385d0339eb6b050a68f66cfd60a73476e6fd6adeb72f5edd7c6f04a5d017a19cbe291935855b4860f69df04c98aa78b407a9ba9826f7266ef14ba6d3f90c4fe154d27c2858ea6db8c117411a1bc5c499410c391b298f37bf636b0f5c31dbd6487a7d3d8cf2a97b619697e66d894299b8b4d80e0498538e18544c3a2fa33f0bfb1cfef8da7875c4967f3  -'
+test "$(printf '' | ./keccaksum -C 512)" = 'c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a4703dbb9a2cd87ca974b9a2b0ec61119bcb5cedf9c0c411221f6141a25f17c60d82d24680abbcbfba815b762b24b751d5b1e85325ba5e6df23c10725bfe986ace3ba2d24535a79f7dbabb153bb0d33c0dfa09cec712ebd7fe3b49a9194e859c82eb  -'
+test "$(printf '' | ./keccaksum -N 100)" = '6753e3380c09e385d0339eb600  -'
+test "$(printf '' | ./keccaksum -S 800)" = '681c4ecfe190d9625b011baaced04540c73a1ff62def9aee443dea516387fbc8  -'
 
 
 test "$(printf 'a' | ./sha3-224sum)" = "$(printf '61' | ./sha3-224sum -x)"
 
 
-test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3-224sum -Z 2)" = '03FE12B4B51D56D96377D927E5CD498FC4BC3AEE389B2F2FF8393AA5  -'
-test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3-224sum -Z 3)" = '0B8FB64EE5D8836956F49CBE4577AFBC638C855C1D553452FC1ECEB8  -'
-test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3-224sum -Z 4)" = '1E03B4CD9EEF3892A7B5E865FCE393C4BC90120D9AEA84D0A0DFF3B8  -'
-test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3-224sum -Z 5)" = 'AAC92FBFD22CE62E83DDAF2E61BD7BF696326E46D1327DEFA4530E20  -'
+test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3-224sum -Z 2)" = '03fe12b4b51d56d96377d927e5cd498fc4bc3aee389b2f2ff8393aa5  -'
+test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3-224sum -Z 3)" = '0b8fb64ee5d8836956f49cbe4577afbc638c855c1d553452fc1eceb8  -'
+test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3-224sum -Z 4)" = '1e03b4cd9eef3892a7b5e865fce393c4bc90120d9aea84d0a0dff3b8  -'
+test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3-224sum -Z 5)" = 'aac92fbfd22ce62e83ddaf2e61bd7bf696326e46d1327defa4530e20  -'
 
-test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3sum -Z 2)" = '03FE12B4B51D56D96377D927E5CD498FC4BC3AEE389B2F2FF8393AA5  -'
-test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3sum -Z 3)" = '0B8FB64EE5D8836956F49CBE4577AFBC638C855C1D553452FC1ECEB8  -'
-test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3sum -Z 4)" = '1E03B4CD9EEF3892A7B5E865FCE393C4BC90120D9AEA84D0A0DFF3B8  -'
-test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3sum -Z 5)" = 'AAC92FBFD22CE62E83DDAF2E61BD7BF696326E46D1327DEFA4530E20  -'
+test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3sum -Z 2)" = '03fe12b4b51d56d96377d927e5cd498fc4bc3aee389b2f2ff8393aa5  -'
+test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3sum -Z 3)" = '0b8fb64ee5d8836956f49cbe4577afbc638c855c1d553452fc1eceb8  -'
+test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3sum -Z 4)" = '1e03b4cd9eef3892a7b5e865fce393c4bc90120d9aea84d0a0dff3b8  -'
+test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3sum -Z 5)" = 'aac92fbfd22ce62e83ddaf2e61bd7bf696326e46d1327defa4530e20  -'
 
-test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3sum -a 224 -Z 2)" = '03FE12B4B51D56D96377D927E5CD498FC4BC3AEE389B2F2FF8393AA5  -'
-test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3sum -a 224 -Z 3)" = '0B8FB64EE5D8836956F49CBE4577AFBC638C855C1D553452FC1ECEB8  -'
-test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3sum -a 224 -Z 4)" = '1E03B4CD9EEF3892A7B5E865FCE393C4BC90120D9AEA84D0A0DFF3B8  -'
-test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3sum -a 224 -Z 5)" = 'AAC92FBFD22CE62E83DDAF2E61BD7BF696326E46D1327DEFA4530E20  -'
+test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3sum -a 224 -Z 2)" = '03fe12b4b51d56d96377d927e5cd498fc4bc3aee389b2f2ff8393aa5  -'
+test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3sum -a 224 -Z 3)" = '0b8fb64ee5d8836956f49cbe4577afbc638c855c1d553452fc1eceb8  -'
+test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3sum -a 224 -Z 4)" = '1e03b4cd9eef3892a7b5e865fce393c4bc90120d9aea84d0a0dff3b8  -'
+test "$(printf 'withdrew hypothesis snakebird qmc2' | ./sha3sum -a 224 -Z 5)" = 'aac92fbfd22ce62e83ddaf2e61bd7bf696326e46d1327defa4530e20  -'
 
 test "$(printf 'abc xyz' | ./sha3sum -a 256)" = "$(printf 'abc xyz' | ./sha3-256sum)"
 test "$(printf 'abc xyz' | ./sha3sum -a 384)" = "$(printf 'abc xyz' | ./sha3-384sum)"

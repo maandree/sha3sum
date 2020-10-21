@@ -25,10 +25,10 @@ Print or check Xsum checksums. If no file
 or when the file is -, read standard input.
 .TP
 .B -u
-Output checksums in upper-case hexadecimal representation. (default)
+Output checksums in upper-case hexadecimal representation.
 .TP
 .B -l
-Output checksums in lower-case hexadecimal representation.
+Output checksums in lower-case hexadecimal representation. (default)
 .TP
 .B -b
 Output checksums in binary representation. This suppresses
