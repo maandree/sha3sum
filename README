@@ -113,3 +113,9 @@ PERFORMANCE
 	utilities from other packages using other
 	algorithm-families.
 
+NOTES
+	Packagers are advised to separate sha3sum(1) into its
+	own packages, apart from the other commands, as it is
+	mearly provided for compatibility and it could cause
+	package conflict with other implementations that only
+	provide sha3sum(1) such as busybox.
