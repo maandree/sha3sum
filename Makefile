@@ -57,11 +57,10 @@ sha3sum-mcb.c: commands.h
 
 %.1: xsum.man
 	u=$$(printf '%s\n' $* | tr a-z A-Z); \
-	sed -e 's/xsum/$*/g' -e 's/XSUM/'"$$u"'/g' -e 's/Xsum/$($*)/g' < xsum.man > $@
 	if test $* = sha3sum; then \
-		sed -i 's/^\\# ONLY SHA3: //' $@; \
+		sed -e 's/xsum/$*/g' -e 's/XSUM/'"$$u"'/g' -e 's/Xsum/$($*)/g' -e 's/^\\# ONLY SHA3: //' < xsum.man > $@; \
 	else \
-		sed -i '/^\\# ONLY SHA3: /d' $@; \
+		sed -e 's/xsum/$*/g' -e 's/XSUM/'"$$u"'/g' -e 's/Xsum/$($*)/g' -e '/^\\# ONLY SHA3: /d' < xsum.man > $@; \
 	fi
 
 commands.h: Makefile
