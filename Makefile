@@ -111,7 +111,7 @@ uninstall:
 	-rm -f -- "$(DESTDIR)$(LIBEXECDIR)/sha3sum"
 
 clean:
-	-rm -rf -- $(MAN1) $(BIN) *.o *.bo *.su commands.h keccak-*sum.c sha3-*sum.c rawshake*sum.c shake*sum.c .testdir
+	-rm -rf -- $(MAN1) $(BIN) sha3sum-mcb *.o *.bo *.su commands.h keccak-*sum.c sha3-*sum.c rawshake*sum.c shake*sum.c .testdir
 
 .SUFFIXES:
 
