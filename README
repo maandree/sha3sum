@@ -11,8 +11,10 @@ SYNOPSIS
 	sha3-256sum    [option ...] [file ...]
 	sha3-384sum    [option ...] [file ...]
 	sha3-512sum    [option ...] [file ...]
+	shake128sum    [option ...] [file ...]
 	shake256sum    [option ...] [file ...]
 	shake512sum    [option ...] [file ...]
+	rawshake128sum [option ...] [file ...]
 	rawshake256sum [option ...] [file ...]
 	rawshake512sum [option ...] [file ...]
 

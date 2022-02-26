@@ -36,11 +36,13 @@ test "$(printf '' | ./sha3-224sum -lu)" = '6B4E03423667DBB73B6E15454F0EB1ABD4597
 test "$(printf '' | ./sha3-224sum -b)" = "$(printf '\153\116\003\102\066\147\333\267\073\156\025\105\117\016\261\253\324\131\177\232\033\007\216\077\133\132\153\307')"
 
 
+test "$(printf '' | ./rawshake128sum -N 128)" = 'fa019a3b17630df6014853b5470773f1  -'
 test "$(printf '' | ./rawshake256sum -N 128)" = '3a1108d4a90a31b85a10bdce77f4bfbd  -'
 test "$(printf '' | ./rawshake256sum -N 8)" = '3a  -'
 test "$(printf '' | ./rawshake512sum -N 128)" = '0ae7dac687c3525d5c2a6c4119ea3968  -'
 
 
+test "$(printf '' | ./shake128sum -N 128)" = '7f9c2ba4e88f827d616045507605853e  -'
 test "$(printf '' | ./shake256sum -N 128)" = '46b9dd2b0ba88d13233b3feb743eeb24  -'
 test "$(printf '' | ./shake256sum -N 8)" = '46  -'
 test "$(printf '' | ./shake512sum -N 128)" = 'ae1b4eea1eaf5ea633e66045f03ff11b  -'

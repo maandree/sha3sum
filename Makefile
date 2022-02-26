@@ -16,8 +16,10 @@ BIN =\
 	sha3-256sum\
 	sha3-384sum\
 	sha3-512sum\
+	rawshake128sum\
 	rawshake256sum\
 	rawshake512sum\
+	shake128sum\
 	shake256sum\
 	shake512sum
 
@@ -34,8 +36,10 @@ sha3-224sum = SHA3-224
 sha3-256sum = SHA3-256
 sha3-384sum = SHA3-384
 sha3-512sum = SHA3-512
+rawshake128sum = RawSHAKE128
 rawshake256sum = RawSHAKE256
 rawshake512sum = RawSHAKE512
+shake128sum = SHAKE128
 shake256sum = SHAKE256
 shake512sum = SHAKE512
 

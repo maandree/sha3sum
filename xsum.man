@@ -107,8 +107,10 @@ or if you know what you are doing; apart from
 which is intended to
 .I always
 be used with
+.BR shake128sum (1),
 .BR shake256sum (1),
 .BR shake512sum (1),
+.BR rawshake128sum (1),
 .BR rawshake256sum (1),
 and
 .BR rawshake512sum (1).
