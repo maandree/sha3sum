@@ -9,7 +9,7 @@ BUILD DEPENDENCIES:
 	coreutils
 	gcc
 	libc
-	libkeccak>=1.2
+	libkeccak>=1.4
 	make
 	sed
 

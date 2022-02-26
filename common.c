@@ -91,17 +91,19 @@ make_spec(struct libkeccak_generalised_spec *restrict gspec, struct libkeccak_sp
 	switch (libkeccak_degeneralise_spec(gspec, spec)) {
 	case 0:
 		break;
-	TEST (STATE_NONPOSITIVE,      "the state size must be positive");
-	TEST (STATE_TOO_LARGE,        "the state size is too large, may not exceed 1600");
-	TEST (STATE_MOD_25,           "the state size must be a multiple of 25");
-	TEST (WORD_NONPOSITIVE,       "the word size must be positive");
-	TEST (WORD_TOO_LARGE,         "the word size is too large, may not exceed 64");
-	TEST (STATE_WORD_INCOHERENCY, "the state size must be exactly 25 times the word size");
-	TEST (CAPACITY_NONPOSITIVE,   "the capacity must be positive");
-	TEST (CAPACITY_MOD_8,         "the capacity must be a multiple of 8");
-	TEST (BITRATE_NONPOSITIVE,    "the rate must be positive");
-	TEST (BITRATE_MOD_8,          "the rate must be a multiple of 8");
-	TEST (OUTPUT_NONPOSITIVE,     "the output size must be positive");
+	TEST (STATE_NONPOSITIVE,                    "the state size must be positive");
+	TEST (STATE_TOO_LARGE,                      "the state size is too large, may not exceed 1600");
+	TEST (STATE_MOD_25,                         "the state size must be a multiple of 25");
+	TEST (WORD_NONPOSITIVE,                     "the word size must be positive");
+	TEST (WORD_TOO_LARGE,                       "the word size is too large, may not exceed 64");
+	TEST (STATE_WORD_INCOHERENCY,               "the state size must be exactly 25 times the word size");
+	TEST (CAPACITY_NONPOSITIVE,                 "the capacity must be positive");
+	TEST (CAPACITY_MOD_8,                       "the capacity must be a multiple of 8");
+	TEST (BITRATE_NONPOSITIVE,                  "the rate must be positive");
+	TEST (BITRATE_MOD_8,                        "the rate must be a multiple of 8");
+	TEST (OUTPUT_NONPOSITIVE,                   "the output size must be positive");
+	TEST (STATE_BITRATE_CAPACITY_INCONSISTENCY, "the sum of the rate and capacity must equal"
+	                                            " the state size (25 times the word size)");
 	default:
 		user_error("unknown error in algorithm parameters");
 	}
