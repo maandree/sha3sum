@@ -319,7 +319,7 @@ check_checksums(const char *restrict filename, const struct libkeccak_spec *rest
 	buf = emalloc(size);
 
 	for (;;) {
-		if (ptr + blksize < size)
+		if (ptr + blksize > size)
 			buf = erealloc(buf, size <<= 1);
 
 		got = read(fd, buf + ptr, blksize);
