@@ -399,7 +399,6 @@ check_checksums(const char *restrict filename, const struct libkeccak_spec *rest
 		user_error("file is malformated");
 
 	free(buf);
-	close(fd);
 	return ret;
 
 	(void) style;
