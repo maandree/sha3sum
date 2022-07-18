@@ -16,4 +16,4 @@ BUILD DEPENDENCIES:
 
 DEPENDENCY SOURCES:
 
-	libkeccak	https://github.com/maandree/libkeccak
+	libkeccak	https://codeberg.org/maandree/libkeccak
