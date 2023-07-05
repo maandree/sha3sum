@@ -5,5 +5,5 @@ LIBEXEC   = libexec
 CC = c99
 
 CPPFLAGS =
-CFLAGS   = -Wall -O3
+CFLAGS   =
 LDFLAGS  = -lkeccak
