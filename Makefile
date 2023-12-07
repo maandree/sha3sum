@@ -103,7 +103,7 @@ $(BIN_SPECIFIC:=.c):
 	+@set -e; \
 		f="$$(\
 			set -e; \
-			sed -n 's/^\([a-z0-9-]\+\)%\([^:]*\):.*$$/\1 \2/p' < unportable.mk | while read start end; do \
+			sed -n 's/^\([a-z][a-z0-9-]\+\)%\([^:]*\):.*$$/\1 \2/p' < unportable.mk | while read start end; do \
 				end="$$(printf '%s\n' "$$end" | sed 's/\./\\\./g')"; \
 				x="$$(printf '%s\n' '$@' | sed -n 's/^'"$$start"'\(.*\)'"$$end"'$$/\1/p')"; \
 				if test -n "$$x"; then \
