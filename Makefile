@@ -53,7 +53,7 @@ $(MAN1): xsum.man algorithm-map
 	set -e; \
 	f="$$(printf '%s\n' "$@" | sed 's/\.1$$//')"; \
 	u="$$(printf '%s\n' "$$f" | tr a-z A-Z)"; \
-	a="$$(sed -n 's/^'"$$f"'\s*=\s*//p' < algorithm-map | sed 's/\s*$$//')"; \
+	a="$$(sed -n 's/^'"$$f"'[[:space:]]*=[[:space:]]*//p' < algorithm-map | sed 's/[[:space:]]*$$//')"; \
 	if test "$$f" = sha3sum; then \
 		sed -e "s/xsum/$$f/g" -e "s/XSUM/$$u/g" -e "s/Xsum/$$a/g" -e 's/^\\# ONLY SHA3: //' < xsum.man > $@; \
 	else \
@@ -103,7 +103,7 @@ $(BIN_SPECIFIC:=.c):
 	+@set -e; \
 		f="$$(\
 			set -e; \
-			sed -n 's/^\([a-z][a-z0-9-]\+\)%\([^:]*\):.*$$/\1 \2/p' < unportable.mk | while read start end; do \
+			sed -n 's/^\([a-z][a-z0-9-]*\)%\([^:]*\):.*$$/\1 \2/p' < unportable.mk | while read start end; do \
 				end="$$(printf '%s\n' "$$end" | sed 's/\./\\\./g')"; \
 				x="$$(printf '%s\n' '$@' | sed -n 's/^'"$$start"'\(.*\)'"$$end"'$$/\1/p')"; \
 				if test -n "$$x"; then \
