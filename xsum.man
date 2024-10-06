@@ -96,7 +96,7 @@ Checksums did not match or a file did not exist.
 An error occurred.
 .SH AUTHORS
 Mattias Andrée
-.RI < maandree@kth.se >
+.RI < m@maandree.se >
 .SH NOTES
 All commands in the sha3sum package allow changing
 the hashing parameters. However it is only intended
